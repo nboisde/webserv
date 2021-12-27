@@ -10,6 +10,7 @@ namespace WS{
 	class basicSocket{
 		public:
 			//constructors and destructors
+			basicSocket();
 			basicSocket(int domain, int service, int protocol, int port, unsigned long interface);
 			~basicSocket();
 

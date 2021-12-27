@@ -1,5 +1,7 @@
 #include "basicSocket.hpp"
 
+WS::basicSocket::basicSocket(){}
+
 WS::basicSocket::basicSocket(int domain, int service, int protocol, int port, unsigned long interface): domain(domain), service(service), protocol(protocol){
 	// Defining address structure.
 	this->address.sin_family = this->domain;
@@ -8,8 +10,8 @@ WS::basicSocket::basicSocket(int domain, int service, int protocol, int port, un
 
 	// Establish connection via socket.
 	this->sock = socket(this->domain, this->service, this->protocol);
-	this->connection = networkConnection(this->sock, this->address);
-	testConnection(this->connection);
+	//this->connection = networkConnection(this->sock, this->address);
+	//testConnection(this->connection);
 }
 
 WS::basicSocket::~basicSocket(){}
