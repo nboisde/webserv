@@ -10,7 +10,12 @@ class route{
 		bool get;
 		bool post;
 		bool del;
-		
+		// consider the redirection.
+		std::string directory;
+		bool autoindex;
+		std::string default_file;
+		std::string cgi_path;
+				
 }
 
 class server
