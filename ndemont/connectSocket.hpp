@@ -1,0 +1,4 @@
+#ifndef CONNECTSOCKET_HPP
+# define CONNECTSOCKET_HPP
+
+#endif
