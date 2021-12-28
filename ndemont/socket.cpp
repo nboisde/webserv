@@ -1,4 +1,4 @@
-#include "socket.hpp"
+#include "Socket.hpp"
 
 ws::Socket::Socket()
 {
@@ -11,15 +11,15 @@ ws::Socket::Socket()
 	address.sin_port = htons(PORT); 
 }
 
-ws::Socket::~Socket() {};
+ws::Socket::~Socket() {}
 
-int	ws::Socket::bindSocket()
+int	ws::Socket::Bind()
 {
 	if (bind(server_fd,(struct sockaddr *)&address,sizeof(address)) < 0)
 	{
 		perror("bind failed\n");
 		return (0); 
 	}
-	perror("bind succeeded\n");
+	std::cout << "bind succeeded" << std::endl;
 	return (1);
 }

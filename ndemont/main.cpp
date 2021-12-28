@@ -1,9 +1,9 @@
-#include "socket.hpp"
+#include "Socket.hpp"
 
 int	main()
 {
 	ws::Socket	socket;
 
-	socket.bindSocket();
+	socket.Bind();
 	return (0);
 }

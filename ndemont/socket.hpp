@@ -18,10 +18,9 @@ class Socket
 
 	public:
 		Socket();
-		~Socket();
+		virtual ~Socket();
 
-		int bindSocket();
-
+		int Bind();
 };
 };
 #endif
