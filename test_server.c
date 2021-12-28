@@ -16,6 +16,7 @@ int main(void)
 {
 	int sockfd, new_fd;
 	struct sockaddr_in serv_addr; // addr of the server.
+	struct sockaddr_in cli_addr;
 	int rd;
 	int sin_size;
 
@@ -41,12 +42,12 @@ int main(void)
 		perror("Error on listening\n");
 		exit(1);
 	}
-
+// READ RFC7230
 	while (1)
 	{
 		sin_size = sizeof(struct socklen_t *);
 		//sin_size = sizeof(struct sockaddr);
-		if ((new_fd = accept(sockfd, (struct sockaddr *)&serv_addr, (socklen_t *)&sin_size)) < 0)
+		if ((new_fd = accept(sockfd, (struct sockaddr *)&cli_addr, (socklen_t *)&sin_size)) < 0)
 		{
 			perror("Error on accept\n");
 			exit(1);
@@ -59,7 +60,7 @@ int main(void)
 		write(1, buffer, 30000);
 		//if (send(new_fd, hello, strlen(hello), MSG_OOB) == -1)
 		//if (write(new_fd, hello, strlen(hello)) == -1)
-		if (write(new_fd, "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 76\n\n<!DOCTYPE html><html><body><h1>First display on localhost</h1></body></html>", strlen("HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 76\n\n<!DOCTYPE html><html><body><h1>First display on localhost</h1></body></html>")) == -1)
+		if (write(new_fd, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: 76\r\n\r\n<!DOCTYPE html><html><body><h1>First display on localhost</h1></body></html>", strlen("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: 76\r\n\r\n<!DOCTYPE html><html><body><h1>First display on localhost</h1></body></html>")) == -1)
 			perror("Error on send\n");
 		close(new_fd);
 	}
