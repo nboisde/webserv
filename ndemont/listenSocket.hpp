@@ -7,15 +7,13 @@ namespace ws
 {
 class listenSocket : public ws::Socket
 {
-	private:
-
 	public:
 		listenSocket();
 		virtual ~listenSocket();
 
-		int Listen();
+		int listenning();
+		int	accepting();
 };
 };
 
 #endif
-

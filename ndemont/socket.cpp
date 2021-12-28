@@ -8,12 +8,13 @@ ws::Socket::Socket()
 	memset((char *)&address, 0, sizeof(address));
 	address.sin_family = AF_INET; 
 	address.sin_addr.s_addr = htonl(INADDR_ANY); 
-	address.sin_port = htons(PORT); 
+	address.sin_port = htons(PORT);
+	bindSocket();
 }
 
 ws::Socket::~Socket() {}
 
-int	ws::Socket::Bind()
+int	ws::Socket::bindSocket()
 {
 	if (bind(server_fd,(struct sockaddr *)&address,sizeof(address)) < 0)
 	{

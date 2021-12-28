@@ -8,11 +8,11 @@
 # include <arpa/inet.h>
 # include <functional>
 
-namespace ws 
+namespace ws
 {
 class Socket
 {
-	private:
+	protected:
 		struct sockaddr_in	address;
 		int					server_fd;
 
@@ -20,7 +20,7 @@ class Socket
 		Socket();
 		virtual ~Socket();
 
-		int Bind();
+		int bindSocket();
 };
 };
 #endif
