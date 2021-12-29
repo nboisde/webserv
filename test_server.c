@@ -52,6 +52,10 @@ int main(void)
 			perror("Error on accept\n");
 			exit(1);
 		}
+		printf("Cli addr: %i %u %u %s\n", cli_addr.sin_family, cli_addr.sin_port, cli_addr.sin_addr.s_addr, cli_addr.sin_zero);
+		printf("Serv addr: %i %u %u %s\n", serv_addr.sin_family, serv_addr.sin_port, serv_addr.sin_addr.s_addr, serv_addr.sin_zero);
+		printf("CLIENT SOCKET FILE DES: %i\n", new_fd);
+		printf("SERVER SOCKET FILE DES: %i\n", sockfd);
 		char buffer[30000] = {0};
 		rd = read(new_fd, buffer, 30000);
 		//rd = recv(new_fd, buffer, 30000, MSG_WAITALL);
