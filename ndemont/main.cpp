@@ -7,21 +7,32 @@
 
 int	main()
 {
-	ws::listenSocket	L_socket;
-	int					C_socket;
+	ws::listenSocket	listenSocket;
+	int					connectSocket;
+	char				*hello = (char *)("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!");
 
-	L_socket.listenning();
-	C_socket = L_socket.accepting();
+	listenSocket.listenning();
+	while(1)
+	{
 
-
-	char buffer[1024] = {0};
-	int valread = read(C_socket, buffer, 1024); 
-	printf("%s\n",buffer );
-	if(valread < 0)
-	{ 
-		printf("No bytes are there to read");
+		printf("\n+++++++ Waiting for new connection ++++++++\n\n");
+		connectSocket = listenSocket.accepting();
+		if (connectSocket < 0)
+		{
+			perror("In accept");
+			exit(EXIT_FAILURE);
+		}
+		char buffer[30000] = {0};
+		int valread = read(connectSocket, buffer, 30000);
+		if (valread < 0)
+		{
+			perror("In read");
+			exit(EXIT_FAILURE);
+		}
+		printf("%s\n", buffer);
+		write(connectSocket , hello, strlen(hello));
+		printf("------------------Hello message sent-------------------\n");
+		close(connectSocket);
 	}
-	char *hello = (char *)("Hello from the server\n");//IMPORTANT! WE WILL GET TO IT
-	write(C_socket, hello , strlen(hello));
 	return (0);
 }
