@@ -1,7 +1,7 @@
 #ifndef CONNECTSOCKET_HPP
 # define CONNECTSOCKET_HPP
 
-# include "Socket.hpp"
+# include "socket.hpp"
 
 namespace ws
 {
