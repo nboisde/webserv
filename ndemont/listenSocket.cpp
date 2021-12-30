@@ -17,9 +17,10 @@ int	ws::listenSocket::listenning()
 int	ws::listenSocket::accepting()
 {
 	int			new_socket;
-	socklen_t	addrlen = sizeof(address);
+	struct sockaddr_in cli_addr;
+	socklen_t	addrlen = sizeof(cli_addr);
 
-	new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+	new_socket = accept(server_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
 	if (new_socket < 0)
 	{
 		perror("In accept");

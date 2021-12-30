@@ -3,20 +3,24 @@
 
 # include <cstdio>
 # include <iostream>
+# include <sys/types.h> 
 # include <sys/socket.h>
 # include <netinet/in.h>
 # include <arpa/inet.h>
 # include <functional>
+# include <fcntl.h>
+# include <sys/select.h>
+# include <unistd.h>
+# include <sys/time.h>
 
 namespace ws
 {
 class Socket
 {
-	protected:
+	public:
 		struct sockaddr_in	address;
 		int					server_fd;
 
-	public:
 		Socket();
 		virtual ~Socket();
 

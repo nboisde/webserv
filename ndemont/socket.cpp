@@ -2,9 +2,23 @@
 
 ws::Socket::Socket()
 {
-	const int	PORT = 8080;
+	const int	PORT = 4242;
+	//int flags;
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (server_fd < 0)
+	{
+		perror("In socket: ");
+		exit(EXIT_FAILURE);
+	}
+	
+	//flags = fcntl(server_fd, F_SETFL, 0);
+	// if ((fcntl(server_fd, F_SETFL, O_NONBLOCK)) < 0)
+	// {
+	// 	perror("In fcntl: ");
+	// 	exit(EXIT_FAILURE);
+	// }
+	//if (setsockopt(server_fd, ) < 0)
 	memset((char *)&address, 0, sizeof(address));
 	address.sin_family = AF_INET; 
 	address.sin_addr.s_addr = htonl(INADDR_ANY); 
@@ -21,6 +35,5 @@ int	ws::Socket::bindSocket()
 		perror("bind failed\n");
 		return (0); 
 	}
-	std::cout << "bind succeeded" << std::endl;
 	return (1);
 }
