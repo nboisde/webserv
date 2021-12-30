@@ -4,7 +4,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
-# define BUFFER 1000
+# define BUFFER 4096
 
 struct pollfd &new_pollfd(int socketfd) //PROTEGER MEMOIRE
 {
@@ -16,45 +16,121 @@ struct pollfd &new_pollfd(int socketfd) //PROTEGER MEMOIRE
 
 int	main()
 {
-	ws::listenSocket	listenSocket;
-	int					connectSocket_fd;
-	char				*hello = (char *)("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8;\r\nContent-Length: 21\r\n\r\n<h1>Hello world!</h1>\n");
-	int					delai = -1;
+	ws::listenSocket			listenSocket;
+	//char						*hello = (char *)("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8;\r\nContent-Length: 21\r\n\r\n<h1>Hello world!</h1>\n");
+	int							delai = -1;
 	std::vector<struct pollfd>	pollfd;
+	int							ret;
+	int							end_server = 0;
+	int							new_sd = -1;
+	int							close_conn, compress_array = 0;
+	char						buffer[80];
 
+	int status = fcntl(listenSocket.server_fd, F_SETFL, fcntl(listenSocket.server_fd, F_GETFL, 0) | O_NONBLOCK);
+	if (status < 0)
+	{
+		perror("In fcntl: ");
+		exit(EXIT_FAILURE);
+	}
 	listenSocket.listenning();
-	while(1)
+	pollfd.push_back(new_pollfd(listenSocket.server_fd));
+	do
 	{
 		printf("\n+++++++ Waiting for new connection ++++++++\n\n");
-		
-		if ((connectSocket_fd = listenSocket.accepting()) < 0)
+		ret = poll(&(*pollfd.begin()), pollfd.size(), delai);
+		if (ret < 0)
 		{
-			perror("accepting failed");
-			continue;
+			perror("In poll: failes");
+			break;
 		}
-		pollfd.push_back(new_pollfd(connectSocket_fd));
+		if (ret == 0)
+		{
+			perror("In poll: timed out");
+			break;
+		}
+		for (int i = 0; i < (int)pollfd.size(); i++)
+		{
+			if (pollfd[i].revents == 0)
+				continue;
+			if (pollfd[i].revents != POLLIN)
+			{
+				printf("  Error! revents = %d\n", pollfd[i].revents);
+				end_server = 1;
+				break;
+			}
+			if (pollfd[i].fd == listenSocket.server_fd)
+			{
+				printf("Listening socket is readable\n");
+				do 
+				{
+					struct sockaddr_in cli_addr;
+					socklen_t	addrlen = sizeof(cli_addr);
 
-		std::vector<struct pollfd>::iterator it = pollfd.begin();
-		std::vector<struct pollfd>::iterator ite = pollfd.end();
-		poll(&(*pollfd.begin()), pollfd.size(), delai);
-		for(; it != ite; it++)
-		{
-			
-			if ((it->revents & POLLIN) == POLLIN)
-			{
-				std::cout << connectSocket_fd << " set for reading" << std::endl;
-				char buffer[BUFFER] = {0};
-				recv(it->fd, buffer, BUFFER, 0);
-				std::cout << buffer << std::endl;
+					std::cout << "Before Accept\n";
+					new_sd = accept(listenSocket.server_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
+					std::cout << "new fd = " << new_sd << std::endl;
+					if (new_sd < 0)
+					{
+						if (errno != EWOULDBLOCK)
+						{
+							perror("  accept() failed");
+							end_server = 1;
+						}
+						break;
+					}
+					printf("  New incoming connection - %d\n", new_sd);
+					pollfd.push_back(new_pollfd(new_sd));
+				} while (new_sd != -1);
 			}
-			if ((it->revents & POLLIN) != POLLIN)
+			else
 			{
-				send(it->fd , hello,strlen(hello), 0);
-				close(it->fd);
-				//pollfd.erase(it);
+				printf("  Descriptor %d is readable\n", pollfd[i].fd);
+				close_conn = 0;
+				do
+				{
+					ret = recv(pollfd[i].fd, buffer, sizeof(buffer), 0);
+					if (ret < 0)
+					{
+						perror("In recv: fail");
+						if (errno != EWOULDBLOCK)
+						{
+						close_conn = 1;
+						}
+						break;
+					}
+					if (ret == 0)
+					{
+						std::cout << "Connection closed\n";
+						close_conn = 1;
+						break;
+					}
+					int len = ret;
+					printf("  %d bytes received\n", len);
+					ret = send(pollfd[i].fd, buffer, len, 0);
+					if (ret < 0)
+					{
+						perror("  send() failed");
+						close_conn = 1;
+						break;
+					}
+
+				} while (1);
+				if (close_conn)
+				{
+					close(pollfd[i].fd);
+					pollfd[i].fd = -1;
+					compress_array = 1;
+				}
 			}
 		}
-	}
-	close(listenSocket.server_fd);
+		if (compress_array)
+		{
+			for (int i = 0; i < (int)pollfd.size(); i++)
+			{
+				if (pollfd[i].fd == -1)
+					pollfd.erase(pollfd.begin() + i);
+			}
+		}
+	} while (end_server == 0);
 	return (0);
 }

@@ -10,7 +10,6 @@ int	ws::listenSocket::listenning()
 		perror("In listen\n");
 		exit(EXIT_FAILURE);
 	}
-	std::cout << "listen succeeded\n";
 	return (1);
 }
 
@@ -26,6 +25,5 @@ int	ws::listenSocket::accepting()
 		perror("In accept");
 		exit(EXIT_FAILURE);
 	}
-	std::cout << "accept succeeded\n";
 	return (new_socket);
 }
