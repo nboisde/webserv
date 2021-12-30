@@ -12,6 +12,8 @@
 # include <sys/select.h>
 # include <unistd.h>
 # include <sys/time.h>
+# include <poll.h>
+# include <vector>
 
 namespace ws
 {
