@@ -19,7 +19,7 @@ init:
 					$(shell mkdir -p ${OBJS_DIR})
 
 ${NAME}:			${OBJS}
-					${CC} ${CFLAGS} ${IFLAGS} *.cpp
+					${CC} ${CFLAGS} ${IFLAGS} -o $@ $^
 
 ${OBJS_DIR}/%.o:	%.cpp
 					@echo "${CLEAR}"
@@ -30,7 +30,7 @@ clean:
 					${RM} ${OBJS_DIR}
 
 fclean:				clean
-					${RM} a.out
+					${RM} ${NAME}
 
 re:					fclean all
 

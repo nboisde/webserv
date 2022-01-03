@@ -1,14 +1,32 @@
-#ifndef SERVER_HPP
-# define SERVER_HPP
+#ifndef SERVER_CONF_HPP
+# define SERVER_CONF_HPP
 
-# define BUFFER 4096
+#include <cstring>
 
-# include "listenSocket.hpp"
-# include <sys/types.h>
-# include <sys/uio.h>
-# include <unistd.h>
+//https://www.plesk.com/blog/various/nginx-configuration-guide/
 
-int	launch_server(void);
+//class route{
+//	private:
+//		bool get;
+//		bool post;
+//		bool del;
+//		// consider the redirection.
+//		std::string directory;
+//		bool autoindex;
+//		std::string default_file;
+//		std::string cgi_path;
+				
+//};
 
+//class server
+//{
+//	private:
+//		std::string server_name;
+//		int port;
+//		long body_size;
+//		std::string error_pages;
+//		std::vector<route> routes;
+//		bool server_valid;
+//};
 
 #endif
