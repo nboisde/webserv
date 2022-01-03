@@ -60,15 +60,13 @@ int	launch_server()
 			}
 			if (pollfd[i].fd == listenSocket.server_fd)
 			{
-				printf("Listening socket is readable\n");
+				printf("  Listening socket is readable\n");
 				do 
 				{
 					struct sockaddr_in cli_addr;
 					socklen_t	addrlen = sizeof(cli_addr);
 
-					std::cout << "Before Accept\n";
 					new_sd = accept(listenSocket.server_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
-					std::cout << "new fd = " << new_sd << std::endl;
 					if (new_sd < 0)
 					{
 						if (errno != EWOULDBLOCK)
@@ -91,11 +89,7 @@ int	launch_server()
 					ret = recv(pollfd[i].fd, buffer, sizeof(buffer), 0);
 					if (ret < 0)
 					{
-						perror("In recv: fail");
-						if (errno != EWOULDBLOCK)
-						{
-						close_conn = 1;
-						}
+						perror("\nIn recv");
 						break;
 					}
 					if (ret == 0)
