@@ -1,8 +1,9 @@
 #include "socket.hpp"
+#include "listenSocket.hpp"
+#include "server.hpp"
 
 int	main()
 {
-	printf("%d\n", POLLHUP);
 	while (1)
 	{
 		launch_server();

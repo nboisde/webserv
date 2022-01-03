@@ -1,22 +1,38 @@
-NAME		= webserver
-CC			= clang++
-RM			= rm -rf
-FLAGS		= -Wall -Werror -Wextra -std=c++98
-SRCS_DIR	= sources
-INC_DIR		= includes
+NAME				= webserver
+CC					= clang++
+RM					= rm -rf
+CFLAGS				= -Wall -Werror -Wextra -std=c++98
+IFLAGS				= -I${INC_DIR}
+SRCS_DIR			= sources
+INC_DIR				= includes
+OBJS_DIR			= objects
 
-all			init ${NAME}
+INC					= $(shell find ${INC_DIR} -type f -name "*.hpp")
+SRCS 				= $(notdir $(shell find ${SRCS_DIR} -type f -name "*.cpp"))
+OBJS 				= $(addprefix ${OBJS_DIR}/, $(SRCS:.cpp=.o))
+vpath				%.cpp $(shell find ${SRCS_DIR} -type d)
 
-${NAME}:	init
-			${CC} ${FLAGS} -i${INC_DIR} *.cpp
+
+all:				init ${NAME}
+
+init:		
+					$(shell mkdir -p ${OBJS_DIR})
+
+${NAME}:			${OBJS}
+					${CC} ${CFLAGS} ${IFLAGS} -o $@ $^
+
+${OBJS_DIR}/%.o:	%.cpp
+					@echo "${CLEAR}"
+					@echo "compiling $<\r\c"
+					@${CC} ${CFLAGS} ${IFLAGS} -c $< -o $@
 
 clean:
-			${RM} ${OBJS_DIR}
+					${RM} ${OBJS_DIR}
 
-fclean:		clean
-			${RM} a.out
+fclean:				clean
+					${RM} ${NAME}
 
-re:			fclean
+re:					fclean all
 
-.SUFFIXWZ	.cpp .o .hpp
-.PHONY		all clean fclean re
+.SUFFIXES:			.cpp .o .hpp
+.PHONY:				all clean fclean re

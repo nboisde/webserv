@@ -1,10 +1,5 @@
 #include "socket.hpp"
 #include "listenSocket.hpp"
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <unistd.h>
-
-# define BUFFER 4096
 
 struct pollfd &new_pollfd(int socketfd) //PROTEGER MEMOIRE
 {
