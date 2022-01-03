@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/wait.h>
+#include <arpa/inet.h>
 
 #define PORT 8080
 #define BACKLOG 10
@@ -52,6 +53,8 @@ int main(void)
 			perror("Error on accept\n");
 			exit(1);
 		}
+		char *client_ip = inet_ntoa(cli_addr.sin_addr);
+		printf("ip address of the client: %s\n", client_ip);
 		printf("Cli addr: %i %u %u %s\n", cli_addr.sin_family, cli_addr.sin_port, cli_addr.sin_addr.s_addr, cli_addr.sin_zero);
 		printf("Serv addr: %i %u %u %s\n", serv_addr.sin_family, serv_addr.sin_port, serv_addr.sin_addr.s_addr, serv_addr.sin_zero);
 		printf("CLIENT SOCKET FILE DES: %i\n", new_fd);
