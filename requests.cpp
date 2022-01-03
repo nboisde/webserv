@@ -93,6 +93,7 @@ int ws::Requests::concatenateRequest(std::string buf)
 			return 0;
 		else
 		{
+			fillHeaderAndBody();
 			_state = BODY_RECIEVED;
 			return 1;
 		}
