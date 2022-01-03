@@ -17,7 +17,7 @@ struct pollfd &new_pollfd(int socketfd) //PROTEGER MEMOIRE
 int	launch_server()
 {
 	ws::listenSocket			listenSocket;
-	//char						*hello = (char *)("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8;\r\nContent-Length: 21\r\n\r\n<h1>Hello world!</h1>\n");
+	char						*hello = (char *)("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8;\r\nContent-Length: 21\r\n\r\n<h1>Hello world!</h1>\n");
 	int							delai = -1;
 	std::vector<struct pollfd>	pollfd;
 	int							ret;
@@ -105,8 +105,11 @@ int	launch_server()
 						break;
 					}
 					int len = ret;
+					printf("  %s", buffer);
 					printf("  %d bytes received\n", len);
-					ret = send(pollfd[i].fd, buffer, len, 0);
+					for (size_t i = 0; i < 80; i++)
+						buffer[i] = 0;
+					ret = send(pollfd[i].fd, hello, strlen(hello), 0);
 					if (ret < 0)
 					{
 						perror("  send() failed");
