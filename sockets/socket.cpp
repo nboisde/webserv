@@ -3,7 +3,7 @@
 ws::Socket::Socket()
 {
 	const int	PORT = 8080;
-	int flags;
+	//int flags;
 	int on = 1;
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -18,7 +18,7 @@ ws::Socket::Socket()
 		close(server_fd);
 		exit(EXIT_FAILURE);
 	}
-	flags = fcntl(server_fd, F_SETFL, 0);
+	//flags = fcntl(server_fd, F_SETFL, 0);
 	if ((fcntl(server_fd, F_GETFL, O_NONBLOCK)) < 0)
 	{
 		perror("In fcntl: ");

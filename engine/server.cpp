@@ -94,7 +94,6 @@ int	launch_server()
 						break;
 					}
 					int len = ret;
-					//printf("  %s", buffer);
 					printf("  %d bytes received\n", len);
 					for (size_t i = 0; i < 80; i++)
 						buffer[i] = 0;
