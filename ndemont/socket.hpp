@@ -29,4 +29,7 @@ class Socket
 		int bindSocket();
 };
 };
+
+
+int launch_server(void);
 #endif
