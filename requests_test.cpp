@@ -43,7 +43,7 @@ int main(void)
 	std::cout << "Method (1-get, 2-post, 3-del)"<< r.getMethodType() << std::endl;
 	std::cout << "content length: " << r.getContentLength() << std::endl;
 
-	r.fillHeaderAndBody();
+	//r.fillHeaderAndBody();
 	std::cout << r.getHeader() << std::endl;
 	std::cout << "--------------------" << std::endl;
 	std::cout << r.getBody() << std::endl;
