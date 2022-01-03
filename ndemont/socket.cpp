@@ -28,17 +28,17 @@ ws::Socket::Socket()
 	address.sin_family = AF_INET; 
 	address.sin_addr.s_addr = htonl(INADDR_ANY); 
 	address.sin_port = htons(PORT);
-	bindSocket();
 }
 
 ws::Socket::~Socket() {}
 
 int	ws::Socket::bindSocket()
 {
-	if (bind(server_fd,(struct sockaddr *)&address,sizeof(address)) < 0)
+	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
-		perror("bind failed\n");
-		return (0); 
+		perror("In bind");
+		close(server_fd);
+		return (0);
 	}
 	return (1);
 }

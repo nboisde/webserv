@@ -26,6 +26,8 @@ int	launch_server()
 	int							close_conn, compress_array = 0;
 	char						buffer[80];
 
+	if (!listenSocket.bindSocket())
+		return (0);
 	int status = fcntl(listenSocket.server_fd, F_SETFL, fcntl(listenSocket.server_fd, F_GETFL, 0) | O_NONBLOCK);
 	if (status < 0)
 	{
@@ -68,14 +70,7 @@ int	launch_server()
 
 					new_sd = accept(listenSocket.server_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
 					if (new_sd < 0)
-					{
-						if (errno != EWOULDBLOCK)
-						{
-							perror("  accept() failed");
-							end_server = 1;
-						}
 						break;
-					}
 					printf("  New incoming connection - %d\n", new_sd);
 					pollfd.push_back(new_pollfd(new_sd));
 				} while (new_sd != -1);
@@ -99,7 +94,7 @@ int	launch_server()
 						break;
 					}
 					int len = ret;
-					printf("  %s", buffer);
+					//printf("  %s", buffer);
 					printf("  %d bytes received\n", len);
 					for (size_t i = 0; i < 80; i++)
 						buffer[i] = 0;
@@ -129,5 +124,10 @@ int	launch_server()
 			}
 		}
 	} while (end_server == 0);
+	for (int i = 0; i <(int)pollfd.size(); i++)
+	{
+		if(pollfd[i].fd >= 0)
+			close(pollfd[i].fd);
+	}
 	return (0);
 }
