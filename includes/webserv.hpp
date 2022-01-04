@@ -1,6 +1,7 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
+//C_LIBRARIES//
 # include <stdlib.h>
 # include <unistd.h>
 # include <arpa/inet.h>
@@ -13,7 +14,12 @@
 # include <fcntl.h>
 # include <stdio.h>
 
+//CPP_LIBRARIES//
 # include <string>
 # include <iostream>
+
+//CLASSES//
+# include "PortsClass.hpp"
+# include "PollClass.hpp"
 
 #endif
