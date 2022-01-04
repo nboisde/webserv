@@ -1,20 +1,7 @@
 #ifndef REQUESTS_HPP
 # define REQUESTS_HPP
 
-# include <string>
-# include <iostream>
-
-// State MACROS
-# define REQUEST_FORMAT_ERROR -1
-# define RECIEVING_HEADER 0
-# define HEADER_RECIEVED 1
-# define BODY_RECIEVED 2
-
-// Methods MACROS
-# define UNKNOWN 0
-# define GET 1
-# define POST 2
-# define DELETE 3
+# include "webserv.hpp"
 
 namespace ws {
 	class Requests {

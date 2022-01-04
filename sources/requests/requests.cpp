@@ -1,4 +1,4 @@
-#include "requests.hpp"
+#include "webserv.hpp"
 
 ws::Requests::Requests(): _state(RECIEVING_HEADER), _raw_content(""),  _body_len_recieved(0), _header_len_recieved(0), _content_length(0), _method_type(UNKNOWN), _header_size(0), _header(""), _body(""){}
 ws::Requests::~Requests(){}
@@ -32,8 +32,15 @@ void ws::Requests::findMethod(void)
 void ws::Requests::identifyBodyLengthInHeader(void)
 {
 	std::string l = "content-length"; // TO CHANGE TO BE COMPATIBLE WITH CONTENT-LENGTH ALL CASES.. ex: postman computer.
+	std::string l2 = "Content-Length";
 	std::string cl;
-	int ret = _raw_content.find(l);
+	int r1 = _raw_content.find(l);
+	int r2 = _raw_content.find(l2);
+	int ret;
+	if ((r1 == -1 && r2 == -1) || r1 >= 0)
+		ret = r1;
+	else
+		ret = r2;
 	if (ret == -1)
 		return ;
 	else

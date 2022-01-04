@@ -1,24 +1,23 @@
-
-#ifndef __POLL_HPP__
-# define __POLL_HPP__
-
 #include "webserv.hpp"
 
+#ifndef __POLLCLASS_HPP__
+# define __POLLCLASS_HPP__
+
 namespace ws{
-class Poll
-{
-	public:
-		Poll(void);
-		virtual ~Poll(void);
-		Poll(Poll const & src);
+	class Poll
+	{
+		public:
+			Poll(void);
+			virtual ~Poll(void);
+			Poll(Poll const & src);
 
-		Poll & operator=(Poll const & rhs);
+			Poll & operator=(Poll const & rhs);
 
-		struct pollfd & new_pollfd(int socketfd);
+			struct pollfd & new_pollfd(int socketfd);
 
-	private:
-		std::vector<struct pollfd>	_pollfds;
-};
+		private:
+			std::vector<struct pollfd>	_pollfds;
+	};
 };
 
 #endif
