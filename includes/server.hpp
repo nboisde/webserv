@@ -2,9 +2,9 @@
 # define SERVER_HPP
 
 # include "webserv.hpp"
-# include <iostream>
-# include <string>
-# include "Ports.hpp"
+
+class Port;
+class Poll;
 
 namespace ws{
 class Server
@@ -13,16 +13,16 @@ class Server
 	public:
 
 		Server( void );
-		Server( std::string, std::vector<Poll> );
+		Server( std::string, std::vector<Port> );
 		Server( Server const & src );
 		virtual ~Server( void );
 
 		Server &		operator=( Server const & rhs );
 
-		std::string	getIp( void ) const;
-		std::string getPorts( void ) const;
+		std::string			getIp( void ) const;
+		std::vector<Port>	getPorts( void ) const;
 		void		setIp( std::string new_ip );
-		void		setPorts( std::vector<Poll> new_ports);
+		void		setPorts( std::vector<Port> new_ports);
 
 	protected:
 
@@ -31,6 +31,6 @@ class Server
 };
 }
 
-std::ostream &			operator<<( std::ostream & o, Server const & i );
+std::ostream &			operator<<( std::ostream & o, ws::Server const & i );
 
 #endif /* ********************************************************** SERVER_H */

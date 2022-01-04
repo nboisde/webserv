@@ -1,5 +1,6 @@
-#include "Port.hpp"
+#include "webserv.hpp"
 
+namespace ws{
 /*
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
@@ -62,5 +63,5 @@ std::ostream &			operator<<( std::ostream & o, Port const & i )
 int	Port::getPort( void ) const{
 	return this->_port_nb;
 }
-
+}
 /* ************************************************************************** */

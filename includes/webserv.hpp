@@ -17,10 +17,16 @@
 //CPP_LIBRARIES//
 # include <string>
 # include <iostream>
+# include <vector>
 
 //CLASSES//
-# include "Ports.hpp"
-# include "Poll.hpp"
 # include "Server.hpp"
+# include "requests.hpp"
+# include "socket.hpp"
+# include "listenSocket.hpp"
+# include "Port.hpp"
+# include "Poll.hpp"
+
+
 
 #endif
