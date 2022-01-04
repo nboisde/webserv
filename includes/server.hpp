@@ -1,32 +1,36 @@
-#ifndef SERVER_CONF_HPP
-# define SERVER_CONF_HPP
+#ifndef SERVER_HPP
+# define SERVER_HPP
 
-#include <cstring>
+# include "webserv.hpp"
+# include <iostream>
+# include <string>
+# include "Ports.hpp"
 
-//https://www.plesk.com/blog/various/nginx-configuration-guide/
+namespace ws{
+class Server
+{
 
-//class route{
-//	private:
-//		bool get;
-//		bool post;
-//		bool del;
-//		// consider the redirection.
-//		std::string directory;
-//		bool autoindex;
-//		std::string default_file;
-//		std::string cgi_path;
-				
-//};
+	public:
 
-//class server
-//{
-//	private:
-//		std::string server_name;
-//		int port;
-//		long body_size;
-//		std::string error_pages;
-//		std::vector<route> routes;
-//		bool server_valid;
-//};
+		Server( void );
+		Server( std::string, std::vector<Poll> );
+		Server( Server const & src );
+		virtual ~Server( void );
 
-#endif
+		Server &		operator=( Server const & rhs );
+
+		std::string	getIp( void ) const;
+		std::string getPorts( void ) const;
+		void		setIp( std::string new_ip );
+		void		setPorts( std::vector<Poll> new_ports);
+
+	protected:
+
+		std::string			_server_ip;
+		std::vector<Port>	_ports;
+};
+}
+
+std::ostream &			operator<<( std::ostream & o, Server const & i );
+
+#endif /* ********************************************************** SERVER_H */
