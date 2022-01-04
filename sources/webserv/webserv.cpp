@@ -82,7 +82,11 @@ int	launch_server()
 
 					new_sd = accept(listenSocket.server_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
 					if (new_sd < 0)
+					{
+						if (errno != EWOULDBLOCK)
+							perror("  accept() failed");
 						break;
+					}
 					printf("  New incoming connection - %d\n", new_sd);
 					pollfd.push_back(new_pollfd(new_sd));
 					clients.push_back(new_client(new_sd));
@@ -97,15 +101,13 @@ int	launch_server()
 					for (size_t i = 0; i < BUFFER_SIZE; i++)
 						buffer[i] = 0;
 					ret = recv(pollfd[i].fd, buffer, sizeof(buffer), 0);
-					std::cout << ret << std::endl;
-					std::cout << buffer << std::endl;
 					int rq = clients[i].r.concatenateRequest((std::string)buffer);
 					if (ret < 0)
 					{
 						perror("\nIn recv");
 						break;
 					}
-					if (ret == 0 || rq == 0)
+					if (ret == 0 || ret < BUFFER_SIZE || rq == 1)
 					{
 						std::cout << "Connection closed\n";
 						close_conn = 1;
