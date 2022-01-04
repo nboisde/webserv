@@ -36,12 +36,12 @@
 # include <vector>
 
 //CLASSES//
-# include "server.hpp"
 # include "requests.hpp"
 # include "socket.hpp"
 # include "listenSocket.hpp"
 # include "Port.hpp"
 # include "Poll.hpp"
+# include "Server.hpp"
 
 
 
