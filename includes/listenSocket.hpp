@@ -1,7 +1,7 @@
-#ifndef LISTENINGSOCKET_HPP
+#ifndef __LISTENINGSOCKET_HPP
 # define LISTENINGSOCKET_HPP
 
-# include "socket.hpp"
+# include "webserv.hpp"
 
 namespace ws
 {

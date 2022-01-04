@@ -1,5 +1,4 @@
 #include "webserv.hpp"
-#include <vector>
 
 namespace ws{
 /*
@@ -49,7 +48,7 @@ Server &				Server::operator=( Server const & rhs )
 std::ostream &			operator<<( std::ostream & o, Server const & i )
 {
 	o << "Server IP = " << i.getIp() << std::endl;
-	//o << "Access through ports : " << i.getPorts() << std::endl;
+	o << "Access through ports : " << i.printPorts() << std::endl;                                                                
 	return o;
 }
 
@@ -58,6 +57,30 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
+std::string	Server::printPorts( void ) const{
+	std::vector<Port>::const_iterator it, itend; 
+	std::string ret;
+	
+	it = _ports.begin();
+	itend = _ports.end();
+	if (it == itend)
+	{
+		return "No Ports in memory";
+	}
+	for (; it != itend; it++)
+	{
+		ret += (*it).getPort();
+		if (it != itend)
+			ret += " ";
+	}
+	return ret;
+}
+
+void		Server::addPort( Port new_port )
+{
+	if (new_port)
+		this->_ports.push_back(new_port);
+}
 
 /*
 ** --------------------------------- ACCESSOR ---------------------------------

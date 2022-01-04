@@ -3,7 +3,7 @@
 ws::listenSocket::listenSocket() : Socket() {};
 ws::listenSocket::~listenSocket() {};
 
-int	ws::listenSocket::listenning()
+int	ws::listenSocket::listening()
 {
 	if (listen(server_fd, 3) < 0)
 	{

@@ -1,6 +1,6 @@
-#include "socket.hpp"
+#include "webserv.hpp"
 
-ws::Socket::Socket()
+ws::Sockets::Sockets()
 {
 	const int	PORT = 8080;
 	//int flags;
@@ -30,9 +30,9 @@ ws::Socket::Socket()
 	address.sin_port = htons(PORT);
 }
 
-ws::Socket::~Socket() {}
+ws::Sockets::~Sockets() {}
 
-int	ws::Socket::bindSocket()
+int	ws::Sockets::bindSocket()
 {
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
