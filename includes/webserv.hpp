@@ -19,7 +19,8 @@
 # include <iostream>
 
 //CLASSES//
-# include "PortsClass.hpp"
-# include "PollClass.hpp"
+# include "Ports.hpp"
+# include "Poll.hpp"
+# include "Server.hpp"
 
 #endif

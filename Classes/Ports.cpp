@@ -1,15 +1,22 @@
-#include "PortsClass.hpp"
+#include "Port.hpp"
 
 /*
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
 
-PortsClass::PortsClass()
+Port::Port( void )
 {
+	return;
 }
 
-PortsClass::PortsClass( const PortsClass & src )
+Port::Port( int nb ) : _port_nb(nb)
 {
+	return;
+}
+
+Port::Port( const Port & src )
+{
+	*this = src;
 }
 
 
@@ -17,8 +24,9 @@ PortsClass::PortsClass( const PortsClass & src )
 ** -------------------------------- DESTRUCTOR --------------------------------
 */
 
-PortsClass::~PortsClass()
+Port::~Port( void )
 {
+	return;
 }
 
 
@@ -26,18 +34,18 @@ PortsClass::~PortsClass()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-PortsClass &				PortsClass::operator=( PortsClass const & rhs )
+Port &				Port::operator=( Port const & rhs )
 {
-	//if ( this != &rhs )
-	//{
-		//this->_value = rhs.getValue();
-	//}
+	if ( this != &rhs )
+	{
+		this->_port_nb = rhs.getPort();
+	}
 	return *this;
 }
 
-std::ostream &			operator<<( std::ostream & o, PortsClass const & i )
+std::ostream &			operator<<( std::ostream & o, Port const & i )
 {
-	//o << "Value = " << i.getValue();
+	o << "Port_nb = " << i.getPort();
 	return o;
 }
 
@@ -51,5 +59,8 @@ std::ostream &			operator<<( std::ostream & o, PortsClass const & i )
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
+int	Port::getPort( void ) const{
+	return this->_port_nb;
+}
 
 /* ************************************************************************** */
