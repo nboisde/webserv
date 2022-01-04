@@ -1,5 +1,7 @@
-#include "Server.hpp"
+#include "webserv.hpp"
+#include <vector>
 
+namespace ws{
 /*
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
@@ -9,7 +11,7 @@ Server::Server( void )
 	return;
 }
 
-Server::Server( std::string ip, std::vector<Poll> ports) : _server_ip(ip), _ports(ports)
+Server::Server( std::string ip, std::vector<Port> ports) : _server_ip(ip), _ports(ports)
 {
 	return;
 }
@@ -26,7 +28,7 @@ Server::Server( const Server & src )
 
 Server::~Server( void )
 {
-	_ports.clear(_ports.begin());
+	_ports.clear();
 }
 
 
@@ -47,7 +49,7 @@ Server &				Server::operator=( Server const & rhs )
 std::ostream &			operator<<( std::ostream & o, Server const & i )
 {
 	o << "Server IP = " << i.getIp() << std::endl;
-	o << "Access through ports : " < i.getPorts() << std::endl;
+	//o << "Access through ports : " << i.getPorts() << std::endl;
 	return o;
 }
 
@@ -65,7 +67,7 @@ std::string	Server::getIp( void ) const{
 	return (this->_server_ip);
 }
 
-std::string Server::getPorts( void ) const{
+std::vector<Port> Server::getPorts( void ) const{
 	return (this->_ports);
 }
 
@@ -73,8 +75,8 @@ void	Server::setIp( std::string new_ip ) {
 	this->_server_ip = new_ip;
 }
 
-void	Server::setPorts( std::vector<Poll> new_ports) {
-	this->_ports = new_ports;;
+void	Server::setPorts( std::vector<Port> new_ports) {
+	this->_ports = new_ports;
 }
-
+}
 /* ************************************************************************** */

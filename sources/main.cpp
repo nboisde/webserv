@@ -1,6 +1,7 @@
-#include "socket.hpp"
-#include "listenSocket.hpp"
-#include "server.hpp"
+#include "webserv.hpp"
+
+int launch_server(void);
+
 
 int	main()
 {

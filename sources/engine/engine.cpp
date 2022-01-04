@@ -1,5 +1,4 @@
-#include "socket.hpp"
-#include "listenSocket.hpp"
+#include "webserv.hpp"
 
 struct pollfd &new_pollfd(int socketfd) //PROTEGER MEMOIRE
 {

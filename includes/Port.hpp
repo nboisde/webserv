@@ -11,6 +11,7 @@ class Port
 
 	public:
 
+		Port( void );
 		Port( int nb );
 		Port( Port const & src );
 		virtual ~Port( void );
@@ -20,11 +21,10 @@ class Port
 		int		getPort( void ) const;
 
 	protected:
-		Port( void );
 		int		_port_nb;
 };
 }
 
-std::ostream &			operator<<( std::ostream & o, Port const & i );
+std::ostream &			operator<<( std::ostream & o, ws::Port const & i );
 
 #endif /* ****************************************************** PORTSCLASS_H */

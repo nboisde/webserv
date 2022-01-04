@@ -1,9 +1,11 @@
-#include "PollClass.hpp"
+#include "webserv.hpp"
 
-struct pollfd &Poll::new_pollfd(int socketfd) //PROTEGER MEMOIRE
-{
-	struct pollfd *ptr = new struct pollfd;
-	ptr->fd = socketfd;
-	ptr->events = POLLIN;
-	return (*ptr);
+namespace ws{
+
+struct pollfd &Poll::new_pollfd(int socketfd){
+	struct pollfd *elem = new struct pollfd;
+	elem->fd = socketfd;
+	elem->events = POLLIN;
+	return (*elem);
+}
 }

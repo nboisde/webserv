@@ -1,6 +1,6 @@
 
-#ifndef __POLLCLASS_HPP__
-# define __POLLCLASS_HPP__
+#ifndef __POLL_HPP__
+# define __POLL_HPP__
 
 #include "webserv.hpp"
 
