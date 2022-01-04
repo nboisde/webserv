@@ -3,7 +3,7 @@
 #include "requests.hpp"
 #include <vector>
 
-#define BUFFER_SIZE 100000000
+#define BUFFER_SIZE 4096
 #define RC goo
 
 int main(void)
