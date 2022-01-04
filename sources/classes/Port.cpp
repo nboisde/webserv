@@ -51,7 +51,6 @@ Port::Port( const Port & src )
 
 Port::~Port( void )
 {
-	_client_skt.clear();
 }
 
 
@@ -96,6 +95,7 @@ int Port::listening( void )
 		perror("In listen\n");
 		exit(EXIT_FAILURE);
 	}
+	_client_skt.add_socket(_port_skt);
 	return (1);
 }
 

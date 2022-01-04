@@ -3,6 +3,13 @@
 
 # include "webserv.hpp"
 
+typedef struct	s_client
+{
+	int				fd;
+	ws::Requests 	r;
+	//ws::Response 	ret;
+}				t_client;
+
 namespace ws
 {
 class Sockets
@@ -12,7 +19,9 @@ class Sockets
 		virtual ~Sockets( void );
 	
 		//methods:
-		void			add_client( int new_socket );
+		void			close_connection( int fd_socket );
+		void			add_socket( int new_socket );
+		void			erase_socket( int old_socket );
 
 	protected:
 		std::vector<struct pollfd>	_pollfds;

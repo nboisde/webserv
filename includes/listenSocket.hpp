@@ -1,11 +1,11 @@
-#ifndef __LISTENINGSOCKET_HPP
+#ifndef LISTENINGSOCKET_HPP
 # define LISTENINGSOCKET_HPP
 
 # include "webserv.hpp"
 
 namespace ws
 {
-class listenSocket : public ws::Socket
+class listenSocket : public ws::Sockets
 {
 	public:
 		listenSocket();
