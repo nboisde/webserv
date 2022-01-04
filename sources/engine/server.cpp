@@ -52,7 +52,9 @@ int	launch_server()
 			if (pollfd[i].revents != POLLIN)
 			{
 				printf("  Error! revents = %d\n", pollfd[i].revents);
-				end_server = 1;
+				close(pollfd[i].fd);
+				pollfd[i].fd = -1;
+				compress_array = 1;
 				break;
 			}
 			if (pollfd[i].fd == listenSocket.server_fd)
