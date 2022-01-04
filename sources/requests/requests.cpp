@@ -1,4 +1,4 @@
-#include "requests.hpp"
+#include "webserv.hpp"
 
 ws::Requests::Requests(): _state(RECIEVING_HEADER), _raw_content(""),  _body_len_recieved(0), _header_len_recieved(0), _content_length(0), _method_type(UNKNOWN), _header_size(0), _header(""), _body(""){}
 ws::Requests::~Requests(){}

@@ -1,6 +1,6 @@
 #include <cstring>
 #include <iostream>
-#include "requests.hpp"
+#include "includes/webserv.hpp"
 #include <vector>
 
 #define BUFFER_SIZE 4096
@@ -53,4 +53,5 @@ int main(void)
 	std::cout << " - header : " << std::endl << r.getHeader() << std::endl;
 	std::cout << "--------------------" << std::endl;
 	std::cout << " - body : " << std::endl << r.getBody() << std::endl;
+	std::cout << goo.length() << std::endl;
 }
