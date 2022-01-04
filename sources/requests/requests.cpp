@@ -6,7 +6,7 @@ ws::Requests::~Requests(){}
 int ws::Requests::checkHeaderEnd(void) const
 {
 	int ret = _raw_content.find("\r\n\r\n");
-	std::cout << "find end header" << ret << std::endl;
+	//std::cout << "find end header" << ret << std::endl;
 	if (ret == -1)
 		return (0);
 	else
@@ -63,7 +63,7 @@ void ws::Requests::identifyBodyLengthInHeader(void)
 int ws::Requests::concatenateRequest(std::string buf)
 {
 	_raw_content += buf;
-	std::cout << _raw_content << std::endl << std::endl;
+	//std::cout << _raw_content << std::endl << std::endl;
 
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
 		return -1;
@@ -93,7 +93,7 @@ int ws::Requests::concatenateRequest(std::string buf)
 			return 0;
 		else
 		{
-			fillHeaderAndBody();
+			//fillHeaderAndBody();
 			_state = BODY_RECIEVED;
 			return 1;
 		}
