@@ -1,6 +1,9 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
+# define DELAI -1
+# define BUFFER_SIZE 4096
+
 //C_LIBRARIES//
 # include <stdlib.h>
 # include <unistd.h>

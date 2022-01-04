@@ -12,13 +12,11 @@ int	launch_server()
 {
 	ws::listenSocket			listenSocket;
 	char						*hello = (char *)("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8;\r\nContent-Length: 21\r\n\r\n<h1>Hello world!</h1>\n");
-	int							delai = -1;
 	std::vector<struct pollfd>	pollfd;
 	int							ret;
-	int							end_server = 0;
 	int							new_sd = -1;
 	int							close_conn, compress_array = 0;
-	char						buffer[80];
+	char						buffer[BUFFER_SIZE];
 
 	if (!listenSocket.bindSocket())
 		return (0);
@@ -33,7 +31,7 @@ int	launch_server()
 	do
 	{
 		printf("\n+++++++ Waiting for new connection ++++++++\n\n");
-		ret = poll(&(*pollfd.begin()), pollfd.size(), delai);
+		ret = poll(&(*pollfd.begin()), pollfd.size(), DELAI);
 		if (ret < 0)
 		{
 			perror("In poll: failes");
@@ -118,7 +116,7 @@ int	launch_server()
 					pollfd.erase(pollfd.begin() + i);
 			}
 		}
-	} while (end_server == 0);
+	} while (1);
 	for (int i = 0; i <(int)pollfd.size(); i++)
 	{
 		if(pollfd[i].fd >= 0)
