@@ -26,7 +26,7 @@ Server::Server( const Server & src )
 
 Server::~Server( void )
 {
-	_ports.erase(_ports.begin());
+	_ports.clear(_ports.begin());
 }
 
 
