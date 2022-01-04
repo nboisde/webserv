@@ -4,22 +4,24 @@
 # include <iostream>
 # include <string>
 
-class Ports
+class Port :
 {
 
 	public:
 
-		Ports();
-		Ports( Ports const & src );
-		~Ports();
+		Port( void );
+		Port( int nb );
+		Port( Port const & src );
+		virtual ~Port( void );
 
-		Ports &		operator=( Ports const & rhs );
+		Port &		operator=( Port const & rhs );
 
-	private:
-		int		port_nbr;
-		Poll	poll_fct;
+		int		getPort( void ) const;
+
+	protected:
+		int		_port_nb;
 };
 
-std::ostream &			operator<<( std::ostream & o, Ports const & i );
+std::ostream &			operator<<( std::ostream & o, Port const & i );
 
 #endif /* ****************************************************** PORTSCLASS_H */
