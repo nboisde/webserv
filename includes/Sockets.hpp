@@ -16,6 +16,7 @@ class Sockets
 
 	protected:
 		std::vector<struct pollfd>	_pollfds;
+		std::vector<t_client>		_clients;
 };
 
 }
