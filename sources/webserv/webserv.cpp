@@ -4,7 +4,7 @@
 typedef struct	s_client
 {
 	int fd;
-	ws::Requests r;
+	ws::Request r;
 }				t_client;
 
 struct pollfd &new_pollfd(int socketfd) //PROTEGER MEMOIRE

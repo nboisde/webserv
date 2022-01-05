@@ -12,24 +12,27 @@ class Port
 
 	public:
 
-		Port( int port_skt );
+		Port( int port_socket );
 		Port( Port const & src );
 		virtual ~Port( void );
 
 		Port &		operator=( Port const & rhs );
 
-		int					bind( void );
-		int					listening( void );
-		int					accepting( void );
-		int					getNb( void ) const;
-		int					getServSocket( void ) const;
-		std::vector<Sockets> getClientSocket( void ) const;
+		int							bind( void );
+		int							listening( void );
+		int							accepting( void );
+		int							getFd( void ) const;
+		int							getPort( void ) const;
+		struct sockaddr_in			getPortAddress( void ) const;
+		std::vector<Client>		getClients( void ) const;
+		void						addClient( int fd );
 
 	protected:
 		Port( void );
-		struct sockaddr_in	_address;
-		int					_port_skt;
-		Sockets 			_client_skt;
+		int 					_fd;
+		int						_port;
+		struct sockaddr_in		_port_address;
+		std::vector<Client>	_clients;
 };
 
 }

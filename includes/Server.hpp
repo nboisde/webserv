@@ -18,17 +18,22 @@ class Server
 
 		Server &		operator=( Server const & rhs );
 
-		std::string			printPorts( void ) const;
-		std::string			getIp( void ) const;
-		std::vector<Port>	getPorts( void ) const;
-		void				setIp( std::string new_ip );
-		void				setPorts( std::vector<Port> new_ports);
-		void				addPort( Port new_port);
+		std::string					printPorts( void ) const;
+		std::string					getIp( void ) const;
+		std::vector<Port>			getPorts( void ) const;
+		std::vector<struct pollfd>	getFds( void ) const;
+		void						setIp( std::string new_ip );
+		void						setPorts( std::vector<Port> new_ports);
+		void						setFds( std::vector<struct pollfd> fds);
+		void						addPort( Port new_port);
+		int							polling( void );
+		void						addToPolling( int fd );
 
 	protected:
+		std::string						_server_ip;
+		std::vector<Port>				_ports;
+		std::vector<struct pollfd>		_fds;
 
-		std::string			_server_ip;
-		std::vector<Port>	_ports;
 };
 }
 

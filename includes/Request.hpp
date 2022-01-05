@@ -1,13 +1,13 @@
-#ifndef REQUESTS_HPP
-# define REQUESTS_HPP
+#ifndef REQUEST_HPP
+# define REQUEST_HPP
 
 # include "webserv.hpp"
 
 namespace ws {
-	class Requests {
+	class Request {
 		public:
-			Requests();
-			~Requests();
+			Request();
+			~Request();
 			int concatenateRequest(std::string buf);
 			int requestReceptionState();
 			void identifyBodyLengthInHeader(void);

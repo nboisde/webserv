@@ -82,6 +82,20 @@ void		Server::addPort( Port new_port )
 		this->_ports.push_back(new_port);
 }
 
+int			Server::polling( void )
+{
+	return (poll(&(*_fds.begin()), _fds.size(), DELAI));
+}
+
+void		Server::addToPolling( int fd )
+{
+	struct pollfd new_elem;
+	new_elem.fd = fd;
+	new_elem.events = POLLIN;
+	_fds.push_back(new_elem);
+}
+
+
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
 */
