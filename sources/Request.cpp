@@ -2,14 +2,36 @@
 
 namespace ws{
 
-Request::Request(): _state(RECIEVING_HEADER), _raw_content(""),  _body_len_recieved(0), _header_len_recieved(0), _content_length(0), _method_type(UNKNOWN), _header_size(0), _header(""), _body("")
+Request::Request( void ): _state(RECIEVING_HEADER), _raw_content(""),  _body_len_recieved(0), _header_len_recieved(0), _content_length(0), _method_type(UNKNOWN), _header_size(0), _header(""), _body("")
 {
 
+}
+
+Request::Request( Request const & src)
+{
+	*this = src;
 }
 
 Request::~Request()
 {
 
+}
+
+Request &	Request::operator=( Request const & rhs )
+{
+	if ( this != &rhs )
+	{
+		_state = rhs._state;
+		_raw_content = rhs._raw_content;
+		_body_len_recieved = rhs._body_len_recieved;
+		_header_len_recieved = rhs._header_len_recieved;
+		_content_length = rhs._content_length;
+		_method_type = rhs._method_type;
+		_header_size = rhs._header_size;
+		_header = rhs._header;
+		_body = rhs._body;
+	}
+	return *this;
 }
 
 int Request::checkHeaderEnd(void) const

@@ -74,18 +74,24 @@ void	Server::launchServer( void )
 	}
 	while (true)
 	{
+		std::cout << "PORTS SIZE " << _ports.size() << std::endl;
+		std::cout << "FDS SIZE " << _fds.size() << std::endl;
 		_clean_fds = 0;
 		setEvents();
-		if (polling() <= 0)
+		if (int ret = polling() <= 0)
 		{	
+			std::cout << "RETURN POLLING " << ret << std::endl;
 			break;
-			/*ERROR*/
 		}
+		std::cout << "PORTS SIZE " << _ports.size() << std::endl;
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
-			std::cout << "FD IN LOOP " << (*pt).getFd() << std::endl;
-			while (int fd = (*pt).accepting() != -1)
+			int fd;
+			while ((fd = (*pt).accepting()) != -1)
+			{
+				std::cout << "New Connection " << fd << std::endl;
 				addToPolling(fd);
+			}
 		}
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{

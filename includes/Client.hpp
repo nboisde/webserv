@@ -14,16 +14,19 @@ class Client{
 	public:
 		Client( void );
 		Client( int fd );
-		Client( Client & src );
+		Client( Client const & src );
 		virtual ~Client();
+			
+		Client &	operator=( Client const & rhs );
 
-		int 	receive( int fd );
-		int		send();
-		void	closeConnection();
+		int 		receive( int fd );
+		int			send( void );
+		void		closeConnection( void );
 
-		int		getFd(void) const;
-		Request &	getReq(void);
-		int		getStatus( void ) const;
+		int			getFd( void ) const;
+		int			getStatus( void ) const;
+		Request &	getReq( void );
+		Response &	getRes( void );
 
 	private:
 		int			_fd;

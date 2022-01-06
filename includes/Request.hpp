@@ -10,7 +10,10 @@ class Client;
 class Request {
 	public:
 		Request( void );
+		Request( Request const & src );
 		virtual ~Request( void );
+
+		Request &	operator=( Request const & rhs );
 
 		int			concatenateRequest(std::string buf);
 		int			requestReceptionState();

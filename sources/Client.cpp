@@ -1,24 +1,42 @@
 #include "Client.hpp"
 
-namespace ws{
-
-Client::Client( void ) 
-{
-	
-}
-
-Client::Client( int fd ) : _fd(fd){
-
-}
-
-Client::Client( Client & src ) 
-{ (void)src; 
-}
-
-Client::~Client()
+namespace ws
 {
 
+/*
+** ------------------------------- CONSTRUCTOR --------------------------------
+*/ 
+Client::Client( void ) {}
+
+Client::Client( int fd ) : _fd(fd) {}
+
+Client::Client( Client const & src ) 
+{
+	*this = src;
 }
+
+/*
+** -------------------------------- DESTRUCTOR --------------------------------
+*/
+
+Client::~Client() {}
+
+/*
+** --------------------------------- OVERLOAD ---------------------------------
+*/
+
+Client &				Client::operator=( Client const & rhs )
+{
+	if ( this != &rhs )
+	{
+		this->_fd = rhs.getFd();
+		this->_status = rhs.getStatus();
+		this->_req = rhs._req;
+		this->_res = rhs._res;
+	}
+	return *this;
+}
+
 
 int Client::receive(int fd)
 {
@@ -38,10 +56,6 @@ int Client::receive(int fd)
 	return SUCCESS;
 }
 
-int	Client::getStatus( void ) const
-{
-	return _status;
-}
 
 int Client::send( void )
 {
@@ -60,12 +74,29 @@ int Client::send( void )
 
 void Client::closeConnection(){}
 
-int Client::getFd(void) const{
+/*
+** --------------------------------- ACCESSOR ---------------------------------
+*/
+
+int	Client::getStatus( void ) const
+{
+	return _status;
+}
+
+
+int Client::getFd(void) const
+{
 	return _fd;
 }
 
-Request & Client::getReq(void){
+Request & Client::getReq( void )
+{
 	return _req;
+}
+
+Response & Client::getRes( void )
+{
+	return _res;
 }
 
 }

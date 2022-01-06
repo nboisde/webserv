@@ -9,8 +9,11 @@ namespace ws
 
 	class Response {
 		public:
-			Response();
-			~Response();
+			Response( void );
+			Response( Response const & src );
+			virtual ~Response();
+
+			Response &		operator=( Response const & rhs );
 
 			std::string		getResponse( void ) const;
 			

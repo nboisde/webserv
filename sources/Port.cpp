@@ -81,7 +81,6 @@ int		Port::launchPort( void ){
 	_port_address.sin_port = htons(_port);
 	if (bind() < 0 || listening() < 0)
 		return ERROR;
-	std::cout << "FD IN PORT = " << _fd << std::endl;
 	return SUCCESS;
 }
 
@@ -113,15 +112,13 @@ int	Port::accepting( void )
 	socklen_t			addrlen = sizeof(cli_addr);
 
 	new_socket = accept(_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
-	std::cout << "VOICI LE FD : " << _fd << std::endl;
 	if (new_socket < 0)
 	{
 		perror("In accept");
 		exit(ERROR);
 	}
 	Client newClient(new_socket);
-	std::cout << newClient.getFd() << std::endl;
-	//_clients.push_back(newClient);
+	_clients.push_back(newClient);
 	return (new_socket);
 }
 
