@@ -5,6 +5,8 @@
 
 namespace ws
 {
+	class Client;
+
 	class Response {
 		public:
 			Response();

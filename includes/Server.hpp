@@ -1,8 +1,9 @@
 #ifndef __SERVER_HPP__
 # define __SERVER_HPP__
 
-# include "webserv.hpp"
+# include "Port.hpp"
 
+class Client;
 class Port;
 
 namespace ws{
@@ -26,6 +27,7 @@ class Server
 		std::string					getIp( void ) const;
 		std::vector<Port>			getPorts( void ) const;
 		std::vector<struct pollfd>	getFds( void ) const;
+		std::vector<int>&			getPortsNb( void );
 		void						setIp( std::string new_ip );
 		void						setPorts( std::vector<Port> new_ports);
 		void						setFds( std::vector<struct pollfd> fds);

@@ -1,9 +1,18 @@
-#include "webserv.hpp"
+#include "Request.hpp"
 
-ws::Request::Request(): _state(RECIEVING_HEADER), _raw_content(""),  _body_len_recieved(0), _header_len_recieved(0), _content_length(0), _method_type(UNKNOWN), _header_size(0), _header(""), _body(""){}
-ws::Request::~Request(){}
+namespace ws{
 
-int ws::Request::checkHeaderEnd(void) const
+Request::Request(): _state(RECIEVING_HEADER), _raw_content(""),  _body_len_recieved(0), _header_len_recieved(0), _content_length(0), _method_type(UNKNOWN), _header_size(0), _header(""), _body("")
+{
+
+}
+
+Request::~Request()
+{
+
+}
+
+int Request::checkHeaderEnd(void) const
 {
 	int ret = _raw_content.find("\r\n\r\n");
 	//std::cout << "find end header" << ret << std::endl;
@@ -13,7 +22,7 @@ int ws::Request::checkHeaderEnd(void) const
 		return (1);
 }
 
-void ws::Request::findMethod(void)
+void Request::findMethod(void)
 {
 	int g, p, d;
 	g = _raw_content.find("GET");
@@ -29,7 +38,7 @@ void ws::Request::findMethod(void)
 		_method_type = UNKNOWN;
 }
 
-void ws::Request::identifyBodyLengthInHeader(void)
+void Request::identifyBodyLengthInHeader(void)
 {
 	std::string l = "content-length"; // TO CHANGE TO BE COMPATIBLE WITH CONTENT-LENGTH ALL CASES.. ex: postman computer.
 	std::string l2 = "Content-Length";
@@ -67,7 +76,7 @@ void ws::Request::identifyBodyLengthInHeader(void)
 ** 0 REQUEST_NOT_FULL -> continue to recv() to catch informations.
 */
 
-int ws::Request::concatenateRequest(std::string buf)
+int Request::concatenateRequest(std::string buf)
 {
 	_raw_content += buf;
 	//std::cout << _raw_content << std::endl << std::endl;
@@ -109,7 +118,7 @@ int ws::Request::concatenateRequest(std::string buf)
 		return 0;
 }
 
-int ws::Request::fillHeaderAndBody(void){
+int Request::fillHeaderAndBody(void){
 	int ret = _raw_content.find("\r\n\r\n");
 	int i = 0;
 
@@ -131,39 +140,41 @@ int ws::Request::fillHeaderAndBody(void){
 }
 
 
-int ws::Request::requestReceptionState(void){
+int Request::requestReceptionState(void){
 	return _state;
 }
 
-std::string ws::Request::getRawContent(void) const{
+std::string Request::getRawContent(void) const{
 	return _raw_content;
 }
 
-int ws::Request::getMethodType(void) const{
+int Request::getMethodType(void) const{
 	return _method_type;
 }
 
-int ws::Request::getContentLength(void) const{
+int Request::getContentLength(void) const{
 	return _content_length;
 }
-int ws::Request::getHeaderSizeRevieved(void) const{
+int Request::getHeaderSizeRevieved(void) const{
 	return _header_len_recieved;
 }
-int ws::Request::getBodySizeRecieved(void) const{
+int Request::getBodySizeRecieved(void) const{
 	return _body_len_recieved;
 }
 
-int ws::Request::getHeaderSize(void) const{
+int Request::getHeaderSize(void) const{
 	return _header_size;
 }
-std::string ws::Request::getHeader(void) const{
+std::string Request::getHeader(void) const{
 	return _header;
 }
-std::string ws::Request::getBody(void) const{
+std::string Request::getBody(void) const{
 	return _body;
 }
 
-int ws::Request::getState( void ) const
+int Request::getState( void ) const
 {
 	return _state;
+}
+
 }

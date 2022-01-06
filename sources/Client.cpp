@@ -1,12 +1,24 @@
-#include "webserv.hpp"
+#include "Client.hpp"
 
 namespace ws{
 
-Client::Client(){}
+Client::Client( void ) 
+{
+	
+}
 
-Client::Client( int fd ) : _fd(fd){}
-Client::Client( Client & src ) { (void)src; }
-Client::~Client(){}
+Client::Client( int fd ) : _fd(fd){
+
+}
+
+Client::Client( Client & src ) 
+{ (void)src; 
+}
+
+Client::~Client()
+{
+
+}
 
 int Client::receive(int fd)
 {
@@ -41,8 +53,8 @@ int Client::send( void )
 		return (ERROR);		
 	}
 	_res.getResponse() += ret;
-	// if (_res.getResponse() == NULL)
-	// 	_status = CLOSING;
+	if (_res.getResponse().empty())
+		_status = CLOSING;
 	return (SUCCESS);
 }
 
@@ -51,7 +63,8 @@ void Client::closeConnection(){}
 int Client::getFd(void) const{
 	return _fd;
 }
-Request Client::getReq(void) const{
+
+Request & Client::getReq(void){
 	return _req;
 }
 

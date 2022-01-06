@@ -1,4 +1,4 @@
-#include "webserv.hpp"
+#include "Port.hpp"
 
 namespace ws{
 /*
@@ -9,6 +9,7 @@ Port::Port( void )
 {
 	return;
 }
+
 
 Port::Port( int port ) : _port(port)
 {
@@ -38,6 +39,7 @@ Port &				Port::operator=( Port const & rhs )
 	if ( this != &rhs )
 	{
 		this->_port = rhs.getPort();
+		this->_fd = rhs.getFd();
 	}
 	return *this;
 }
@@ -79,6 +81,7 @@ int		Port::launchPort( void ){
 	_port_address.sin_port = htons(_port);
 	if (bind() < 0 || listening() < 0)
 		return ERROR;
+	std::cout << "FD IN PORT = " << _fd << std::endl;
 	return SUCCESS;
 }
 
@@ -110,32 +113,30 @@ int	Port::accepting( void )
 	socklen_t			addrlen = sizeof(cli_addr);
 
 	new_socket = accept(_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
+	std::cout << "VOICI LE FD : " << _fd << std::endl;
 	if (new_socket < 0)
 	{
 		perror("In accept");
 		exit(ERROR);
 	}
-	// Client	newClient(new_socket);
-	// //CREER NOUVEAU CLIENT, ET L'AJOUTER A LA LISTE DE CLIENTS DU PORT
-	// _clients.push_back(newClient);
+	Client newClient(new_socket);
+	std::cout << newClient.getFd() << std::endl;
+	//_clients.push_back(newClient);
 	return (new_socket);
 }
 
 
-void	removeClient( int fd )
+void	Port::removeClient( int fd )
 {
 	(void)fd;
-	// std::vector<Client>::iterator it = _clients.begin();
-	// std::vector<Client>::iterator ite = _clients.end();
+	std::vector<Client>::iterator it = _clients.begin();
+	std::vector<Client>::iterator ite = _clients.end();
 
-	// for (it; it != ite; it++)
-	// {
-	// 	if (fd == (*it).fd)
-	// 	{
-	// 		close(fd);
-	// 		pollfd[i].fd = -1;
-	// 	}
-	// }
+	for (; it != ite; it++)
+	{
+		if (fd == (*it).getFd())
+			close(fd);
+	}
 }
 
 
@@ -143,6 +144,24 @@ void	removeClient( int fd )
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
+int	Port::getFd( void ) const{
+	return _fd;
+}
+void	Port::setFd( int fd )
+{
+	_fd = fd;
+}
+
+
+int	Port::getPort( void ) const{
+	return _port;
+}
+
+
+std::vector<Client>	& Port::getClients( void )
+{
+	return _clients;
+}
 
 /* ************************************************************************** */
 }

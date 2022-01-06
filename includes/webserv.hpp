@@ -1,5 +1,5 @@
-#ifndef WEBSERV_HPP
-# define WEBSERV_HPP
+#ifndef __WEBSERV_HPP__
+# define __WEBSERV_HPP__
 
 // General MACRORS
 # define DELAI -1
@@ -24,6 +24,11 @@
 # define POST 2
 # define DELETE 3
 
+//CPP_LIBRARIES//
+# include <iostream>
+# include <string>
+# include <vector>
+
 //C_LIBRARIES//
 # include <stdlib.h>
 # include <unistd.h>
@@ -37,16 +42,12 @@
 # include <fcntl.h>
 # include <stdio.h>
 
-//CPP_LIBRARIES//
-# include <string>
-# include <iostream>
-# include <vector>
-
 //CLASSES//
-# include "Request.hpp"
-# include "Response.hpp"
-# include "Client.hpp"
-# include "Port.hpp"
-# include "Server.hpp"
+
+// # include "Client.hpp"
+// # include "Request.hpp"
+// # include "Response.hpp"
+// # include "Port.hpp"
+// # include "Server.hpp"
 
 #endif

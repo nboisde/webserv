@@ -1,4 +1,4 @@
-#include "webserv.hpp"
+#include "Server.hpp"
 
 namespace ws{
 /*
@@ -57,10 +57,11 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-void	Server::launchServer( void ){
+void	Server::launchServer( void )
+{
 	for (std::vector<int>::iterator it = _ports_nb.begin(); it != _ports_nb.end(); it++)
 	{
-		ws::Port new_port(*it);
+		Port new_port(*it);
 		if (new_port.launchPort())
 		{
 			_ports.push_back(new_port);
@@ -82,6 +83,7 @@ void	Server::launchServer( void ){
 		}
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
+			std::cout << "FD IN LOOP " << (*pt).getFd() << std::endl;
 			while (int fd = (*pt).accepting() != -1)
 				addToPolling(fd);
 		}
@@ -208,5 +210,12 @@ void	Server::setIp( std::string new_ip ) {
 void	Server::setPorts( std::vector<Port> new_ports) {
 	this->_ports = new_ports;
 }
+
+std::vector<int>&	Server::getPortsNb( void )
+{
+	return _ports_nb;
+}
+
+
 }
 /* ************************************************************************** */
