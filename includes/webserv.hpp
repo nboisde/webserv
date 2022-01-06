@@ -4,6 +4,8 @@
 // General MACRORS
 # define DELAI -1
 # define BUFFER_SIZE 4096
+# define ERROR -1
+# define SUCCESS 1
 
 // Requests State MACROS
 # define REQUEST_FORMAT_ERROR -1
@@ -36,11 +38,11 @@
 # include <vector>
 
 //CLASSES//
+# include "Server.hpp"
+# include "Port.hpp"
 # include "Request.hpp"
 # include "Sockets.hpp"
-# include "listenSocket.hpp"
-# include "Port.hpp"
-# include "Server.hpp"
+# include "Client.hpp"
 
 
 #endif

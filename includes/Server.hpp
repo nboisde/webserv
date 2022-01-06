@@ -29,8 +29,12 @@ class Server
 		int							polling( void );
 		void						addToPolling( int fd );
 
+		void						launchServer( void );
+		int							stopServer( void );
+
 	protected:
 		std::string						_server_ip;
+		std::vector<int>				_ports_nb;
 		std::vector<Port>				_ports;
 		std::vector<struct pollfd>		_fds;
 

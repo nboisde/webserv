@@ -1,10 +1,11 @@
-#ifndef __PORTS_HPP__
-# define __PORTS_HPP__
+#ifndef __PORT_HPP__
+# define __PORT_HPP__
 
 # include "webserv.hpp"
 # include "Sockets.hpp"
 
 class Sockets;
+class Client;
 
 namespace ws{
 class Port
@@ -12,19 +13,20 @@ class Port
 
 	public:
 
-		Port( int port_socket );
+		Port( int port );
 		Port( Port const & src );
 		virtual ~Port( void );
 
 		Port &		operator=( Port const & rhs );
 
+		int							launchPort( void );
 		int							bind( void );
 		int							listening( void );
 		int							accepting( void );
 		int							getFd( void ) const;
 		int							getPort( void ) const;
 		struct sockaddr_in			getPortAddress( void ) const;
-		std::vector<Client>		getClients( void ) const;
+		std::vector<Client>			getClients( void ) const;
 		void						addClient( int fd );
 
 	protected:
@@ -32,7 +34,7 @@ class Port
 		int 					_fd;
 		int						_port;
 		struct sockaddr_in		_port_address;
-		std::vector<Client>	_clients;
+		std::vector<Client>		_clients;
 };
 
 }

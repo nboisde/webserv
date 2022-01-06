@@ -57,6 +57,37 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
+void	Server::launchServer( void ){
+	typedef std::vector<struct pollfd>::iterator it_fds;
+
+	for (std::vector<int>::iterator it = _ports_nb.begin(); it != _ports_nb.end(); it++)
+	{
+		ws::Port new_port(*it);
+		if (new_port.launchPort())
+		{
+			_ports.push_back(new_port);
+			addToPolling(new_port.getFd());
+		}
+		else
+		{
+			//GESTION D'ERROR//
+		}
+	}
+	while (true)
+	{
+		if (polling() < 0)
+		{	break;/*ERROR*/}
+		for (it_fds it = _fds; it != _fds.end(); it++)
+		{
+			
+		}
+	}
+}
+
+int		Server::stopServer( void ){
+
+}
+
 std::string	Server::printPorts( void ) const{
 	std::vector<Port>::const_iterator it, itend; 
 	std::string ret;
