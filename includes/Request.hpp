@@ -24,6 +24,7 @@ namespace ws {
 			int getHeaderSize(void) const;
 			std::string getHeader(void) const;
 			std::string getBody(void) const;
+			int getState( void ) const ;
 
 		private:
 			int _state;

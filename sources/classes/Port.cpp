@@ -103,7 +103,7 @@ int Port::listening( void )
 	return SUCCESS;
 }
 
-void	Port::accepting( void )
+int	Port::accepting( void )
 {
 	int			new_socket;
 	struct sockaddr_in cli_addr;
@@ -113,7 +113,7 @@ void	Port::accepting( void )
 	if (new_socket < 0)
 	{
 		perror("In accept");
-		exit(EXIT_FAILURE);
+		exit(ERROR);
 	}
 	//CREER NOUVEAU CLIENT, ET L'AJOUTER A LA LISTE DE CLIENTS DU PORT
 	_clients.push_back();

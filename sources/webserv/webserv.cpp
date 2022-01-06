@@ -153,10 +153,5 @@ int	launch_server()
 			}
 		}
 	} while (1);
-	for (int i = 0; i <(int)pollfd.size(); i++)
-	{
-		if(pollfd[i].fd >= 0)
-			close(pollfd[i].fd);
-	}
 	return (0);
 }

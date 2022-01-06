@@ -162,3 +162,8 @@ std::string ws::Request::getHeader(void) const{
 std::string ws::Request::getBody(void) const{
 	return _body;
 }
+
+int ws::Request::getState( void ) const
+{
+	return _state;
+}

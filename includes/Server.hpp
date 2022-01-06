@@ -34,6 +34,7 @@ class Server
 		int							polling( void );
 		void						addToPolling( int fd );
 		void						setEvents( void );
+		void						cleanFds( void ) ;
 
 		void						launchServer( void );
 		int							stopServer( void );
