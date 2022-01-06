@@ -35,12 +35,13 @@ class Server
 		void						addToPolling( int fd );
 		void						setEvents( void );
 		void						cleanFds( void ) ;
-
+		struct pollfd	&			findFds( int fd );
 		void						launchServer( void );
 		int							stopServer( void );
 
 	protected:
 		std::string						_server_ip;
+		bool							_clean_fds;
 		std::vector<int>				_ports_nb;
 		std::vector<Port>				_ports;
 		std::vector<struct pollfd>		_fds;

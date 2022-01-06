@@ -12,20 +12,21 @@ namespace ws {
 			Client( Client & src );
 			~Client();
 
-			int receive();
-			int send();
-			void closeConnection();
+			int 	receive();
+			int		send();
+			void	closeConnection();
 
-			int getFd(void) const;
-			Request getReq(void) const;
-
+			int		getFd(void) const;
+			Request	getReq(void) const;
+			int		getStatus( void ) const;
 		protected:
 			Client();
 
 		private:
-			int _fd;
-			Request _req;
-			//Response _res;
+			int			_fd;
+			int			_status;
+			Request		_req;
+			Response	_res;
 	};
 }
 

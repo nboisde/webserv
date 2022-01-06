@@ -31,6 +31,7 @@ class Port
 		void						setClients( int fd );
 
 		void						addClient( int fd );
+		void						removeClient( int fd );
 
 	protected:
 		Port( void );

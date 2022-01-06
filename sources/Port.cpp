@@ -120,6 +120,23 @@ int	Port::accepting( void )
 	return (new_socket);
 }
 
+
+void	removeClient( int fd )
+{
+	typedef std::vector<Port>::iterator it = _clients.begin();
+	typedef std::vector<Port>::iterator ite = _clients.end();
+
+	for (it; it != ite; it++)
+	{
+		if (fd == (*it).fd)
+		{
+			close(fd);
+			pollfd[i].fd = -1;
+		}
+	}
+}
+
+
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
 */

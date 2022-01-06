@@ -73,35 +73,52 @@ void	Server::launchServer( void ){
 	}
 	while (true)
 	{
+		_clean_fds = 0;
 		setEvents();
 		if (polling() <= 0)
 		{	
 			break;
 			/*ERROR*/
 		}
-		for (it_fds it = _fds.begin(); it != _fds.end(); it++)
+		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
-			for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
+			if ((*it).fd == (*pt).fd)
 			{
-				for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end(); ct++)
+				while (int fd = (*it).accepting() != -1)
+					addToPolling(fd);
+			}
+		for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end(); ct++)
+		{
+			if ((*it).revents == 0)
+				continue;
+			else if ((*ct).getStatus() == WRITING)
+				(*ct).receive();
+				else if ((*ct).getStatus() == READING)
+					(*ct).send();
+				if (((*ct).getStatus() == CLOSING))
 				{
-					if ((*it).revents == 0)
-						continue;
-					else if ((*it).fd == (*pt).fd)
-					{
-						while (int fd = (*it).accepting() != -1)
-							addToPolling(fd);
-					}
-					else if ((*ct).getReq().getState() == 0 || (*ct).getReq().getState() == 1)
-						(*ct).receive();
-					else if ((*ct).getReq().getState() == 2)
-						(*ct).send();
+					(*pt).removeClient((*ct)._fd);
+					(findFds((*ct).fd)._fd = -1;
+					_clean_fds = 1;
 				}
 			}
 		}
-		if (remove_connection)
+		if (_clean_fds)
 			cleanFds();
 	}
+}
+
+struct pollfd & Server::findFds( int fd)
+{
+	std::vector<struct pollfd>::iterator it = _fds.begin();
+	std::vector<struct pollfd>::iterator ite = _fds.end();
+
+	for (; it != ite; it++)
+	{
+		if ((*it)._fd == fd)
+			return (*it);
+	}
+	return *ite;
 }
 
 void	Server::cleanFds( void )
