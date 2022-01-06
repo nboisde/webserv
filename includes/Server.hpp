@@ -4,7 +4,6 @@
 # include "webserv.hpp"
 
 class Port;
-class Client;
 
 namespace ws{
 class Server

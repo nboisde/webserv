@@ -4,6 +4,7 @@
 #include "webserv.hpp"
 
 class Request;
+class Response;
 
 namespace ws {
 	class Client{
@@ -12,7 +13,7 @@ namespace ws {
 			Client( Client & src );
 			~Client();
 
-			int 	receive();
+			int 	receive( int fd );
 			int		send();
 			void	closeConnection();
 

@@ -82,23 +82,21 @@ void	Server::launchServer( void ){
 		}
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
-			if ((*it).fd == (*pt).fd)
-			{
-				while (int fd = (*it).accepting() != -1)
-					addToPolling(fd);
-			}
-		for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end(); ct++)
+			while (int fd = (*pt).accepting() != -1)
+				addToPolling(fd);
+		}
+		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
-			if ((*it).revents == 0)
-				continue;
-			else if ((*ct).getStatus() == WRITING)
-				(*ct).receive();
+			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end(); ct++)
+			{
+				if ((*ct).getStatus() == WRITING)
+					(*ct).receive( (*pt).getFd());
 				else if ((*ct).getStatus() == READING)
 					(*ct).send();
-				if (((*ct).getStatus() == CLOSING))
+				else if (((*ct).getStatus() == CLOSING))
 				{
-					(*pt).removeClient((*ct)._fd);
-					(findFds((*ct).fd)._fd = -1;
+					(*pt).removeClient((*ct).getFd());
+					(findFds((*ct).getFd()).fd) = -1;
 					_clean_fds = 1;
 				}
 			}
@@ -115,7 +113,7 @@ struct pollfd & Server::findFds( int fd)
 
 	for (; it != ite; it++)
 	{
-		if ((*it)._fd == fd)
+		if ((*it).fd == fd)
 			return (*it);
 	}
 	return *ite;
@@ -131,7 +129,7 @@ void	Server::cleanFds( void )
 }
 
 int		Server::stopServer( void ){
-
+	return (1);
 }
 
 std::string	Server::printPorts( void ) const{
@@ -155,8 +153,7 @@ std::string	Server::printPorts( void ) const{
 
 void		Server::addPort( Port new_port )
 {
-	if (new_port)
-		this->_ports.push_back(new_port);
+	this->_ports.push_back(new_port);
 }
 
 int			Server::polling( void )

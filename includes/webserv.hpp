@@ -13,6 +13,11 @@
 # define HEADER_RECIEVED 1
 # define BODY_RECIEVED 2
 
+// CLIENT STATUS
+# define CLOSING 0
+# define READING 1
+# define WRITING 2
+
 // Methods MACROS
 # define UNKNOWN 0
 # define GET 1
@@ -38,11 +43,10 @@
 # include <vector>
 
 //CLASSES//
-# include "Server.hpp"
-# include "Port.hpp"
 # include "Request.hpp"
-# include "Sockets.hpp"
+# include "Response.hpp"
 # include "Client.hpp"
-
+# include "Port.hpp"
+# include "Server.hpp"
 
 #endif

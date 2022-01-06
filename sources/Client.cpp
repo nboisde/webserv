@@ -5,17 +5,17 @@ namespace ws{
 Client::Client(){}
 
 Client::Client( int fd ) : _fd(fd){}
-Client::Client( Client & src ){}
+Client::Client( Client & src ) { (void)src; }
 Client::~Client(){}
 
-int Client::receive()
+int Client::receive(int fd)
 {
 	char	buffer[BUFFER_SIZE];
 
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
-	ret = recv(pollfd[i].fd, buffer, sizeof(buffer), 0);
-	_rq = clients[i].r.concatenateRequest((std::string)buffer);
+	int ret = recv(fd, buffer, sizeof(buffer), 0);
+	_req.getRawContent() = _req.concatenateRequest((std::string)buffer);
 	if (ret < 0)
 	{
 		perror("\nIn recv");
@@ -26,7 +26,7 @@ int Client::receive()
 	return SUCCESS;
 }
 
-int	Client::getStatus()
+int	Client::getStatus( void ) const
 {
 	return _status;
 }
@@ -35,14 +35,14 @@ int Client::send( void )
 {
 	int ret;
 
-	if ((ret = send(_fd, _res, BUFFER_SIZE, 0) < 0)
+	if ((ret = ::send(_fd, _res.getResponse().c_str(), BUFFER_SIZE, 0)) < 0)
 	{
 		perror("  send() failed");
 		return (ERROR);		
 	}
-	_res += ret;
-	if (!_res)
-		_status = CLOSING;
+	_res.getResponse() += ret;
+	// if (_res.getResponse() == NULL)
+	// 	_status = CLOSING;
 	return (SUCCESS);
 }
 

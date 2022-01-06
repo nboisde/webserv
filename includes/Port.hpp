@@ -2,15 +2,10 @@
 # define __PORT_HPP__
 
 # include "webserv.hpp"
-# include "Sockets.hpp"
-
-class Sockets;
-class Client;
 
 namespace ws{
 class Port
 {
-
 	public:
 
 		Port( int port );
@@ -27,9 +22,7 @@ class Port
 		int							getPort( void ) const;
 		struct sockaddr_in			getPortAddress( void ) const;
 		std::vector<Client>			getClients( void ) const;
-
 		void						setClients( int fd );
-
 		void						addClient( int fd );
 		void						removeClient( int fd );
 
