@@ -3,6 +3,8 @@
 
 #include "webserv.hpp"
 
+class Request;
+
 namespace ws {
 	class Client{
 		public:
@@ -14,12 +16,15 @@ namespace ws {
 			int send();
 			void closeConnection();
 
+			int getFd(void) const;
+			Request getReq(void) const;
+
 		protected:
 			Client();
 
 		private:
 			int _fd;
-			Requests _req;
+			Request _req;
 			//Response _res;
 	};
 }

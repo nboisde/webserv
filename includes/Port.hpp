@@ -27,6 +27,9 @@ class Port
 		int							getPort( void ) const;
 		struct sockaddr_in			getPortAddress( void ) const;
 		std::vector<Client>			getClients( void ) const;
+
+		void						setClients( int fd );
+
 		void						addClient( int fd );
 
 	protected:

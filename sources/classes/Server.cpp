@@ -58,8 +58,6 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 */
 
 void	Server::launchServer( void ){
-	typedef std::vector<struct pollfd>::iterator it_fds;
-
 	for (std::vector<int>::iterator it = _ports_nb.begin(); it != _ports_nb.end(); it++)
 	{
 		ws::Port new_port(*it);
@@ -125,6 +123,25 @@ void		Server::addToPolling( int fd )
 	new_elem.events = POLLIN;
 	_fds.push_back(new_elem);
 }
+
+void		Server::setEvents( void )
+{
+	for (it_fds it = _fds.begin(); it != _fds.end(); it++)
+	{
+		(*it).events = POLLIN;
+		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
+		{
+			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end(); ct++)
+			{
+				if ((*ct).getFd() == (*it).fd)
+				{
+
+				}
+			}
+		}
+	}
+}
+
 
 
 /*

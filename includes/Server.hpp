@@ -4,10 +4,15 @@
 # include "webserv.hpp"
 
 class Port;
+class Client;
 
 namespace ws{
 class Server
 {
+
+	typedef std::vector<struct pollfd>::iterator	it_fds;
+	typedef std::vector<Port>::iterator 			it_port;
+	typedef std::vector<Client>::iterator			it_client;
 
 	public:
 
@@ -28,6 +33,7 @@ class Server
 		void						addPort( Port new_port);
 		int							polling( void );
 		void						addToPolling( int fd );
+		void						setEvents( void );
 
 		void						launchServer( void );
 		int							stopServer( void );
