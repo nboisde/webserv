@@ -93,8 +93,10 @@ void	Server::launchServer( void )
 				addToPolling(fd);
 			}
 		}
+		std::cout << "OUT OF ACCEPTING\n";
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
+			std::cout << "PORT LOOP\n";
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end(); ct++)
 			{
 				if ((*ct).getStatus() == WRITING)
