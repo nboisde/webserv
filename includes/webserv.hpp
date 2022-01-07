@@ -1,9 +1,11 @@
-#ifndef WEBSERV_HPP
-# define WEBSERV_HPP
+#ifndef __WEBSERV_HPP__
+# define __WEBSERV_HPP__
 
 // General MACRORS
 # define DELAI -1
 # define BUFFER_SIZE 4096
+# define ERROR -1
+# define SUCCESS 1
 
 // Requests State MACROS
 # define REQUEST_FORMAT_ERROR -1
@@ -11,11 +13,21 @@
 # define HEADER_RECIEVED 1
 # define BODY_RECIEVED 2
 
+// CLIENT STATUS
+# define CLOSING 0
+# define READING 1
+# define WRITING 2
+
 // Methods MACROS
 # define UNKNOWN 0
 # define GET 1
 # define POST 2
 # define DELETE 3
+
+//CPP_LIBRARIES//
+# include <iostream>
+# include <string>
+# include <vector>
 
 //C_LIBRARIES//
 # include <stdlib.h>
@@ -30,19 +42,12 @@
 # include <fcntl.h>
 # include <stdio.h>
 
-//CPP_LIBRARIES//
-# include <string>
-# include <iostream>
-# include <vector>
-
 //CLASSES//
-# include "requests.hpp"
-# include "socket.hpp"
-# include "listenSocket.hpp"
-# include "Port.hpp"
-# include "Poll.hpp"
-# include "Server.hpp"
 
-
+// # include "Client.hpp"
+// # include "Request.hpp"
+// # include "Response.hpp"
+// # include "Port.hpp"
+// # include "Server.hpp"
 
 #endif

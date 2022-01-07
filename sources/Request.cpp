@@ -1,9 +1,40 @@
-#include "webserv.hpp"
+#include "Request.hpp"
 
-ws::Requests::Requests(): _state(RECIEVING_HEADER), _raw_content(""),  _body_len_recieved(0), _header_len_recieved(0), _content_length(0), _method_type(UNKNOWN), _header_size(0), _header(""), _body(""){}
-ws::Requests::~Requests(){}
+namespace ws{
 
-int ws::Requests::checkHeaderEnd(void) const
+Request::Request( void ): _state(RECIEVING_HEADER), _raw_content(""),  _body_len_recieved(0), _header_len_recieved(0), _content_length(0), _method_type(UNKNOWN), _header_size(0), _header(""), _body("")
+{
+
+}
+
+Request::Request( Request const & src)
+{
+	*this = src;
+}
+
+Request::~Request()
+{
+
+}
+
+Request &	Request::operator=( Request const & rhs )
+{
+	if ( this != &rhs )
+	{
+		_state = rhs._state;
+		_raw_content = rhs._raw_content;
+		_body_len_recieved = rhs._body_len_recieved;
+		_header_len_recieved = rhs._header_len_recieved;
+		_content_length = rhs._content_length;
+		_method_type = rhs._method_type;
+		_header_size = rhs._header_size;
+		_header = rhs._header;
+		_body = rhs._body;
+	}
+	return *this;
+}
+
+int Request::checkHeaderEnd(void) const
 {
 	int ret = _raw_content.find("\r\n\r\n");
 	//std::cout << "find end header" << ret << std::endl;
@@ -13,7 +44,7 @@ int ws::Requests::checkHeaderEnd(void) const
 		return (1);
 }
 
-void ws::Requests::findMethod(void)
+void Request::findMethod(void)
 {
 	int g, p, d;
 	g = _raw_content.find("GET");
@@ -29,7 +60,7 @@ void ws::Requests::findMethod(void)
 		_method_type = UNKNOWN;
 }
 
-void ws::Requests::identifyBodyLengthInHeader(void)
+void Request::identifyBodyLengthInHeader(void)
 {
 	std::string l = "content-length"; // TO CHANGE TO BE COMPATIBLE WITH CONTENT-LENGTH ALL CASES.. ex: postman computer.
 	std::string l2 = "Content-Length";
@@ -56,7 +87,7 @@ void ws::Requests::identifyBodyLengthInHeader(void)
 }
 
 /*
-** this function will concatenate buffer into raw requests and tell to the engine if the request is full: ie,
+** this function will concatenate buffer into raw Request and tell to the engine if the request is full: ie,
 ** if the header and the body is full.
 ** in This case we will stop using the recv() function and handle with other functions for example in subclass,
 ** each method separately GET POST DELETE
@@ -67,7 +98,7 @@ void ws::Requests::identifyBodyLengthInHeader(void)
 ** 0 REQUEST_NOT_FULL -> continue to recv() to catch informations.
 */
 
-int ws::Requests::concatenateRequest(std::string buf)
+int Request::concatenateRequest(std::string buf)
 {
 	_raw_content += buf;
 	//std::cout << _raw_content << std::endl << std::endl;
@@ -109,7 +140,7 @@ int ws::Requests::concatenateRequest(std::string buf)
 		return 0;
 }
 
-int ws::Requests::fillHeaderAndBody(void){
+int Request::fillHeaderAndBody(void){
 	int ret = _raw_content.find("\r\n\r\n");
 	int i = 0;
 
@@ -131,34 +162,41 @@ int ws::Requests::fillHeaderAndBody(void){
 }
 
 
-int ws::Requests::requestReceptionState(void){
+int Request::requestReceptionState(void){
 	return _state;
 }
 
-std::string ws::Requests::getRawContent(void) const{
+std::string Request::getRawContent(void) const{
 	return _raw_content;
 }
 
-int ws::Requests::getMethodType(void) const{
+int Request::getMethodType(void) const{
 	return _method_type;
 }
 
-int ws::Requests::getContentLength(void) const{
+int Request::getContentLength(void) const{
 	return _content_length;
 }
-int ws::Requests::getHeaderSizeRevieved(void) const{
+int Request::getHeaderSizeRevieved(void) const{
 	return _header_len_recieved;
 }
-int ws::Requests::getBodySizeRecieved(void) const{
+int Request::getBodySizeRecieved(void) const{
 	return _body_len_recieved;
 }
 
-int ws::Requests::getHeaderSize(void) const{
+int Request::getHeaderSize(void) const{
 	return _header_size;
 }
-std::string ws::Requests::getHeader(void) const{
+std::string Request::getHeader(void) const{
 	return _header;
 }
-std::string ws::Requests::getBody(void) const{
+std::string Request::getBody(void) const{
 	return _body;
+}
+
+int Request::getState( void ) const
+{
+	return _state;
+}
+
 }
