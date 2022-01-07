@@ -13,6 +13,11 @@
 # define HEADER_RECIEVED 1
 # define BODY_RECIEVED 2
 
+// Body reception method MACROS
+# define BODY_RECEPTION_NOT_SPECIFIED 0
+# define CONTENT_LENGTH 1
+# define TRANSFER_ENCODING 2
+
 // CLIENT STATUS
 # define CLOSING 0
 # define READING 1
