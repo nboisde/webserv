@@ -3,7 +3,9 @@
 namespace ws
 {
 
-Response::Response( void ) {};
+Response::Response( void ) : _response("Hello from Server\n")
+{
+};
 
 Response::Response( Response const & src)
 {

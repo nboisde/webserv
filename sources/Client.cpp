@@ -44,8 +44,8 @@ int Client::receive(void)
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, sizeof(buffer), 0);
-	std::cout << "Je suis ret : " << ret << std::endl; 
-	_req.getRawContent() = _req.concatenateRequest((std::string)buffer);
+	std::cout << "RECEIVED CONTENT = " << buffer << std::endl;
+	//int ret2 = _req.concatenateRequest((std::string)buffer);
 	if (ret < 0)
 	{
 		perror("\nIn recv");
@@ -59,16 +59,26 @@ int Client::receive(void)
 
 int Client::send( void )
 {
-	int ret;
+	int			ret;
+	int			len;
+	const char* prov;
+	std::string str = _res.getResponse();	
 
-	if ((ret = ::send(_fd, _res.getResponse().c_str(), BUFFER_SIZE, 0)) < 0)
+	len = str.size();
+	prov = str.c_str();
+	if (len > BUFFER_SIZE)
+		len = BUFFER_SIZE;
+	ret = ::send(_fd, prov, len, 0);
+	std::cout << "RET IN SENDING " << ret << std::endl;
+	exit(1);
+	if (ret < 0)
 	{
-		perror("  send() failed");
+		perror(" send() failed");
 		return (ERROR);		
 	}
-	_res.getResponse() += ret;
-	if (_res.getResponse().empty())
-		_status = CLOSING;
+	str.erase(0, ret);
+	if (str.empty())
+		return CLOSING;
 	return (SUCCESS);
 }
 
