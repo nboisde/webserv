@@ -92,11 +92,14 @@ void	Server::launchServer( void )
 		}
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
-			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end(); ct++)
+			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
 				if ((findFds((*ct).getFd()).revents) == 0)
+				{
+					ct++;
 					continue;
-				if (((findFds((*ct).getFd()).revents & POLLIN)))
+				}
+				if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
 					std::cout << "FD = " << (*ct).getFd() << std::endl;
 					std::cout << findFds((*ct).getFd()).revents << std::endl;
@@ -108,17 +111,23 @@ void	Server::launchServer( void )
 					{
 						//ERROR//
 					}
-					
+					ct++;
 				}
-				else if (((findFds((*ct).getFd()).revents & POLLOUT)))
+				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
 				{
 					int ret = (*ct).send();
 					if (ret == CLOSING)
 					{	
-						(*pt).removeClient((*ct).getFd());
-						(findFds((*ct).getFd()).fd) = -1;
+						int tempo = (*ct).getFd();
+						findFds(tempo).revents = 0;
+						findFds(tempo).fd = -1;
+						((*pt).getClients()).erase(ct);
+						//(*pt).removeClient(tempo);
+						close(tempo);
 						_clean_fds = 1;
 					}
+					else
+						ct++;
 				}
 			}
 		}
@@ -142,10 +151,12 @@ struct pollfd & Server::findFds( int fd)
 
 void	Server::cleanFds( void )
 {
-	for (it_fds it = _fds.begin(); it != _fds.end(); it++)
+	for (it_fds it = _fds.begin(); it != _fds.end(); )
 	{
 		if ((*it).fd == -1)
-			_fds.erase(it);
+			it = _fds.erase(it);
+		else
+			it++;
 	}
 }
 
