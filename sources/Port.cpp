@@ -70,7 +70,7 @@ int		Port::launchPort( void ){
 		close(_fd);
 		return ERROR;
 	}
-	if ((fcntl(_fd, F_GETFL, O_NONBLOCK)) < 0)
+	if ((fcntl(_fd, F_SETFL, O_NONBLOCK)) < 0)
 	{
 		perror("In fcntl: ");
 		return ERROR;
@@ -97,7 +97,7 @@ int	Port::bind( void ){
 
 int Port::listening( void )
 {
-	if (listen(_fd, 3) < 0)
+	if (listen(_fd, 5) < 0)
 	{
 		perror("In listen\n");
 		return ERROR;
@@ -114,8 +114,9 @@ int	Port::accepting( void )
 	new_socket = accept(_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
 	if (new_socket < 0)
 	{
-		perror("In accept");
-		exit(ERROR);
+		if (errno != EAGAIN)
+			perror("In accept");
+		return(ERROR);
 	}
 	Client newClient(new_socket);
 	_clients.push_back(newClient);

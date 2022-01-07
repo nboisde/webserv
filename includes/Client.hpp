@@ -19,7 +19,7 @@ class Client{
 			
 		Client &	operator=( Client const & rhs );
 
-		int 		receive( int fd );
+		int 		receive( void );
 		int			send( void );
 		void		closeConnection( void );
 
