@@ -126,14 +126,16 @@ int	Port::accepting( void )
 
 void	Port::removeClient( int fd )
 {
-	(void)fd;
 	std::vector<Client>::iterator it = _clients.begin();
-	std::vector<Client>::iterator ite = _clients.end();
 
-	for (; it != ite; it++)
+	for (; it != _clients.end(); it++)
 	{
 		if (fd == (*it).getFd())
+		{
 			close(fd);
+			//it = _clients.erase(it);
+			return;
+		}
 	}
 }
 

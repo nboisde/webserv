@@ -43,16 +43,19 @@ int Client::receive(void)
 
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
-	int ret = recv(_fd, buffer, sizeof(buffer), 0);
-	std::cout << "RECEIVED CONTENT = " << buffer << std::endl;
-	//int ret2 = _req.concatenateRequest((std::string)buffer);
-	if (ret < 0)
+	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
+	std::cout << "RECEIVED CONTENT = [" << buffer << "]" << std::endl;
+	int req = _req.concatenateRequest((std::string)buffer);
+	if ( ret < 0 )
 	{
 		perror("\nIn recv");
 		return WRITING;
 	}
-	if (ret < BUFFER_SIZE)
+	if (ret < BUFFER_SIZE - 1 || req == 1)
+	{
+		std::cout << _req.getRawContent() << std::endl;
 		return WRITING;
+	}
 	return READING;
 }
 
@@ -68,9 +71,9 @@ int Client::send( void )
 	prov = str.c_str();
 	if (len > BUFFER_SIZE)
 		len = BUFFER_SIZE;
+	std::cout << "SEND FD = " << _fd << std::endl;
 	ret = ::send(_fd, prov, len, 0);
 	std::cout << "RET IN SENDING " << ret << std::endl;
-	exit(1);
 	if (ret < 0)
 	{
 		perror(" send() failed");
