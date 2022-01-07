@@ -3,3 +3,4 @@
 .DS_Store
 objects/*.o
 webserver
+log.out

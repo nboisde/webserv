@@ -74,16 +74,13 @@ void	Server::launchServer( void )
 	}
 	while (true)
 	{
-		std::cout << "PORTS SIZE " << _ports.size() << std::endl;
-		std::cout << "FDS SIZE " << _fds.size() << std::endl;
 		_clean_fds = 0;
-		setEvents();
+		//setEvents();
 		if (int ret = polling() <= 0)
 		{	
 			std::cout << "RETURN POLLING " << ret << std::endl;
 			break;
 		}
-		std::cout << "PORTS SIZE " << _ports.size() << std::endl;
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
 			int fd;
@@ -93,15 +90,27 @@ void	Server::launchServer( void )
 				addToPolling(fd);
 			}
 		}
-		std::cout << "OUT OF ACCEPTING\n";
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
-			std::cout << "PORT LOOP\n";
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end(); ct++)
 			{
-				if ((*ct).getStatus() == WRITING)
-					(*ct).receive( (*pt).getFd());
-				else if ((*ct).getStatus() == READING)
+				if ((findFds((*ct).getFd()).revents) == 0)
+					continue;
+				if (((findFds((*ct).getFd()).revents & POLLIN)))
+				{
+					std::cout << "FD = " << (*ct).getFd() << std::endl;
+					std::cout << findFds((*ct).getFd()).revents << std::endl;
+					std::cout << (findFds((*ct).getFd()).revents & POLLIN) << std::endl;
+					int ret = (*ct).receive();
+					if ( ret == WRITING)
+						(findFds((*ct).getFd())).events = POLLOUT;
+					else if (ret == ERROR)
+					{
+						//ERROR//
+					}
+					
+				}
+				else if (((findFds((*ct).getFd()).revents & POLLOUT)))
 					(*ct).send();
 				else if (((*ct).getStatus() == CLOSING))
 				{

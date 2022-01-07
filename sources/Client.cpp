@@ -8,7 +8,7 @@ namespace ws
 */ 
 Client::Client( void ) {}
 
-Client::Client( int fd ) : _fd(fd) {}
+Client::Client( int fd ) : _fd(fd), _status(WRITING) {}
 
 Client::Client( Client const & src ) 
 {
@@ -37,23 +37,23 @@ Client &				Client::operator=( Client const & rhs )
 	return *this;
 }
 
-
-int Client::receive(int fd)
+int Client::receive(void)
 {
 	char	buffer[BUFFER_SIZE];
 
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
-	int ret = recv(fd, buffer, sizeof(buffer), 0);
+	int ret = recv(_fd, buffer, sizeof(buffer), 0);
+	std::cout << "Je suis ret : " << ret << std::endl; 
 	_req.getRawContent() = _req.concatenateRequest((std::string)buffer);
 	if (ret < 0)
 	{
 		perror("\nIn recv");
-		return ERROR;
+		return WRITING;
 	}
 	if (ret < BUFFER_SIZE)
-		_status = WRITING;
-	return SUCCESS;
+		return WRITING;
+	return READING;
 }
 
 
