@@ -111,12 +111,14 @@ void	Server::launchServer( void )
 					
 				}
 				else if (((findFds((*ct).getFd()).revents & POLLOUT)))
-					(*ct).send();
-				else if (((*ct).getStatus() == CLOSING))
 				{
-					(*pt).removeClient((*ct).getFd());
-					(findFds((*ct).getFd()).fd) = -1;
-					_clean_fds = 1;
+					int ret = (*ct).send();
+					if (ret == CLOSING)
+					{	
+						(*pt).removeClient((*ct).getFd());
+						(findFds((*ct).getFd()).fd) = -1;
+						_clean_fds = 1;
+					}
 				}
 			}
 		}
