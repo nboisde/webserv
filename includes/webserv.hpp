@@ -32,7 +32,9 @@
 //CPP_LIBRARIES//
 # include <iostream>
 # include <string>
+# include <sstring>
 # include <vector>
+# include <map>
 
 //C_LIBRARIES//
 # include <string.h>

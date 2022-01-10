@@ -1,33 +1,34 @@
 #include "Response.hpp"
+#include <ctime>
 
 namespace ws
 {
 
-std::map<int, std::string>  Response::_status_code = {
-    (100, "Continue"), 
-    (200, "OK"),
-    (300, "Multiple Choice"),
-    (301, "Moved Permanently"),
-    (400 "Bad Request"),
-    (401 "Unauthorized"),
-    (403 "Forbidden"),
-    (404 "Not Found"),
-    (500, "Internal Server Error")
+std::map<int, std::string>	init_responseMap( void ){
+	std::map<int, std::string>	m;
+
+    m[100] = "Continue";
+	m[200] =  "OK";
+    m[300] =  "Multiple Choice";
+    m[301] =  "Moved Permanently";
+    m[400] = "Bad Request";
+    m[401] = "Unauthorized";
+    m[403] = "Forbidden";
+    m[404] = "Not Found";
+    m[500] =  "Internal Server Error";
+	return m;
 }
 
-Response::Response( void ) : _response("Hello from Server\n")
-{
+std::map<int, std::string>  Response::_status_code = init_responseMap();
 
+Response::Response( void ) : _response("Hello from Server\n"){
 };
 
-Response::Response( Response const & src)
-{
+Response::Response( Response const & src){
     *this = src;
 }
 
-Response::~Response( void )
-{
-
+Response::~Response( void ){
 };
 
 Response &  Response::operator=( Response const & rhs)
@@ -41,13 +42,29 @@ Response &  Response::operator=( Response const & rhs)
 
 //METHODS - //
 
-char*      Response::response( void ){
-    //CONCATENER LES STRINGS POUR CREER LA REPONSE
-    return response.c_str();
+std::string 	Response::genStatusLine( void ){
+	int ret_code = 200;
+	std::stringstream ret;
+
+	ret << "HTTP/1.1" << ret_code << _status_code[ret_code];	
+	return ret.str();
+}
+
+std::string		getDate( void ){
+}
+
+std::string		Response::genHeader( void ){
+}
+
+const char *      Response::response( void ){
+	_response.append(this->genStatusLine());
+
+	const char * str = _response.c_str();
+	return str;
 }
 
 size_t      Response::response_size( void ){
-    return  response.size();
+    return  _response.size();
 }
 
 //ACCESSORS - GETTERS//
@@ -56,8 +73,8 @@ std::string Response::getResponse( void ) const{
     return _response;
 }
 
-std::string		Response::getDate( void ) const{
-    return _date;
+std::string		Response::getHeader( void ) const{
+    return _header;
 }
 
 std::string		Response::getStatusLine(void) const{
@@ -69,8 +86,8 @@ void			Response::setResponse( std::string resp ){
     _response = resp;
 }
 
-void			Response::setDate( std::string date ){
-    _date = date;
+void			Response::setHeader( std::string header ){
+    _header = header;
 }
 
 void			Response::setStatusLine( std::string status_l ){
