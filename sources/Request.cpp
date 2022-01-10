@@ -135,7 +135,6 @@ int Request::concatenateRequest(std::string buf)
 			// IDENTIFY CONTENT LENGTH AND TRANSFER ENCODING. (if both render -> flag goes to REQUEST_FORMAT_ERROR)
 			int ct = identifyBodyLengthInHeader();
 			int te = isTransferEncoding();
-			std::cout << "ct : " << ct << " te: " << te << std::endl;
 			findMethod();
 			if (_method_type == UNKNOWN || (ct == 1 && te == 1))
 			{
@@ -160,7 +159,7 @@ int Request::concatenateRequest(std::string buf)
 		else if (_body_reception_encoding == TRANSFER_ENCODING)
 		{
 			//int ret =
-			int ret = buf.find("0\r\n");
+			int ret = _raw_content.find("0\r\n\r\n");
 			if (ret == -1)
 				return 0;
 			else
@@ -183,7 +182,6 @@ int Request::concatenateRequest(std::string buf)
 int Request::fillHeaderAndBody(void){
 	int ret = _raw_content.find("\r\n\r\n");
 	int i = 0;
-
 	if (ret == -1)
 		return -1;
 	while (i < ret + 4)
@@ -191,6 +189,8 @@ int Request::fillHeaderAndBody(void){
 		_header += _raw_content[i];
 		i++;
 	}
+	std::string body = _raw_content.substr(ret + 4, _raw_content.length() - i);
+	//std::cout << body << std::endl;
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 		return 0;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
@@ -203,15 +203,25 @@ int Request::fillHeaderAndBody(void){
 	}
 	else if (_body_reception_encoding == TRANSFER_ENCODING)
 	{
-		//ChunkedBodyProcessing()
+		ChunkedBodyProcessing(body);
 		// ICI, TRAITER LE PARSING DU BODY CHUNKED...
-		while (_raw_content[i])
+/* 		while (_raw_content[i])
 		{
 			_body += _raw_content[i];
 			i++;
-		}
+		} */
 	}
 	return 1;
+}
+
+void		Request::ChunkedBodyProcessing(std::string body)
+{
+	std::string proceed_body;
+	//int i = 0;
+	int ret = body.find("0\r\n\r\n");
+	std::cout << body;
+	std::cout << ret << std::endl;
+	_body = body;
 }
 
 
