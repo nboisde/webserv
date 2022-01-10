@@ -22,7 +22,8 @@ class Request {
 		int			checkHeaderEnd() const;
 		void		findMethod(void);
 		int			fillHeaderAndBody(void);
-		void		concatenateChunk(std::string buf);
+		void		ChunkedBodyProcessing(std::string body);
+;
 		
 		// GETTERS
 		std::string	getRawContent(void) const;

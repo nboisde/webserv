@@ -78,7 +78,7 @@ void	Server::launchServer( void )
 		//setEvents();
 		if (int ret = polling() <= 0)
 		{	
-			std::cout << "RETURN POLLING " << ret << std::endl;
+			//std::cout << "RETURN POLLING " << ret << std::endl;
 			break;
 		}
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
@@ -86,7 +86,7 @@ void	Server::launchServer( void )
 			int fd;
 			while ((fd = (*pt).accepting()) != -1)
 			{
-				std::cout << "New Connection " << fd << std::endl;
+				//std::cout << "New Connection " << fd << std::endl;
 				addToPolling(fd);
 			}
 		}
@@ -101,9 +101,9 @@ void	Server::launchServer( void )
 				}
 				if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
-					std::cout << "FD = " << (*ct).getFd() << std::endl;
-					std::cout << findFds((*ct).getFd()).revents << std::endl;
-					std::cout << (findFds((*ct).getFd()).revents & POLLIN) << std::endl;
+					//std::cout << "FD = " << (*ct).getFd() << std::endl;
+					//std::cout << findFds((*ct).getFd()).revents << std::endl;
+					//std::cout << (findFds((*ct).getFd()).revents & POLLIN) << std::endl;
 					int ret = (*ct).receive();
 					if ( ret == WRITING)
 						(findFds((*ct).getFd())).events = POLLOUT;
