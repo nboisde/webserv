@@ -17,10 +17,12 @@ class Request {
 
 		int			concatenateRequest(std::string buf);
 		int			requestReceptionState();
-		void		identifyBodyLengthInHeader(void);
+		int			identifyBodyLengthInHeader(void);
+		int			isTransferEncoding(void) const;
 		int			checkHeaderEnd() const;
 		void		findMethod(void);
 		int			fillHeaderAndBody(void);
+		void		concatenateChunk(std::string buf);
 		
 		// GETTERS
 		std::string	getRawContent(void) const;
@@ -36,6 +38,7 @@ class Request {
 	private:
 		int			_state;
 		std::string	_raw_content;
+		int			_body_reception_encoding;
 		int			_body_len_recieved;
 		int			_header_len_recieved;
 		int			_content_length;

@@ -2,7 +2,17 @@
 
 namespace ws{
 
-Request::Request( void ): _state(RECIEVING_HEADER), _raw_content(""),  _body_len_recieved(0), _header_len_recieved(0), _content_length(0), _method_type(UNKNOWN), _header_size(0), _header(""), _body("")
+Request::Request( void ): 
+_state(RECIEVING_HEADER),
+_raw_content(""),
+_body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
+_body_len_recieved(0),
+_header_len_recieved(0),
+_content_length(0),
+_method_type(UNKNOWN),
+_header_size(0),
+_header(""),
+_body("")
 {
 
 }
@@ -60,7 +70,7 @@ void Request::findMethod(void)
 		_method_type = UNKNOWN;
 }
 
-void Request::identifyBodyLengthInHeader(void)
+int Request::identifyBodyLengthInHeader(void)
 {
 	std::string l = "content-length"; // TO CHANGE TO BE COMPATIBLE WITH CONTENT-LENGTH ALL CASES.. ex: postman computer.
 	std::string l2 = "Content-Length";
@@ -73,7 +83,7 @@ void Request::identifyBodyLengthInHeader(void)
 	else
 		ret = r2;
 	if (ret == -1)
-		return ;
+		return 0;
 	else
 	{
 		int i = 0;
@@ -83,7 +93,18 @@ void Request::identifyBodyLengthInHeader(void)
 			i++;
 		}
 		_content_length = std::stoi(cl, NULL, 10);
+		return 1;
 	}
+}
+
+int Request::isTransferEncoding(void) const
+{
+	// HERE SEE DIFFERENTS TYPOS OF TRANSFER ENCODING.
+	int r = _raw_content.find("Transfer-Encoding: chunked");
+	if (r == -1)
+		return 0;
+	else
+		return 1;
 }
 
 /*
@@ -101,7 +122,6 @@ void Request::identifyBodyLengthInHeader(void)
 int Request::concatenateRequest(std::string buf)
 {
 	_raw_content += buf;
-	//std::cout << _raw_content << std::endl << std::endl;
 
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
 		return -1;
@@ -112,13 +132,20 @@ int Request::concatenateRequest(std::string buf)
 		_header_len_recieved += buf.length();
 		if (checkHeaderEnd() == 1)
 		{
-			identifyBodyLengthInHeader();
+			// IDENTIFY CONTENT LENGTH AND TRANSFER ENCODING. (if both render -> flag goes to REQUEST_FORMAT_ERROR)
+			int ct = identifyBodyLengthInHeader();
+			int te = isTransferEncoding();
+			std::cout << "ct : " << ct << " te: " << te << std::endl;
 			findMethod();
-			if (_method_type == UNKNOWN)
+			if (_method_type == UNKNOWN || (ct == 1 && te == 1))
 			{
 				_state = REQUEST_FORMAT_ERROR;
 				return -1;
 			}
+			else if (ct == 1)
+				_body_reception_encoding = CONTENT_LENGTH;
+			else if (te == 1)
+				_body_reception_encoding = TRANSFER_ENCODING;
 			_state = HEADER_RECIEVED;
 		}
 		return 0;
@@ -127,8 +154,21 @@ int Request::concatenateRequest(std::string buf)
 	{
 		_body_len_recieved += buf.length();
 		int i = _raw_content.find("\r\n\r\n");
-		if (_body_len_recieved + _header_len_recieved < _content_length + i + 4)
-			return 0;
+		// ICI -> gerer les differentes methodes d'encodage.
+		if (_body_reception_encoding == CONTENT_LENGTH && _body_len_recieved + _header_len_recieved < _content_length + i + 4)
+				return 0;
+		else if (_body_reception_encoding == TRANSFER_ENCODING)
+		{
+			//int ret =
+			int ret = buf.find("0\r\n");
+			if (ret == -1)
+				return 0;
+			else
+			{
+				_state = BODY_RECIEVED;
+				return 1;
+			}
+		}
 		else
 		{
 			//fillHeaderAndBody();
@@ -151,12 +191,25 @@ int Request::fillHeaderAndBody(void){
 		_header += _raw_content[i];
 		i++;
 	}
-	if (_content_length == 0)
+	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 		return 0;
-	while (_raw_content[i])
+	else if (_body_reception_encoding == CONTENT_LENGTH)
 	{
-		_body += _raw_content[i];
-		i++;
+		while (_raw_content[i])
+		{
+			_body += _raw_content[i];
+			i++;
+		}
+	}
+	else if (_body_reception_encoding == TRANSFER_ENCODING)
+	{
+		//ChunkedBodyProcessing()
+		// ICI, TRAITER LE PARSING DU BODY CHUNKED...
+		while (_raw_content[i])
+		{
+			_body += _raw_content[i];
+			i++;
+		}
 	}
 	return 1;
 }

@@ -53,7 +53,11 @@ int Client::receive(void)
 	}
 	if (ret < BUFFER_SIZE - 1 || req == 1)
 	{
+		_req.fillHeaderAndBody();
 		std::cout << _req.getRawContent() << std::endl;
+		std::cout << "--------------------------------" << std::endl << "Header:" << std::endl;
+		std::cout << _req.getHeader() << std::endl;
+		std::cout << "Body : " << std::endl << _req.getBody() << std::endl;
 		return WRITING;
 	}
 	return READING;
