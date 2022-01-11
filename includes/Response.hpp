@@ -24,17 +24,17 @@ namespace ws
 			size_t			response_size( void ); //RENVOIE LA TAILLE DE LA REP
 
 			std::string		getResponse( void ) const;
-			std::string		getHeader( void ) const;
 			std::string		getStatusLine(void) const;
+			std::string		getHeader( void ) const;
 			void			setResponse( std::string resp );
-			void			setHeader( std::string header );
 			void			setStatusLine( std::string status_l );
+			void			setHeader( std::string header );
 	
 		private:
+			std::string		_response;
 			std::string 	_status_line;
 			std::string		_header;
 			std::string		_content;
-            std::string		_response;
 	};
 }
 #endif

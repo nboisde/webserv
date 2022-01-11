@@ -36,7 +36,7 @@ Response &  Response::operator=( Response const & rhs)
     if ( this != &rhs )
         _response = rhs.getResponse();
         _status_line = rhs.getStatusLine();
-        _date = rhs.getDate();
+        _header = rhs.getHeader();
     return *this;
 }
 
@@ -51,9 +51,11 @@ std::string 	Response::genStatusLine( void ){
 }
 
 std::string		getDate( void ){
+    return NULL;
 }
 
 std::string		Response::genHeader( void ){
+    return NULL;
 }
 
 const char *      Response::response( void ){
@@ -73,12 +75,12 @@ std::string Response::getResponse( void ) const{
     return _response;
 }
 
-std::string		Response::getHeader( void ) const{
-    return _header;
-}
-
 std::string		Response::getStatusLine(void) const{
     return _status_line;
+}
+
+std::string		Response::getHeader( void ) const{
+    return _header;
 }
 
 //ACCESSORS - SETTERS//
@@ -86,12 +88,13 @@ void			Response::setResponse( std::string resp ){
     _response = resp;
 }
 
+void			Response::setStatusLine( std::string status_l ){
+    _status_line = status_l;
+}
+
 void			Response::setHeader( std::string header ){
     _header = header;
 }
 
-void			Response::setStatusLine( std::string status_l ){
-    _status_line = status_l;
-}
 
 }
