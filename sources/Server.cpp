@@ -94,6 +94,7 @@ void	Server::launchServer( void )
 		{
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
+				//std::cout << "REVENTS = " << findFds((*ct).getFd()).revents << std::endl;
 				if ((findFds((*ct).getFd()).revents) == 0)
 				{
 					ct++;
@@ -130,8 +131,11 @@ void	Server::launchServer( void )
 					else
 						ct++;
 				}
-				else
+				else //GERER FLAG D'ERREURS DE POLL POUR EVITER BOUCLE INFINIE
+				{
 					ct++;
+				}
+				findFds((*ct).getFd()).revents = 0;
 			}
 		}
 		if (_clean_fds)
@@ -201,6 +205,7 @@ void		Server::addToPolling( int fd )
 	struct pollfd new_elem;
 	new_elem.fd = fd;
 	new_elem.events = POLLIN;
+	new_elem.revents = 0;
 	_fds.push_back(new_elem);
 }
 
