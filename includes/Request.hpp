@@ -22,7 +22,7 @@ class Request {
 		int			checkHeaderEnd() const;
 		void		findMethod(void);
 		int			fillHeaderAndBody(void);
-		void		concatenateChunk(std::string buf);
+		void		ChunkedBodyProcessing(std::string body);
 		
 		// GETTERS
 		std::string	getRawContent(void) const;
@@ -36,6 +36,8 @@ class Request {
 		int			getState( void ) const ;
 
 	private:
+		int		isHexa(char c);
+
 		int			_state;
 		std::string	_raw_content;
 		int			_body_reception_encoding;
@@ -49,5 +51,4 @@ class Request {
 };
 
 }
-
 #endif

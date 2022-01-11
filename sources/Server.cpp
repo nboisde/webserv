@@ -78,15 +78,15 @@ void	Server::launchServer( void )
 		//setEvents();
 		if (int ret = polling() <= 0)
 		{	
-			std::cout << "RETURN POLLING " << ret << std::endl;
+			//std::cout << "RETURN POLLING " << ret << std::endl;
 			break;
 		}
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
-			int fd;
+			int fd = 0;
 			while ((fd = (*pt).accepting()) != -1)
 			{
-				std::cout << "New Connection " << fd << std::endl;
+				//std::cout << "New Connection " << fd << std::endl;
 				addToPolling(fd);
 			}
 		}
@@ -94,16 +94,17 @@ void	Server::launchServer( void )
 		{
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
+				//std::cout << "REVENTS = " << findFds((*ct).getFd()).revents << std::endl;
 				if ((findFds((*ct).getFd()).revents) == 0)
 				{
 					ct++;
 					continue;
 				}
-				if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
+				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
-					std::cout << "FD = " << (*ct).getFd() << std::endl;
-					std::cout << findFds((*ct).getFd()).revents << std::endl;
-					std::cout << (findFds((*ct).getFd()).revents & POLLIN) << std::endl;
+					//std::cout << "FD = " << (*ct).getFd() << std::endl;
+					//std::cout << findFds((*ct).getFd()).revents << std::endl;
+					//std::cout << (findFds((*ct).getFd()).revents & POLLIN) << std::endl;
 					int ret = (*ct).receive();
 					if ( ret == WRITING)
 						(findFds((*ct).getFd())).events = POLLOUT;
@@ -116,6 +117,7 @@ void	Server::launchServer( void )
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
 				{
 					int ret = (*ct).send();
+					//(findFds((*ct).getFd())).events = POLLOUT;
 					if (ret == CLOSING)
 					{	
 						int tempo = (*ct).getFd();
@@ -129,6 +131,11 @@ void	Server::launchServer( void )
 					else
 						ct++;
 				}
+				else //GERER FLAG D'ERREURS DE POLL POUR EVITER BOUCLE INFINIE
+				{
+					ct++;
+				}
+				findFds((*ct).getFd()).revents = 0;
 			}
 		}
 		if (_clean_fds)
@@ -198,6 +205,7 @@ void		Server::addToPolling( int fd )
 	struct pollfd new_elem;
 	new_elem.fd = fd;
 	new_elem.events = POLLIN;
+	new_elem.revents = 0;
 	_fds.push_back(new_elem);
 }
 

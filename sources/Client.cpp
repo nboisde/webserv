@@ -44,20 +44,22 @@ int Client::receive(void)
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
-	std::cout << "RECEIVED CONTENT = [" << buffer << "]" << std::endl;
+	//std::cout << "RECEIVED CONTENT = [" << buffer << "]" << std::endl;
 	int req = _req.concatenateRequest((std::string)buffer);
 	if ( ret < 0 )
 	{
 		perror("\nIn recv");
 		return WRITING;
 	}
-	if (ret < BUFFER_SIZE - 1 || req == 1)
+	if (/*ret < BUFFER_SIZE - 1 || */req == 1)
 	{
+		//std::cout << "ret :" << ret << std::endl;
 		_req.fillHeaderAndBody();
-		std::cout << _req.getRawContent() << std::endl;
-		std::cout << "--------------------------------" << std::endl << "Header:" << std::endl;
+ 		//std::cout << _req.getRawContent() << std::endl;
+		//std::cout << "--------------------------------" << std::endl << "Header:" << std::endl;
 		std::cout << _req.getHeader() << std::endl;
 		std::cout << "Body : " << std::endl << _req.getBody() << std::endl;
+		//std::cout << _req.getBody();// << std::endl;
 		return WRITING;
 	}
 	return READING;
@@ -67,26 +69,37 @@ int Client::receive(void)
 int Client::send( void )
 {
 	int			ret;
-	int			len;
+	//int			len;
 	const char* prov;
-	std::string str = _res.getResponse();	
+	std::string str = _res.getResponse();
 
-	len = str.size();
+	//len = str.size();
 	prov = str.c_str();
-	if (len > BUFFER_SIZE)
-		len = BUFFER_SIZE;
-	std::cout << "SEND FD = " << _fd << std::endl;
-	ret = ::send(_fd, prov, len, 0);
-	std::cout << "RET IN SENDING " << ret << std::endl;
+	ret = ::send(_fd, prov, str.size(), 0);
 	if (ret < 0)
 	{
 		perror(" send() failed");
 		return (ERROR);		
 	}
-	str.erase(0, ret);
+
+	// DEUX CAS A GERER SUR CETTE FONCTION supposement. (avec content-length ou transfer encoding.)
+	/*
+	if (len > BUFFER_SIZE)
+		len = BUFFER_SIZE;
+	//std::cout << "SEND FD = " << _fd << std::endl;
+	ret = ::send(_fd, prov, len, 0);
+	//std::cout << "RET IN SENDING " << ret << std::endl;
+	if (ret < 0)
+	{
+		perror(" send() failed");
+		return (ERROR);		
+	}
+	//str.erase(0, ret - 1);
 	if (str.empty())
 		return CLOSING;
-	return (SUCCESS);
+	//return (WRITING);
+	return (SUCCESS);*/
+	return CLOSING;
 }
 
 void Client::closeConnection(){}

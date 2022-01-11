@@ -21,5 +21,4 @@ namespace ws
             std::string		_response;
 	};
 }
-
 #endif
