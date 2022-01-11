@@ -270,32 +270,6 @@ void		Request::ChunkedBodyProcessing(std::string body)
 		if (k == 3)
 			break;
 	}
-	//int i = 0;
-	//int ret = body.find("0\r\n\r\n");
-	/*while (i <= ret)
-	{
-		int j = 0;
-		std::string hex_len = "";
-		while (body[i + j] && body[i + j] != '\r' && body[i + j + 1] && body[i + j + 1] != '\n')
-		{	
-			hex_len += body[i + j];
-			j++;
-		}
-		i += j + 2;
-		//std::cout << hex_len << std::endl;
-		int dec_len = std::stoi(hex_len, NULL, 16);
-		//std::cout << "dec len: " << dec_len << std::endl;
-		int k = 0;
-		while (body[i + k] && k <= dec_len + 1)
-		{
-			proceed_body += body[i + k];
-			k++;
-		}
-		//std::cout << proceed_body << std::endl;
-		_body += proceed_body;
-		i += k + 1;
-		//std::cout << i << std::endl;
-	}*/
 }
 
 
