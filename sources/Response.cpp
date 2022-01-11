@@ -7,15 +7,15 @@ namespace ws
 std::map<int, std::string>	init_responseMap( void ){
 	std::map<int, std::string>	m;
 
-    m[100] = "Continue";
+	m[100] = "Continue";
 	m[200] =  "OK";
-    m[300] =  "Multiple Choice";
-    m[301] =  "Moved Permanently";
-    m[400] = "Bad Request";
-    m[401] = "Unauthorized";
-    m[403] = "Forbidden";
-    m[404] = "Not Found";
-    m[500] =  "Internal Server Error";
+	m[300] =  "Multiple Choice";
+	m[301] =  "Moved Permanently";
+	m[400] = "Bad Request";
+	m[401] = "Unauthorized";
+	m[403] = "Forbidden";
+	m[404] = "Not Found";
+	m[500] =  "Internal Server Error";
 	return m;
 }
 
@@ -25,7 +25,7 @@ Response::Response( void ) : _response("Hello from Server\n"){
 };
 
 Response::Response( Response const & src){
-    *this = src;
+	*this = src;
 }
 
 Response::~Response( void ){
@@ -33,11 +33,13 @@ Response::~Response( void ){
 
 Response &  Response::operator=( Response const & rhs)
 {
-    if ( this != &rhs )
-        _response = rhs.getResponse();
-        _status_line = rhs.getStatusLine();
-        _header = rhs.getHeader();
-    return *this;
+	if ( this != &rhs )
+	{ 
+		_response = rhs.getResponse();
+		_status_line = rhs.getStatusLine();
+		_header = rhs.getHeader();
+	}
+	return *this;
 }
 
 //METHODS - //
@@ -51,11 +53,11 @@ std::string 	Response::genStatusLine( void ){
 }
 
 std::string		getDate( void ){
-    return NULL;
+	return NULL;
 }
 
 std::string		Response::genHeader( void ){
-    return NULL;
+	return NULL;
 }
 
 const char *      Response::response( void ){
@@ -66,34 +68,34 @@ const char *      Response::response( void ){
 }
 
 size_t      Response::response_size( void ){
-    return  _response.size();
+	return  _response.size();
 }
 
 //ACCESSORS - GETTERS//
 
 std::string Response::getResponse( void ) const{
-    return _response;
+	return _response;
 }
 
 std::string		Response::getStatusLine(void) const{
-    return _status_line;
+	return _status_line;
 }
 
 std::string		Response::getHeader( void ) const{
-    return _header;
+	return _header;
 }
 
 //ACCESSORS - SETTERS//
 void			Response::setResponse( std::string resp ){
-    _response = resp;
+	_response = resp;
 }
 
 void			Response::setStatusLine( std::string status_l ){
-    _status_line = status_l;
+	_status_line = status_l;
 }
 
 void			Response::setHeader( std::string header ){
-    _header = header;
+	_header = header;
 }
 
 
