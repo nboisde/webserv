@@ -23,7 +23,6 @@ class Request {
 		void		findMethod(void);
 		int			fillHeaderAndBody(void);
 		void		ChunkedBodyProcessing(std::string body);
-;
 		
 		// GETTERS
 		std::string	getRawContent(void) const;
@@ -52,5 +51,4 @@ class Request {
 };
 
 }
-
 #endif
