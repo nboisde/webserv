@@ -83,7 +83,7 @@ void	Server::launchServer( void )
 		}
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
-			int fd;
+			int fd = 0;
 			while ((fd = (*pt).accepting()) != -1)
 			{
 				//std::cout << "New Connection " << fd << std::endl;
@@ -99,7 +99,7 @@ void	Server::launchServer( void )
 					ct++;
 					continue;
 				}
-				if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
+				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
 					//std::cout << "FD = " << (*ct).getFd() << std::endl;
 					//std::cout << findFds((*ct).getFd()).revents << std::endl;
@@ -116,6 +116,7 @@ void	Server::launchServer( void )
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
 				{
 					int ret = (*ct).send();
+					//(findFds((*ct).getFd())).events = POLLOUT;
 					if (ret == CLOSING)
 					{	
 						int tempo = (*ct).getFd();
@@ -129,6 +130,8 @@ void	Server::launchServer( void )
 					else
 						ct++;
 				}
+				else
+					ct++;
 			}
 		}
 		if (_clean_fds)

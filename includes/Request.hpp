@@ -37,6 +37,8 @@ class Request {
 		int			getState( void ) const ;
 
 	private:
+		int		isHexa(char c);
+
 		int			_state;
 		std::string	_raw_content;
 		int			_body_reception_encoding;

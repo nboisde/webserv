@@ -125,9 +125,9 @@ int Request::concatenateRequest(std::string buf)
 
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
 		return -1;
-	else if (requestReceptionState() == BODY_RECIEVED)
+	if (requestReceptionState() == BODY_RECIEVED)
 		return 1;
-	else if (requestReceptionState() == RECIEVING_HEADER)
+	if (requestReceptionState() == RECIEVING_HEADER)
 	{
 		_header_len_recieved += buf.length();
 		if (checkHeaderEnd() == 1)
@@ -147,18 +147,21 @@ int Request::concatenateRequest(std::string buf)
 				_body_reception_encoding = TRANSFER_ENCODING;
 			_state = HEADER_RECIEVED;
 		}
-		return 0;
 	}
-	else if (requestReceptionState() == HEADER_RECIEVED)
+	if (requestReceptionState() == HEADER_RECIEVED)
 	{
 		_body_len_recieved += buf.length();
 		int i = _raw_content.find("\r\n\r\n");
 		// ICI -> gerer les differentes methodes d'encodage.
-		if (_body_reception_encoding == CONTENT_LENGTH && _body_len_recieved + _header_len_recieved < _content_length + i + 4)
+		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
+		{
+			_state = BODY_RECIEVED;
+			return 1;	
+		}
+		else if (_body_reception_encoding == CONTENT_LENGTH && _body_len_recieved + _header_len_recieved < _content_length + i + 4)
 				return 0;
 		else if (_body_reception_encoding == TRANSFER_ENCODING)
 		{
-			//int ret =
 			int ret = _raw_content.find("0\r\n\r\n");
 			if (ret == -1)
 				return 0;
@@ -170,13 +173,11 @@ int Request::concatenateRequest(std::string buf)
 		}
 		else
 		{
-			//fillHeaderAndBody();
 			_state = BODY_RECIEVED;
 			return 1;
 		}
 	}
-	else
-		return 0;
+	return 0;
 }
 
 int Request::fillHeaderAndBody(void){
@@ -192,7 +193,7 @@ int Request::fillHeaderAndBody(void){
 	std::string body = _raw_content.substr(ret + 4, _raw_content.length() - i);
 	//std::cout << body << std::endl;
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
-		return 0;
+		return 1;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
 	{
 		while (_raw_content[i])
@@ -203,25 +204,75 @@ int Request::fillHeaderAndBody(void){
 	}
 	else if (_body_reception_encoding == TRANSFER_ENCODING)
 	{
-		ChunkedBodyProcessing(body);
+		//ChunkedBodyProcessing(body);
 		// ICI, TRAITER LE PARSING DU BODY CHUNKED...
-/* 		while (_raw_content[i])
+     	while (_raw_content[i])
 		{
 			_body += _raw_content[i];
 			i++;
-		} */
+		}
 	}
 	return 1;
 }
 
+int		Request::isHexa(char c)
+{
+	if (c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9'
+	|| c == 'a' || c == 'b' || c == 'c' || c == 'd' || c == 'e' || c == 'f')
+		return 1;
+	return 0;
+}
+
 void		Request::ChunkedBodyProcessing(std::string body)
 {
-	std::string proceed_body;
+	//(void)body;
 	int i = 0;
 	int ret = body.find("0\r\n\r\n");
-	std::cout << body;
-	std::cout << ret << std::endl;
-	while (i < ret)
+	const char* str = body.c_str();
+	int k = 0;
+	while (i <= ret)
+	{
+		std::string proceed_body = "";
+		std::string hex = "";
+		while (str[i] != '\r')
+		{
+			hex += str[i];
+			i++;
+		}
+		i+=2;
+		std::cout << str[i] << std::endl;
+		//std::cout << body[i];
+		int j = 0;
+		int dec = std::stoi(hex, 0, 16);
+		std::cout << hex << ", " << dec << std::endl;
+		while (j < dec)
+		{
+			proceed_body += str[i];
+			i++;
+			j++;
+		}
+		int n = 0;
+		while (str[i + 4] != 'f' &&str[i + 5] != 'f' &&str[i + 6] != 'f' && str[i + 7] != '4')
+		{
+			i++;
+			n++;
+		}
+		std::cout << str[i - 1] << std::endl;
+		std::cout << str[i] << str[i + 1] << str[i + 2] << str[i + 3] << std::endl;
+		std::cout << n << std::endl;
+		//i+=2;
+		//while (!isHexa(body[i]))
+		//	i++;
+		std::cout << proceed_body.length() << std::endl;
+		_body += proceed_body;
+		//ret = _body.find("0\r\n\r\n");
+		k++;
+		if (k == 3)
+			break;
+	}
+	//int i = 0;
+	//int ret = body.find("0\r\n\r\n");
+	/*while (i <= ret)
 	{
 		int j = 0;
 		std::string hex_len = "";
@@ -230,10 +281,10 @@ void		Request::ChunkedBodyProcessing(std::string body)
 			hex_len += body[i + j];
 			j++;
 		}
-		i += j + 1;
+		i += j + 2;
 		//std::cout << hex_len << std::endl;
 		int dec_len = std::stoi(hex_len, NULL, 16);
-		//std::cout << dec_len << std::endl;
+		//std::cout << "dec len: " << dec_len << std::endl;
 		int k = 0;
 		while (body[i + k] && k <= dec_len + 1)
 		{
@@ -242,8 +293,9 @@ void		Request::ChunkedBodyProcessing(std::string body)
 		}
 		//std::cout << proceed_body << std::endl;
 		_body += proceed_body;
-		i += k;
-	}
+		i += k + 1;
+		//std::cout << i << std::endl;
+	}*/
 }
 
 
