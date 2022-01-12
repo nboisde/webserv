@@ -11,10 +11,11 @@ namespace ws
 class Parser
 {
 	private:
-		std::string											_content;
-		int													_size;
-		int													_pos;
-		std::vector<std::pair<std::string, std::string> >	_kv;
+		Server							_server;
+		std::string						_content;
+		int								_size;
+		int								_pos;
+		std::vector<std::string>		_keys;
 
 		int		checkFileName(char *file);
 		int		readFile(char *file, std::string *content);
@@ -25,7 +26,7 @@ class Parser
 		int		checkKeyValue(std::string content, int i, int size);
 
 	public:
-		Parser(char *config_file);
+		Parser();
 		virtual ~Parser();
 
 		int		launch(char *file, ws::Server *server);
