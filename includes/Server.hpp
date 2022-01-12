@@ -17,7 +17,7 @@ class Server
 	public:
 
 		Server( void );
-		Server( std::string ip);
+		Server( std::string ip );
 		Server( Server const & src );
 		virtual ~Server( void );
 

@@ -1,19 +1,18 @@
 #include "webserv.hpp"
 #include "Server.hpp"
-#include "parsing.hpp"
+#include "Parser.hpp"
 
 int	main(int ac, char **av)
 {
-	ws::Server server;
-
+	ws::Parser	parser;
+	
 	if (ac != 2)
 		return (1);
-	if (!parsing(av[1], &server))
+	if (!parser.launch(av[1]))
 	{
 		std::cout << "Wrong config" << std::endl;
 		return (1);
 	}
-	server.getPortsNb().push_back(8080);
-	server.launchServer();
+	parser.getServer().launchServer();
 	return (0);
 }

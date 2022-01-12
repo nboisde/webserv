@@ -3,7 +3,7 @@
 namespace ws
 {
 
-Parser::Parser(void) : _server("127.0.0.1")
+Parser::Parser(void) : _server("127.0.0.1"), _pos(0)
 {
 	_keys.push_back("listen");
 	_keys.push_back("server_name");
@@ -15,6 +15,12 @@ Parser::Parser(void) : _server("127.0.0.1")
 Parser::~Parser(void)
 {
 }
+
+Server	Parser::getServer(void)
+{
+	return _server;
+}
+
 
 int	Parser::launch(std::string file)
 {
@@ -28,7 +34,7 @@ int	Parser::launch(std::string file)
 	return (1);
 }
 
-int	Parser::checkFileName()
+int	Parser::checkFileName(void)
 {
 	int size = _config_file.size();
 	int pos = _config_file.rfind(".conf");
@@ -39,98 +45,99 @@ int	Parser::checkFileName()
 	return (1);
 }
 
-int	Parser::readFile()
+int	Parser::readFile(void)
 {
-	std::ifstream	ifs(file);
+	std::ifstream	ifs(_config_file);
 	std::string		buffer;
 
 	while (getline(ifs, buffer))
-	{
-		*content += buffer;
-		*content += "\n";
-	}
+		_content += buffer;
+	_size = _content.size();
 	ifs.close();
 	return (1);
 }
 
-int		checkHttp(std::string content, int i, int size)
+int	Parser::initWebServer(void)
 {
-	int pos;
-
-	while (i < size && isspace(content[i]))
-		i++;
-	pos = content.find("http");
-	if (pos != i)
+	if (!checkHttp())
 		return (0);
-	i = 4;
-	while (i < size && isspace(content[i]))
-		i++;
-	if (content[i] != '{')
-		return (0);
-	return (i);
-}
-
-
-int		checkInfo(std::string content, int i, int size)
-{
-	while (i < size)
+	while (_pos < _size)
 	{
-
-		i = checkElem(content, i, size);
-		if (!i)
+		if (!checkServer())
 			return (0);
-		while (i < size && isspace(content[i]))
-			i++;
-		if (content[i] == ';')
+		while (_pos < _size && isspace(_content[_pos]))
+			_pos++;
+		if (_content[_pos] == '}')
 			break;
 	}
-	if (i == size && content[i] != ';')
+	while (_pos < _size && isspace(_content[_pos]))
+		_pos++;
+	if (_pos != _size)
 		return (0);
-	return (i);
-}
-
-int		checkServer(std::string content, int i, int size)
-{
-	int	pos;
-
-	while (i < size && isspace(content[i]))
-		i++;
-	pos = content.find("server", i);
-	if (pos != i)
-		return (0);
-	i += 6;
-	while (i < size)
-	{
-		i = checkInfo(content, i, size);
-		if (!i)
-			return (0);
-		while (i < size && isspace(content[i]))
-			i++;
-		if (content[i] == '}')
-			break;
-	}
-	if (i == size && content[i] != '}')
-		return (0);
-	return (i);
-}
-
-int		initWebServer(std::string content, ws::Server *server)
-{
-	int	size = content.size();
-	int	pos = 0;
-
-	(void)server;
-	if (!(pos = checkHttp(content, pos, size)))
-		return (0);
-	while (pos < size)
-	{
-		if (!(pos = checkServer(content, pos, size)))
-			return (0);
-		pos++;
-	}
 	return (1);
 }
 
+int	Parser::checkHttp(void)
+{
+	int	i;
+
+	while (_pos < _size && isspace(_content[_pos]))
+		_pos++;
+	i = _content.find("http");
+	if (_pos != i)
+		return (0);
+	_pos += 4;
+	while (_pos < _size && isspace(_content[_pos]))
+		_pos++;
+	if (_content[_pos] != '{')
+		return (0);
+	return (1);
+}
+
+int	Parser::checkServer(void)
+{
+	int i;
+
+	while (_pos < _size && isspace(_content[_pos]))
+		_pos++;
+	i = _content.find("server", _pos);
+	if (i != _pos)
+		return (0);
+	_pos += 6;
+	while (_pos < _size && isspace(_content[_pos]))
+		_pos++;
+	if (_content[_pos] != '{')
+		return (0);
+	while (_pos < _size)
+	{
+		if (!checkKeys())
+			return (0);
+		while (_pos < _size && isspace(_content[_pos]))
+			_pos++;
+		if (_content[_pos] == '}')
+			break;
+	}
+	if (_pos == _size)
+		return (0);
+	return (i);
+}
 
 
+int	Parser::checkKeys(void)
+{
+	int	key_index;
+	int key_total = _keys.size();
+
+	while (_pos < _size && isspace(_content[_pos]))
+		_pos++;
+	for (key_index = 0; key_index <key_total; key_index++)
+	{
+		int	i = _content.find(_keys[key_index], _pos);
+		if (i != _pos)
+			break;
+	}
+	if (key_index == key_total)
+		return (0);
+	return (1);
+}
 }
