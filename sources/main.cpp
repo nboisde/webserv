@@ -1,10 +1,17 @@
+#include "webserv.hpp"
 #include "Server.hpp"
+#include "parsing.hpp"
 
-int	main()
+int	main(int ac, char **av)
 {
-	//CREER PARSER DE CONFIG ET PASSER LE RESULTAT DANS LE CONSTRUCTEUR DE SERVER.//
-	//parser(av[1])
 	ws::Server server;
+
+	if (ac != 2)
+		return (1);
+	if (!parsing(av[1], &server))
+	{
+		//exit or default server
+	}
 	server.getPortsNb().push_back(8080);
 	server.launchServer();
 	return (0);

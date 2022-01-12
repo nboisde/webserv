@@ -51,12 +51,4 @@
 # include <fcntl.h>
 # include <stdio.h>
 
-//CLASSES//
-
-// # include "Client.hpp"
-// # include "Request.hpp"
-// # include "Response.hpp"
-// # include "Port.hpp"
-// # include "Server.hpp"
-
 #endif

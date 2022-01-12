@@ -3,9 +3,8 @@
 
 # include "webserv.hpp"
 
-namespace ws {
-
-class Client;
+namespace ws 
+{
 
 class Request {
 	public:

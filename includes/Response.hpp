@@ -5,8 +5,6 @@
 
 namespace ws
 {
-	class Client;
-
 	class Response {
 		public:
 			Response( void );
@@ -18,7 +16,7 @@ namespace ws
 			std::string		getResponse( void ) const;
 			
 		private:
-            std::string		_response;
+			std::string		_response;
 	};
 }
 #endif

@@ -1,38 +1,39 @@
 #ifndef __CLIENT_HPP__
 # define __CLIENT_HPP__
 
-#include "Request.hpp"
-#include "Response.hpp"
-
-class Request;
-class Response;
-
-
+# include "webserv.hpp"
+# include "Request.hpp"
+# include "Response.hpp"
 
 namespace ws {
-class Client{
+
+//class Request;
+//class Response;
+
+class Client
+{
+	protected:
+		int			_fd;
+		int			_status;
+		ws::Request		_req;
+		ws::Response	_res;
+
 	public:
 		Client( void );
 		Client( int fd );
 		Client( Client const & src );
 		virtual ~Client();
 			
-		Client &	operator=( Client const & rhs );
+		Client &		operator=( Client const & rhs );
 
-		int 		receive( void );
-		int			send( void );
-		void		closeConnection( void );
+		int 			receive( void );
+		int				send( void );
+		void			closeConnection( void );
 
-		int			getFd( void ) const;
-		int			getStatus( void ) const;
-		Request &	getReq( void );
-		Response &	getRes( void );
-
-	private:
-		int			_fd;
-		int			_status;
-		Request		_req;
-		Response	_res;
+		int				getFd( void ) const;
+		int				getStatus( void ) const;
+		ws::Request &	getReq( void );
+		ws::Response &	getRes( void );
 };
 }
 
