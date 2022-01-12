@@ -16,6 +16,7 @@ namespace ws
 			Response &		operator=( Response const & rhs );
 
 			std::string 	genStatusLine( void );
+			std::string		genDate( void ){
 			std::string		genHeader( void );
 
 			const char *	response( void ); //CREER LA REPONSE A PARTIR DE ENTETE ET DONNES DE RETOUR
