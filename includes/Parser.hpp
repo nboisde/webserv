@@ -18,20 +18,21 @@ class Parser
 		int							_pos;
 		std::vector<std::string>	_keys;
 
+
 		int		checkFileName(void);
 		int		readFile(void);
 		int		initWebServer(void);
 		int		checkHttp(void);
 		int		checkServer(void);
-		int		checkContent(void);
-		int		checkKeyValue(void);
+		int		checkKeys(void);
 
 	public:
 		Parser();
 		virtual ~Parser();
 
+		Server	getServer(void);
 		int		launch(std::string file);
-};s
+};
 }
 
 #endif
