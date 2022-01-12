@@ -94,7 +94,7 @@ int Request::identifyBodyLengthInHeader(void)
 			i++;
 		}
 		// remplace by strtol
-		_content_length = std::stoi(cl, NULL, 10);
+		_content_length = std::strtol(cl.c_str(), NULL, 10);
 		return 1;
 	}
 }
@@ -224,13 +224,13 @@ int Request::fillHeaderAndBody(void){
 	}
 	else if (_body_reception_encoding == TRANSFER_ENCODING)
 	{
-		//ChunkedBodyProcessing(body);
+		ChunkedBodyProcessing(body);
 		// ICI, TRAITER LE PARSING DU BODY CHUNKED...
-		while (_raw_content[i])
+/*  		while (_raw_content[i])
 		{
 			_body += _raw_content[i];
 			i++;
-		}
+		} */
 	}
 	return 1;
 }
@@ -245,50 +245,29 @@ int		Request::isHexa(char c)
 
 void		Request::ChunkedBodyProcessing(std::string body)
 {
-	//(void)body;
 	int i = 0;
 	int ret = body.find("0\r\n\r\n");
 	const char* str = body.c_str();
-	int k = 0;
-	while (i <= ret)
+	while (i < ret)
 	{
 		std::string proceed_body = "";
 		std::string hex = "";
-		while (str[i] != '\r')
+		while (str[i] != '\r' && str[i + 1] != '\n')
 		{
 			hex += str[i];
 			i++;
 		}
 		i+=2;
-		std::cout << str[i] << std::endl;
-		//std::cout << body[i];
 		int j = 0;
-		int dec = std::stoi(hex, 0, 16);
-		std::cout << hex << ", " << dec << std::endl;
+		int dec = std::strtol(hex.c_str(), 0, 16);
 		while (j < dec)
 		{
 			proceed_body += str[i];
 			i++;
 			j++;
 		}
-		int n = 0;
-		while (str[i + 4] != 'f' &&str[i + 5] != 'f' &&str[i + 6] != 'f' && str[i + 7] != '4')
-		{
-			i++;
-			n++;
-		}
-		std::cout << str[i - 1] << std::endl;
-		std::cout << str[i] << str[i + 1] << str[i + 2] << str[i + 3] << std::endl;
-		std::cout << n << std::endl;
-		//i+=2;
-		//while (!isHexa(body[i]))
-		//	i++;
-		std::cout << proceed_body.length() << std::endl;
+		i+=2;
 		_body += proceed_body;
-		//ret = _body.find("0\r\n\r\n");
-		k++;
-		if (k == 3)
-			break;
 	}
 }
 

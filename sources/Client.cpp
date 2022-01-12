@@ -45,7 +45,14 @@ int Client::receive(void)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
 	//std::cout << "RECEIVED CONTENT = [" << buffer << "]" << std::endl;
-	int req = _req.concatenateRequest((std::string)buffer);
+	//std::cout << buffer;
+	if ( ret < 0 )
+	{
+		perror("\nIn recv");
+		return WRITING;
+	}
+	std::string tmp(buffer, ret);
+	int req = _req.concatenateRequest(tmp);
 	if ( ret < 0 )
 	{
 		perror("\nIn recv");
@@ -63,9 +70,11 @@ int Client::receive(void)
 		_req.fillHeaderAndBody();
  		//std::cout << _req.getRawContent() << std::endl;
 		//std::cout << "--------------------------------" << std::endl << "Header:" << std::endl;
-		std::cout << _req.getHeader() << std::endl;
-		std::cout << "Body : " << std::endl << _req.getBody() << std::endl;
+		//std::cout << _req.getHeader() << std::endl;
+		//std::cout << "Body : " << std::endl << _req.getBody() << std::endl;
 		//std::cout << _req.getBody();// << std::endl;
+		//std::cout << _req.getBody().length() << std::endl;
+		write(1, _req.getBody().c_str(), _req.getBody().length());
 		return WRITING;
 	}
 	return READING;
