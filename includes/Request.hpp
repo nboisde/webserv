@@ -37,7 +37,11 @@ class Request {
 		int			getState( void ) const ;
 
 	private:
+<<<<<<< HEAD
 		int		findProtocol(std::string buf);
+=======
+		int			isHexa(char c);
+>>>>>>> 976b65e (Begin Parsing)
 
 		int			_line;
 		int			_state;
