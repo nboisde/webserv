@@ -37,7 +37,9 @@ class Request {
 
 	private:
 		int		isHexa(char c);
+		int		findProtocol(std::string buf);
 
+		int			_line;
 		int			_state;
 		std::string	_raw_content;
 		int			_body_reception_encoding;
