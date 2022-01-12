@@ -75,7 +75,7 @@ void	Server::launchServer( void )
 	while (true)
 	{
 		_clean_fds = 0;
-		//setEvents();
+		setRevents();
 		if (int ret = polling() <= 0)
 		{	
 			//std::cout << "RETURN POLLING " << ret << std::endl;
@@ -135,7 +135,7 @@ void	Server::launchServer( void )
 				{
 					ct++;
 				}
-				findFds((*ct).getFd()).revents = 0;
+				// findFds((*ct).getFd()).revents = 0;
 			}
 		}
 		if (_clean_fds)
@@ -209,22 +209,10 @@ void		Server::addToPolling( int fd )
 	_fds.push_back(new_elem);
 }
 
-void		Server::setEvents( void )
+void		Server::setRevents( void )
 {
 	for (it_fds it = _fds.begin(); it != _fds.end(); it++)
-	{
-		(*it).events = POLLIN;
-		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
-		{
-			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end(); ct++)
-			{
-				if ((*ct).getFd() == (*it).fd)
-				{
-					(*it).events = (*ct).getReq().getState();
-				}
-			}
-		}
-	}
+		(*it).revents = 0;
 }
 
 
