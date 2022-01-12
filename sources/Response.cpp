@@ -52,17 +52,52 @@ std::string 	Response::genStatusLine( void ){
 	return ret.str();
 }
 
-std::string		getDate( void ){
-	return NULL;
+std::string		Response::genDate( void ){
+	time_t rawtime;
+	struct tm * gmt;
+	std::stringstream ret;
+	static const char days[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	static const char months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+	//TIME init and struct loading
+	time(&rawtime);
+	gmt = gmtime(&rawtime);
+
+	//Header Date String Construction
+	ret << "Date: " << days[gmt->tm_wday] << ", ";
+	if (gmt->tm_mday < 10)
+		ret << "0";
+	ret << gmt->tm_mday << " ";
+	ret << months[gmt->tm_mon] << " ";
+	ret << gmt->tm_year + 1900 << " ";
+	if gmt->tm_hour < 10
+		ret << "0";
+	ret << gmt->tm_hour << ":";
+	if gmt->tm_min < 10
+		ret << "0";
+	ret << gmt->tm_min << ":";
+	if gmt->tm_sec < 10
+		ret << "0";
+	ret << gmt->tm_sec << " GMT";
+	
+	return ret.str();
 }
 
 std::string		Response::genHeader( void ){
-	return NULL;
+	std::string header;
+
+	header << genDate();
+	return header;
 }
 
 const char *      Response::response( void ){
-	_response.append(this->genStatusLine());
-
+	std::streamstring tmp;
+	
+	tmp << genStatusLine() << CRLF 
+	tmp << genHeader() << CRLF;
+	_response = tmp.str();
+	
 	const char * str = _response.c_str();
 	return str;
 }

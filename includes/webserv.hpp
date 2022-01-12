@@ -1,11 +1,15 @@
 #ifndef __WEBSERV_HPP__
 # define __WEBSERV_HPP__
 
-// General MACRORS
+// General MACROS
 # define DELAI -1
 # define BUFFER_SIZE 80
 # define ERROR -1
 # define SUCCESS 1
+
+// Litteral MACROS
+# define CRLF "\r\n"
+
 
 // Requests State MACROS
 # define REQUEST_FORMAT_ERROR -1
