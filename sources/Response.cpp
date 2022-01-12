@@ -21,7 +21,7 @@ std::map<int, std::string>	init_responseMap( void ){
 
 std::map<int, std::string>  Response::_status_code = init_responseMap();
 
-Response::Response( void ) : _response("Hello from Server\n"){
+Response::Response( void ) : _response("Hello from Server\n"), _content(""){
 };
 
 Response::Response( Response const & src){
@@ -120,6 +120,10 @@ std::string		Response::getStatusLine(void) const{
 
 std::string		Response::getHeader( void ) const{
 	return _header;
+}
+
+std::string		Response::getContent( void ) const{
+	return _content;
 }
 
 //ACCESSORS - SETTERS//

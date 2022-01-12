@@ -25,6 +25,7 @@ namespace ws
 			std::string		getResponse( void ) const;
 			std::string		getStatusLine(void) const;
 			std::string		getHeader( void ) const;
+			std::string		getContent( void ) const;
 			void			setResponse( std::string resp );
 			void			setStatusLine( std::string status_l );
 			void			setHeader( std::string header );
