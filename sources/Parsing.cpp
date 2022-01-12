@@ -1,16 +1,29 @@
 #include "parsing.hpp"
+#include <fstream>
 
 int		checkFileName(char *file)
 {
+	int	pos;
+	int	size;
+
 	std::string s_file(file);
-	std::cout << s_file << std::endl;
+	size = s_file.size();
+	pos = s_file.rfind(".conf");
+	if (pos == -1)
+		return (0);
+	else if ((size - pos) != 5)
+		return (0);
 	return (1);
 }
 
 int		readFile(char *file, std::string *content)
 {
-	(void)file;
-	(void)content;
+	std::ifstream	ifs(file);
+	std::string		buffer;
+
+	while (getline(ifs, buffer))
+		*content += buffer;
+	ifs.close();
 	return (1);
 }
 
