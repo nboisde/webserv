@@ -10,7 +10,8 @@ int	main(int ac, char **av)
 		return (1);
 	if (!parsing(av[1], &server))
 	{
-		//exit or default server
+		std::cout << "Wrong config" << std::endl;
+		return (1);
 	}
 	server.getPortsNb().push_back(8080);
 	server.launchServer();
