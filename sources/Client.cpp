@@ -51,7 +51,13 @@ int Client::receive(void)
 		perror("\nIn recv");
 		return WRITING;
 	}
-	if (ret < BUFFER_SIZE - 1 || req == 1)
+	if (req == -1)
+	{
+		std::cout << "Gerer ici une reponse d'erreur" << std::endl;
+		return WRITING;
+		//exit(EXIT_FAILURE);
+	}
+	if (/* ret < BUFFER_SIZE - 1 ||  */req == 1)
 	{
 		//std::cout << "ret :" << ret << std::endl;
 		_req.fillHeaderAndBody();

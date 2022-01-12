@@ -2,7 +2,8 @@
 
 namespace ws{
 
-Request::Request( void ): 
+Request::Request( void ):
+_line(0),
 _state(RECIEVING_HEADER),
 _raw_content(""),
 _body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
@@ -92,6 +93,7 @@ int Request::identifyBodyLengthInHeader(void)
 			cl += _raw_content[ret + l.length() + 2 + i];
 			i++;
 		}
+		// remplace by strtol
 		_content_length = std::stoi(cl, NULL, 10);
 		return 1;
 	}
@@ -105,6 +107,14 @@ int Request::isTransferEncoding(void) const
 		return 0;
 	else
 		return 1;
+}
+
+int		Request::findProtocol(std::string buf)
+{
+	int ret = buf.find("HTTP/1.1");
+	if (ret != -1)
+		return 1;
+	return 0;
 }
 
 /*
@@ -122,7 +132,17 @@ int Request::isTransferEncoding(void) const
 int Request::concatenateRequest(std::string buf)
 {
 	_raw_content += buf;
+	if (_line == 0)
+	{
+		findMethod();
+		if (_method_type == UNKNOWN || !findProtocol(buf))
+		{
+			_state = REQUEST_FORMAT_ERROR;
+			return -1;
+		}
+	}
 
+	_line++;
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
 		return -1;
 	if (requestReceptionState() == BODY_RECIEVED)
@@ -206,7 +226,7 @@ int Request::fillHeaderAndBody(void){
 	{
 		//ChunkedBodyProcessing(body);
 		// ICI, TRAITER LE PARSING DU BODY CHUNKED...
-     	while (_raw_content[i])
+		while (_raw_content[i])
 		{
 			_body += _raw_content[i];
 			i++;
