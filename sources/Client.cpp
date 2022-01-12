@@ -51,7 +51,7 @@ int Client::receive(void)
 		perror("\nIn recv");
 		return WRITING;
 	}
-	if (/*ret < BUFFER_SIZE - 1 || */req == 1)
+	if (ret < BUFFER_SIZE - 1 || req == 1)
 	{
 		//std::cout << "ret :" << ret << std::endl;
 		_req.fillHeaderAndBody();
