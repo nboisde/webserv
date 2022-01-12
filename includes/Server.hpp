@@ -34,7 +34,7 @@ class Server
 		void						addPort( Port new_port);
 		int							polling( void );
 		void						addToPolling( int fd );
-		void						setEvents( void );
+		void						setRevents( void );
 		void						cleanFds( void ) ;
 		struct pollfd	&			findFds( int fd );
 		void						launchServer( void );
