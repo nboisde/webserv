@@ -48,7 +48,7 @@ std::string 	Response::genStatusLine( void ){
 	int ret_code = 200;
 	std::stringstream ret;
 
-	ret << "HTTP/1.1" << ret_code << _status_code[ret_code];	
+	ret << "HTTP/1.1 " << ret_code << " " << _status_code[ret_code];	
 	return ret.str();
 }
 
@@ -56,8 +56,8 @@ std::string		Response::genDate( void ){
 	time_t rawtime;
 	struct tm * gmt;
 	std::stringstream ret;
-	static const char days[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-	static const char months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	static const char days[][7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	static const char months[][12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 	//TIME init and struct loading
@@ -71,13 +71,13 @@ std::string		Response::genDate( void ){
 	ret << gmt->tm_mday << " ";
 	ret << months[gmt->tm_mon] << " ";
 	ret << gmt->tm_year + 1900 << " ";
-	if gmt->tm_hour < 10
+	if (gmt->tm_hour < 10)
 		ret << "0";
 	ret << gmt->tm_hour << ":";
-	if gmt->tm_min < 10
+	if (gmt->tm_min < 10)
 		ret << "0";
 	ret << gmt->tm_min << ":";
-	if gmt->tm_sec < 10
+	if (gmt->tm_sec < 10)
 		ret << "0";
 	ret << gmt->tm_sec << " GMT";
 	
@@ -85,17 +85,19 @@ std::string		Response::genDate( void ){
 }
 
 std::string		Response::genHeader( void ){
-	std::string header;
+	std::stringstream header;
 
 	header << genDate();
-	return header;
+	return header.str();
 }
 
 const char *      Response::response( void ){
-	std::streamstring tmp;
+	std::stringstream tmp;
 	
-	tmp << genStatusLine() << CRLF 
+	tmp << genStatusLine() << CRLF;
 	tmp << genHeader() << CRLF;
+	
+	tmp << CRLF << CRLF;
 	_response = tmp.str();
 	
 	const char * str = _response.c_str();
