@@ -11,26 +11,27 @@ namespace ws
 class Parser
 {
 	private:
-		Server							_server;
-		std::string						_content;
-		int								_size;
-		int								_pos;
-		std::vector<std::string>		_keys;
+		Server						_server;
+		std::string					_config_file;
+		std::string					_content;
+		int							_size;
+		int							_pos;
+		std::vector<std::string>	_keys;
 
-		int		checkFileName(char *file);
-		int		readFile(char *file, std::string *content);
-		int		initWebServer(std::string content, ws::Server *server);
-		int		checkHttp(std::string content, int i, int size);
-		int		checkServer(std::string content, int i, int size);
-		int		checkContent(std::string content, int i, int size);
-		int		checkKeyValue(std::string content, int i, int size);
+		int		checkFileName(void);
+		int		readFile(void);
+		int		initWebServer(void);
+		int		checkHttp(void);
+		int		checkServer(void);
+		int		checkContent(void);
+		int		checkKeyValue(void);
 
 	public:
 		Parser();
 		virtual ~Parser();
 
-		int		launch(char *file, ws::Server *server);
-};
+		int		launch(std::string file);
+};s
 }
 
 #endif

@@ -10,7 +10,7 @@ Server::Server( void )
 	return;
 }
 
-Server::Server( std::string ip, std::vector<Port> ports) : _server_ip(ip), _ports(ports)
+Server::Server( std::string ip, std::vector<Port> ports) : _server_ip(ip)
 {
 	return;
 }
