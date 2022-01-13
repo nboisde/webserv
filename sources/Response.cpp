@@ -21,7 +21,11 @@ std::map<int, std::string>	init_responseMap( void ){
 
 std::map<int, std::string>  Response::_status_code = init_responseMap();
 
-Response::Response( void ) : _response("Hello from Server\n"), _content(""){
+Response::Response( void ) : _response("Hello from Server\n"), _content("<html>\n\
+<body>\n\
+<h1>Hello, World!</h1>\n\
+</body>\n\
+</html>"){
 };
 
 Response::Response( Response const & src){
@@ -88,6 +92,9 @@ std::string		Response::genHeader( void ){
 	std::stringstream header;
 
 	header << genDate();
+	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
+	
+	header << CRLF;
 	return header.str();
 }
 
@@ -96,7 +103,9 @@ const char *      Response::response( void ){
 	
 	tmp << genStatusLine() << CRLF;
 	tmp << genHeader() << CRLF;
-	
+
+	tmp << _content;
+
 	tmp << CRLF << CRLF;
 	_response = tmp.str();
 	
