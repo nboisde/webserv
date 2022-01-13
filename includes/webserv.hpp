@@ -33,6 +33,7 @@
 # include <iostream>
 # include <string>
 # include <vector>
+# include <map>
 
 //C_LIBRARIES//
 # include <string.h>

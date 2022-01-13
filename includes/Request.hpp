@@ -23,6 +23,8 @@ class Request {
 		void		findMethod(void);
 		int			fillHeaderAndBody(void);
 		void		ChunkedBodyProcessing(std::string body);
+		void		parseHeader(void);
+
 		
 		// GETTERS
 		std::string	getRawContent(void) const;
@@ -36,7 +38,6 @@ class Request {
 		int			getState( void ) const ;
 
 	private:
-		int		isHexa(char c);
 		int		findProtocol(std::string buf);
 
 		int			_line;
@@ -50,6 +51,7 @@ class Request {
 		int 		_header_size;
 		std::string	_header;
 		std::string	_body;
+		std::map<std::string, std::string> _head;
 };
 
 }
