@@ -41,6 +41,7 @@ Request &	Request::operator=( Request const & rhs )
 		_header_size = rhs._header_size;
 		_header = rhs._header;
 		_body = rhs._body;
+		_head = rhs._head;
 	}
 	return *this;
 }
@@ -48,7 +49,6 @@ Request &	Request::operator=( Request const & rhs )
 int Request::checkHeaderEnd(void) const
 {
 	int ret = _raw_content.find("\r\n\r\n");
-	//std::cout << "find end header" << ret << std::endl;
 	if (ret == -1)
 		return (0);
 	else
@@ -85,16 +85,12 @@ void Request::findMethod(void)
 
 int Request::identifyBodyLengthInHeader(void)
 {
-	std::string l = "content-length"; // TO CHANGE TO BE COMPATIBLE WITH CONTENT-LENGTH ALL CASES.. ex: postman computer.
+	std::string l = "content-length"; // Change with all compatible casses. ?
 	std::string l2 = "Content-Length";
 	std::string cl;
 	int r1 = _raw_content.find(l);
 	int r2 = _raw_content.find(l2);
-	int ret;
-	if ((r1 == -1 && r2 == -1) || r1 >= 0)
-		ret = r1;
-	else
-		ret = r2;
+	int ret = ((r1 == -1 && r2 == -1) || r1 >= 0) ? r1 : r2;
 	if (ret == -1)
 		return 0;
 	else
@@ -105,7 +101,6 @@ int Request::identifyBodyLengthInHeader(void)
 			cl += _raw_content[ret + l.length() + 2 + i];
 			i++;
 		}
-		// remplace by strtol
 		_content_length = std::strtol(cl.c_str(), NULL, 10);
 		return 1;
 	}
@@ -236,10 +231,10 @@ void	Request::parseHeader(void)
 			int i = 0;
 			for (std::string::iterator si = (*it).begin(); si != (*it).end(); si++)
 			{
-				if (*si == ' ')
+				if (*si && *si == ' ')
 				{
 					i++;
-					while (*si == ' ')
+					while (*si && *si == ' ')
 						si++;
 				}
 				if (i == 1)
@@ -322,41 +317,59 @@ void		Request::ChunkedBodyProcessing(std::string body)
 }
 
 
-int Request::requestReceptionState(void){
+int Request::requestReceptionState(void)
+{
 	return _state;
 }
 
-std::string Request::getRawContent(void) const{
+std::string Request::getRawContent(void) const
+{
 	return _raw_content;
 }
 
-int Request::getMethodType(void) const{
+int Request::getMethodType(void) const
+{
 	return _method_type;
 }
 
-int Request::getContentLength(void) const{
+int Request::getContentLength(void) const
+{
 	return _content_length;
 }
-int Request::getHeaderSizeRevieved(void) const{
+
+int Request::getHeaderSizeRevieved(void) const
+{
 	return _header_len_recieved;
 }
-int Request::getBodySizeRecieved(void) const{
+
+int Request::getBodySizeRecieved(void) const
+{
 	return _body_len_recieved;
 }
 
-int Request::getHeaderSize(void) const{
+int Request::getHeaderSize(void) const
+{
 	return _header_size;
 }
-std::string Request::getHeader(void) const{
+
+std::string Request::getHeader(void) const
+{
 	return _header;
 }
-std::string Request::getBody(void) const{
+
+std::string Request::getBody(void) const
+{
 	return _body;
 }
 
 int Request::getState( void ) const
 {
 	return _state;
+}
+
+std::map<std::string, std::string>	Request::getMap(void) const
+{
+	return _head;
 }
 
 }
