@@ -68,15 +68,13 @@ void	Server::launchServer( void )
 			//GESTION D'ERROR//
 		}
 	}
+	std::cout << _ports.size() << std::endl;
 	while (true)
 	{
 		_clean_fds = 0;
 		setRevents();
 		if (int ret = polling() <= 0)
-		{	
-			//std::cout << "RETURN POLLING " << ret << std::endl;
 			break;
-		}
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
 			int fd = 0;
@@ -217,20 +215,9 @@ void		Server::setRevents( void )
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-std::string	Server::getIp( void ) const{
-	return (this->_server_ip);
-}
-
-std::vector<Port> Server::getPorts( void ) const{
-	return (this->_ports);
-}
-
-void	Server::setIp( std::string new_ip ) {
-	this->_server_ip = new_ip;
-}
-
-void	Server::setPorts( std::vector<Port> new_ports) {
-	this->_ports = new_ports;
-}
+std::string			Server::getIp( void ) const { return (this->_server_ip); }
+std::vector<Port>	Server::getPorts( void ) const { return (this->_ports); }
+void				Server::setIp( std::string new_ip ) { this->_server_ip = new_ip; }
+void				Server::setPorts( std::vector<Port> new_ports) { this->_ports = new_ports; }
 }
 /* ************************************************************************** */
