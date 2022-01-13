@@ -91,6 +91,7 @@ int	Parser::checkHttp(void)
 		_pos++;
 	if (_content[_pos] != '{')
 		return (0);
+	_pos++;
 	return (1);
 }
 
@@ -108,6 +109,7 @@ int	Parser::checkServer(void)
 		_pos++;
 	if (_content[_pos] != '{')
 		return (0);
+	_pos++;
 	while (_pos < _size)
 	{
 		getServer().getPorts().push_back(Port());
@@ -116,11 +118,15 @@ int	Parser::checkServer(void)
 		while (_pos < _size && isspace(_content[_pos]))
 			_pos++;
 		if (_content[_pos] == '}')
+		{
+			std::cout << "coucou" << std::endl;
+			_pos++;
 			break;
+		}
 	}
 	if (_pos == _size)
 		return (0);
-	return (i);
+	return (1);
 }
 
 
@@ -152,11 +158,13 @@ int	Parser::checkValues(void)
 	int	isspaceNb = 0;
 
 	while (_pos < _size && isspace(_content[_pos]))
+	{
+		_pos++;
 		isspaceNb++;
+	}
 	if (!isspaceNb)
 		return (0);
-	_pos += isspaceNb;
-	return (0);
+	return (1);
 }
 
 }

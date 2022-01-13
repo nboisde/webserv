@@ -42,7 +42,6 @@ class Server
 	protected:
 		bool							_clean_fds;
 		std::string						_server_ip;
-		std::string						_server_name;
 		std::vector<Port>				_ports;
 		std::vector<struct pollfd>		_fds;
 
