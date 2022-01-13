@@ -59,7 +59,6 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 
 void	Server::launchServer( void )
 {
-	std::cout << "PORTS NB " << _ports.size();
 	for (std::vector<Port>::iterator it = _ports.begin(); it != _ports.end(); it++)
 	{
 		if ((*it).launchPort())
@@ -69,7 +68,6 @@ void	Server::launchServer( void )
 			//GESTION D'ERROR//
 		}
 	}
-	std::cout << _ports.size() << std::endl;
 	while (true)
 	{
 		_clean_fds = 0;

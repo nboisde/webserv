@@ -5,7 +5,7 @@ namespace ws{
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
 
-Port::Port( void ) : _port(4242)
+Port::Port( void ) : _port(8080)
 {
 	return;
 }
