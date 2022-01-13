@@ -24,12 +24,19 @@ class Port
 		int						bind( void );
 		int						listening( void );
 		int						accepting( void );
+	
 		int						getFd( void ) const ;
 		void					setFd( int fd);
 		int						getPort( void ) const;
+		void					setPort( int fd);
+		std::string				getServerName( void ) const;
+		void					setServerName( std::string );
+		int						getClientMaxSize( void ) const;
+		void					setClientMaxSize( int size );
 		struct sockaddr_in		getPortAddress( void ) const;
 		std::vector<Client>		&getClients( void );
 		void					setClients( int fd );
+	
 		void					addClient( int fd );
 		void					removeClient( int fd );
 

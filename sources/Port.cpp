@@ -144,19 +144,14 @@ void	Port::removeClient( int fd )
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-int	Port::getFd( void ) const{
-	return _fd;
-}
-void	Port::setFd( int fd )
-{
-	_fd = fd;
-}
-
-
-int	Port::getPort( void ) const{
-	return _port;
-}
-
+int				Port::getFd( void ) const { return _fd; }
+void			Port::setFd( int fd ) {	_fd = fd; }
+int				Port::getPort( void ) const { return _port; }
+void			Port::setPort( int port ) { _port = port; }
+std::string		Port::getServerName( void ) const { return _server_name; }
+void			Port::setServerName( std::string name ) { _server_name = name; }
+int				Port::getClientMaxSize( void ) const { return _client_max_size; }
+void			Port::setClientMaxSize( int size ) { _client_max_size = size; }
 
 std::vector<Client>	& Port::getClients( void )
 {
