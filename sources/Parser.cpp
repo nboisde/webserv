@@ -10,12 +10,6 @@ Parser::Parser(void) : _server("127.0.0.1"), _pos(0)
 	_keys.push_back("client_max_body_size");
 	_keys.push_back("error_page");
 	_keys.push_back("autoindex");
-
-	_keys.push_back("listen");
-	_keys.push_back("server_name");
-	_keys.push_back("client_max_body_size");
-	_keys.push_back("error_page");
-	_keys.push_back("autoindex");
 }
 
 Parser::~Parser(void)
@@ -74,7 +68,10 @@ int	Parser::initWebServer(void)
 		while (_pos < _size && isspace(_content[_pos]))
 			_pos++;
 		if (_content[_pos] == '}')
+		{
+			_pos++;
 			break;
+		}
 	}
 	while (_pos < _size && isspace(_content[_pos]))
 		_pos++;
@@ -118,14 +115,13 @@ int	Parser::checkServer(void)
 	_pos++;
 	while (_pos < _size)
 	{
-		getServer().getPorts().push_back(Port());
+		_server.addPort(Port());
 		if (!checkKeys())
 			return (0);
 		while (_pos < _size && isspace(_content[_pos]))
 			_pos++;
 		if (_content[_pos] == '}')
 		{
-			std::cout << "coucou" << std::endl;
 			_pos++;
 			break;
 		}
@@ -143,7 +139,7 @@ int	Parser::checkKeys(void)
 
 	while (_pos < _size && isspace(_content[_pos]))
 		_pos++;
-	for (key_index = 0; key_index <key_total; key_index++)
+	for (key_index = 0; key_index < key_total; key_index++)
 	{
 		int	i = _content.find(_keys[key_index], _pos);
 		if (i == _pos)
@@ -172,9 +168,10 @@ int	Parser::checkValues(int key)
 		return (0);
 	while (_pos < _size && _content[_pos] != ';')
 	{
-		setValue(key, _content);
-		while (_pos < _size && isspace(_content[_pos]))
-			_pos++;
+		int	dot = _content.find_first_of(";", _pos);
+		std::string value = _content.substr(_pos, dot - _pos);
+		setValue(key, value);
+		_pos = dot;
 	}
 	if (_pos == _size)
 		return (0);
@@ -190,10 +187,8 @@ int	Parser::setValue(int key, std::string value)
 		_server.getPorts().back().setServerName(value);
 	else if (key == 2)
 		_server.getPorts().back().setClientMaxSize(strtol(value.c_str(), NULL, 10));
-	//else if (key == 3)
-	//	_server.getPorts().back()._errors.push_back(Pair(value, value));
-	//else if (key == 4)
-	//	_server.getPorts().back().setAutoindex(value);
+	else if (key == 4)
+		_server.getPorts().back().setAutoindex(1);
 	else 
 		return (0);
 	return (1);

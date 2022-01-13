@@ -5,7 +5,7 @@ namespace ws{
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
 
-Port::Port( void )
+Port::Port( void ) : _port(4242)
 {
 	return;
 }
@@ -114,8 +114,8 @@ int	Port::accepting( void )
 	new_socket = accept(_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
 	if (new_socket < 0)
 	{
-		if (errno != EAGAIN)
-			perror("In accept");
+		//if (errno != EAGAIN)
+		//	perror("In accept");
 		return(ERROR);
 	}
 	Client newClient(new_socket);
@@ -147,7 +147,9 @@ void	Port::removeClient( int fd )
 int				Port::getFd( void ) const { return _fd; }
 void			Port::setFd( int fd ) {	_fd = fd; }
 int				Port::getPort( void ) const { return _port; }
-void			Port::setPort( int port ) { _port = port; }
+void			Port::setPort( int port ) { std::cout << port << std::endl; _port = port; }
+bool			Port::getAutoindex( void ) const { return _autoindex; }
+void			Port::setAutoindex( bool status ) { _autoindex = status; }
 std::string		Port::getServerName( void ) const { return _server_name; }
 void			Port::setServerName( std::string name ) { _server_name = name; }
 int				Port::getClientMaxSize( void ) const { return _client_max_size; }
