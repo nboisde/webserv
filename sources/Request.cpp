@@ -101,7 +101,12 @@ int Request::identifyBodyLengthInHeader(void)
 			cl += _raw_content[ret + l.length() + 2 + i];
 			i++;
 		}
+<<<<<<< HEAD
 		_content_length = std::strtol(cl.c_str(), NULL, 10);
+=======
+		// remplace by strtol
+		_content_length = std::stoi(cl, NULL, 10);
+>>>>>>> 919579b (Merge pt 2)
 		return 1;
 	}
 }
