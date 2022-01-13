@@ -367,9 +367,4 @@ int Request::getState( void ) const
 	return _state;
 }
 
-std::map<std::string, std::string>	Request::getMap(void) const
-{
-	return _head;
-}
-
 }
