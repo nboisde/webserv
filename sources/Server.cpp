@@ -59,14 +59,10 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 
 void	Server::launchServer( void )
 {
-	for (std::vector<int>::iterator it = _ports_nb.begin(); it != _ports_nb.end(); it++)
+	for (std::vector<Port>::iterator it = _ports.begin(); it != _ports.end(); it++)
 	{
-		Port new_port(*it);
-		if (new_port.launchPort())
-		{
-			_ports.push_back(new_port);
-			addToPolling(new_port.getFd());
-		}
+		if ((*it).launchPort())
+			addToPolling((*it).getFd());
 		else
 		{
 			//GESTION D'ERROR//
@@ -236,12 +232,5 @@ void	Server::setIp( std::string new_ip ) {
 void	Server::setPorts( std::vector<Port> new_ports) {
 	this->_ports = new_ports;
 }
-
-std::vector<int>&	Server::getPortsNb( void )
-{
-	return _ports_nb;
-}
-
-
 }
 /* ************************************************************************** */
