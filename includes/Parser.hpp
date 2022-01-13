@@ -25,6 +25,7 @@ class Parser
 		int		checkHttp(void);
 		int		checkServer(void);
 		int		checkKeys(void);
+		int		checkValues(void);
 
 	public:
 		Parser();

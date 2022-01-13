@@ -110,6 +110,7 @@ int	Parser::checkServer(void)
 		return (0);
 	while (_pos < _size)
 	{
+		getServer().getPorts().push_back(Port());
 		if (!checkKeys())
 			return (0);
 		while (_pos < _size && isspace(_content[_pos]))
@@ -133,11 +134,31 @@ int	Parser::checkKeys(void)
 	for (key_index = 0; key_index <key_total; key_index++)
 	{
 		int	i = _content.find(_keys[key_index], _pos);
-		if (i != _pos)
+		if (i == _pos)
+		{
+			_pos += _keys[key_index].size();
 			break;
+		}
 	}
 	if (key_index == key_total)
 		return (0);
+	if (!checkValues())
+		return (0);
 	return (1);
 }
+
+int	Parser::checkValues(void)
+{
+	int	isspaceNb = 0;
+
+	while (_pos < _size && isspace(_content[_pos]))
+		isspaceNb++;
+	if (!isspaceNb)
+		return (0);
+	_pos += isspaceNb;
+	return (0);
 }
+
+}
+
+

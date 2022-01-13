@@ -27,7 +27,6 @@ class Server
 		std::string					getIp( void ) const;
 		std::vector<Port>			getPorts( void ) const;
 		std::vector<struct pollfd>	getFds( void ) const;
-		std::vector<int>&			getPortsNb( void );
 		void						setIp( std::string new_ip );
 		void						setPorts( std::vector<Port> new_ports);
 		void						setFds( std::vector<struct pollfd> fds);
@@ -44,7 +43,6 @@ class Server
 		bool							_clean_fds;
 		std::string						_server_ip;
 		std::string						_server_name;
-		std::vector<int>				_ports_nb;
 		std::vector<Port>				_ports;
 		std::vector<struct pollfd>		_fds;
 
