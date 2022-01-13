@@ -62,13 +62,25 @@ void Request::findMethod(void)
 	p = _raw_content.find("POST");
 	d = _raw_content.find("DELETE");
 	if (g != -1)
+	{
+		_head["Method"] = "GET";
 		_method_type = GET;
+	}
 	else if (p != -1)
+	{
+		_head["Method"] = "POST";
 		_method_type = POST;
+	}
 	else if (d != -1)
+	{
+		_head["Method"] = "UPDATE";
 		_method_type = DELETE;
+	}
 	else
+	{
+		_head["Method"] = "UNKNOWN";
 		_method_type = UNKNOWN;
+	}
 }
 
 int Request::identifyBodyLengthInHeader(void)
@@ -200,6 +212,52 @@ int Request::concatenateRequest(std::string buf)
 	return 0;
 }
 
+void	Request::parseHeader(void)
+{
+	std::vector<std::string> v;
+	//_head["url"] = _url;
+	//_head["host"] = _host;
+    int ret = _header.find("\r\n");
+	std::string tmp = _header;
+	while (ret != -1)
+	{
+		v.push_back(tmp.substr(0, ret));
+		tmp = tmp.substr(ret + 2, tmp.length() - ret);
+		ret = tmp.find("\r\n");
+		if (tmp.find("\r\n") == 0)
+			break ;
+	}
+	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)
+	{
+		if (it == v.begin())
+		{
+			std::string url = "";
+			std::string protocol = "";
+			int i = 0;
+			for (std::string::iterator si = (*it).begin(); si != (*it).end(); si++)
+			{
+				if (*si == ' ')
+				{
+					i++;
+					while (*si == ' ')
+						si++;
+				}
+				if (i == 1)
+					url += *si;
+				if (i == 2)
+					protocol += *si;
+			}
+			_head["protocol"] = protocol;
+			_head["url"] = url;
+			continue ;
+		}
+		ret = (*it).find(": ");
+		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
+	}
+ 	/*for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
+		std::cout << (*it).first << "->" << (*it).second << std::endl;*/
+}
+
 int Request::fillHeaderAndBody(void){
 	int ret = _raw_content.find("\r\n\r\n");
 	int i = 0;
@@ -212,6 +270,7 @@ int Request::fillHeaderAndBody(void){
 	}
 	std::string body = _raw_content.substr(ret + 4, _raw_content.length() - i);
 	//std::cout << body << std::endl;
+	parseHeader();
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 		return 1;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
@@ -225,7 +284,6 @@ int Request::fillHeaderAndBody(void){
 	else if (_body_reception_encoding == TRANSFER_ENCODING)
 	{
 		ChunkedBodyProcessing(body);
-		// ICI, TRAITER LE PARSING DU BODY CHUNKED...
 /*  		while (_raw_content[i])
 		{
 			_body += _raw_content[i];
@@ -233,14 +291,6 @@ int Request::fillHeaderAndBody(void){
 		} */
 	}
 	return 1;
-}
-
-int		Request::isHexa(char c)
-{
-	if (c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9'
-	|| c == 'a' || c == 'b' || c == 'c' || c == 'd' || c == 'e' || c == 'f')
-		return 1;
-	return 0;
 }
 
 void		Request::ChunkedBodyProcessing(std::string body)
