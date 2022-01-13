@@ -13,7 +13,6 @@ int	main(int ac, char **av)
 		std::cout << "Wrong config" << std::endl;
 		return (1);
 	}
-	std::cout << "Paser done" << std::endl;
 	parser.getServer().launchServer();
 	return (0);
 }

@@ -113,9 +113,10 @@ int	Parser::checkServer(void)
 	if (_content[_pos] != '{')
 		return (0);
 	_pos++;
+	std::cout << "new port\n";
+	_server.addPort(Port());
 	while (_pos < _size)
 	{
-		_server.addPort(Port());
 		if (!checkKeys())
 			return (0);
 		while (_pos < _size && isspace(_content[_pos]))
