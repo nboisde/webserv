@@ -5,6 +5,7 @@
 # include "Server.hpp"
 # include <utility>
 # include <fstream>
+# include <cstdlib>
 
 namespace ws
 {
@@ -25,7 +26,8 @@ class Parser
 		int		checkHttp(void);
 		int		checkServer(void);
 		int		checkKeys(void);
-		int		checkValues(void);
+		int		checkValues(int key);
+		int		setValue(int key, std::string);
 
 	public:
 		Parser();

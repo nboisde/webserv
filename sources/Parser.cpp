@@ -10,6 +10,12 @@ Parser::Parser(void) : _server("127.0.0.1"), _pos(0)
 	_keys.push_back("client_max_body_size");
 	_keys.push_back("error_page");
 	_keys.push_back("autoindex");
+
+	_keys.push_back("listen");
+	_keys.push_back("server_name");
+	_keys.push_back("client_max_body_size");
+	_keys.push_back("error_page");
+	_keys.push_back("autoindex");
 }
 
 Parser::~Parser(void)
@@ -148,12 +154,12 @@ int	Parser::checkKeys(void)
 	}
 	if (key_index == key_total)
 		return (0);
-	if (!checkValues())
+	if (!checkValues(key_index))
 		return (0);
 	return (1);
 }
 
-int	Parser::checkValues(void)
+int	Parser::checkValues(int key)
 {
 	int	isspaceNb = 0;
 
@@ -164,9 +170,32 @@ int	Parser::checkValues(void)
 	}
 	if (!isspaceNb)
 		return (0);
+	while (_pos < _size && _content[_pos] != ';')
+	{
+		setValue(key, _content);
+		while (_pos < _size && isspace(_content[_pos]))
+			_pos++;
+	}
+	if (_pos == _size)
+		return (0);
+	_pos++;
 	return (1);
 }
 
+int	Parser::setValue(int key, std::string value)
+{
+	if (key == 0)
+		_server.getPorts().back().setPort(strtol(value.c_str(), NULL, 10));
+	else if (key == 1)
+		_server.getPorts().back().setServerName(value);
+	else if (key == 2)
+		_server.getPorts().back().setClientMaxSize(strtol(value.c_str(), NULL, 10));
+	//else if (key == 3)
+	//	_server.getPorts().back()._errors.push_back(Pair(value, value));
+	//else if (key == 4)
+	//	_server.getPorts().back().setAutoindex(value);
+	else 
+		return (0);
+	return (1);
 }
-
-
+}
