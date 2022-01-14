@@ -118,6 +118,11 @@ int Client::send( void )
 	return CLOSING;
 }
 
+int	Client::executeCGI( void ){
+	CGI cgi(*this);
+	return SUCCESS;
+}
+
 void Client::closeConnection(){}
 
 /*
@@ -137,6 +142,10 @@ int Client::getFd(void) const
 
 Request & Client::getReq( void )
 {
+	return _req;
+}
+
+Request 	Client::getReq( void ) const{
 	return _req;
 }
 

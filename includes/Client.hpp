@@ -4,6 +4,7 @@
 # include "webserv.hpp"
 # include "Request.hpp"
 # include "Response.hpp"
+# include "CGI.hpp"
 
 namespace ws {
 
@@ -27,14 +28,17 @@ class Client
 		Client &		operator=( Client const & rhs );
 
 		int 			receive( void );
+		int				executeCGI( void );
 		int				send( void );
 		void			closeConnection( void );
 
 		int				getFd( void ) const;
 		int				getStatus( void ) const;
+		ws::Request 	getReq( void ) const ;
 		ws::Request &	getReq( void );
 		ws::Response &	getRes( void );
 };
+
 }
 
 #endif
