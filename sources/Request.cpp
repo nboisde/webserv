@@ -4,7 +4,7 @@ namespace ws{
 
 Request::Request( void ):
 _line(0),
-_state(RECIEVING_HEADER),
+_state(RECEIVING_HEADER),
 _raw_content(""),
 _body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
 _body_len_received(0),
@@ -154,7 +154,7 @@ int Request::concatenateRequest(std::string buf)
 		return -1;
 	if (requestReceptionState() == BODY_RECEIVED)
 		return 1;
-	if (requestReceptionState() == RECIEVING_HEADER)
+	if (requestReceptionState() == RECEIVING_HEADER)
 	{
 		_header_len_received += buf.length();
 		if (checkHeaderEnd() == 1)

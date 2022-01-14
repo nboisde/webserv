@@ -13,7 +13,7 @@
 
 // Requests State MACROS
 # define REQUEST_FORMAT_ERROR -1
-# define RECIEVING_HEADER 0
+# define RECEIVING_HEADER 0
 # define HEADER_RECEIVED 1
 # define BODY_RECEIVED 2
 
