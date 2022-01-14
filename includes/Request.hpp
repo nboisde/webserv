@@ -34,8 +34,8 @@ class Request {
 		int			getHeaderSize(void) const;
 		std::string	getHeader(void) const;
 		std::string	getBody(void) const;
-		int			getState( void ) const ;
-		std::map<std::string, std::string>	getHead(void);
+		int			getState( void ) const;
+		std::map<std::string, std::string> getHead( void ) const;
 
 	private:
 		int			findProtocol(std::string buf);

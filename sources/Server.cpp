@@ -84,7 +84,10 @@ void	Server::launchServer( void )
 					//std::cout << (findFds((*ct).getFd()).revents & POLLIN) << std::endl;
 					int ret = (*ct).receive();
 					if ( ret == WRITING)
+					{
 						(findFds((*ct).getFd())).events = POLLOUT;
+						(*ct).executeCGI();
+					}
 					else if (ret == ERROR)
 					{
 						//ERROR//
