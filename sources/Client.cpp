@@ -97,7 +97,7 @@ int Client::send( void )
 	int			ret;
 	//int			len;
 	const char* prov;
-	std::string str = _res.getResponse();
+	std::string str = _res.response();
 
 	//len = str.size();
 	prov = str.c_str();

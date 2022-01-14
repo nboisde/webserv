@@ -1,11 +1,15 @@
 #ifndef __WEBSERV_HPP__
 # define __WEBSERV_HPP__
 
-// General MACRORS
+// General MACROS
 # define DELAI -1
 # define BUFFER_SIZE 80
 # define ERROR -1
 # define SUCCESS 1
+
+// Litteral MACROS
+# define CRLF "\r\n"
+
 
 // Requests State MACROS
 # define REQUEST_FORMAT_ERROR -1
@@ -32,20 +36,20 @@
 //CPP_LIBRARIES//
 # include <iostream>
 # include <string>
+# include <sstream>
 # include <vector>
 # include <map>
 
-//C_LIBRARIES//
+//C_LIBRARIES//#include <string.h>
 # include <string.h>
+# include <errno.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include <arpa/inet.h>
 # include <sys/select.h>
 # include <poll.h>
 # include <sys/types.h>
-# include <errno.h>  
-
-// # include <sys/event.h>
+//# include <sys/event.h>
 # include <sys/time.h>
 # include <sys/socket.h>
 # include <fcntl.h>
