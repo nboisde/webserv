@@ -182,13 +182,13 @@ int	Parser::checkValues(int key)
 int	Parser::setValue(int key, std::string value)
 {
 	if (key == 0)
-		_server.getPorts().back().setPort(strtol(value.c_str(), NULL, 10));
+		_server.getRefPorts().back().setPort(strtol(value.c_str(), NULL, 10));
 	else if (key == 1)
-		_server.getPorts().back().setServerName(value);
+		_server.getRefPorts().back().setServerName(value);
 	else if (key == 2)
-		_server.getPorts().back().setClientMaxSize(strtol(value.c_str(), NULL, 10));
+		_server.getRefPorts().back().setClientMaxSize(strtol(value.c_str(), NULL, 10));
 	else if (key == 4)
-		_server.getPorts().back().setAutoindex(1);
+		_server.getRefPorts().back().setAutoindex(1);
 	else 
 		return (0);
 	return (1);

@@ -26,6 +26,7 @@ class Server
 		std::string					printPorts( void ) const;
 		std::string					getIp( void ) const;
 		std::vector<Port>			getPorts( void ) const;
+		std::vector<Port>&			getRefPorts( void );
 		std::vector<struct pollfd>	getFds( void ) const;
 		void						setIp( std::string new_ip );
 		void						setPorts( std::vector<Port> new_ports);

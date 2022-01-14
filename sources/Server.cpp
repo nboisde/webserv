@@ -216,6 +216,7 @@ void		Server::setRevents( void )
 
 std::string			Server::getIp( void ) const { return (this->_server_ip); }
 std::vector<Port>	Server::getPorts( void ) const { return (this->_ports); }
+std::vector<Port>&	Server::getRefPorts( void ) {return this->_ports;}
 void				Server::setIp( std::string new_ip ) { this->_server_ip = new_ip; }
 void				Server::setPorts( std::vector<Port> new_ports) { this->_ports = new_ports; }
 }
