@@ -22,6 +22,8 @@ class CGI {
 
 		int									generate_env( void );
 		int									generate_arg( void );
+		int									execute( void );
+
 		std::string							getBinLocation( void ) const;
 		std::map<std::string, std::string>	getHeader( void ) const;
 
