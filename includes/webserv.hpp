@@ -27,6 +27,10 @@
 # define READING 1
 # define WRITING 2
 
+# define STDIN 0
+# define STDOUT 1
+# define STDERR 2
+
 // Methods MACROS
 # define UNKNOWN 0
 # define GET 1
@@ -52,6 +56,10 @@
 # include <sys/select.h>
 # include <poll.h>
 # include <sys/types.h>
+# include <unistd.h>
+# include <sys/types.h>
+# include <sys/wait.h>
+//# include <sys/event.h>
 # include <sys/time.h>
 # include <sys/socket.h>
 # include <fcntl.h>

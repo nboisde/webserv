@@ -11,14 +11,24 @@ void	CGI::init_conversion( void )
 {
 	typedef std::pair<std::string, std::string>	pair;
 
-	_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
-	_conversion.insert(pair("CONTENT_LENGTH", _header["Content-Length"]));
-	_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
-	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
-	_conversion.insert(pair("QUERY_STRING", ""));
-	_conversion.insert(pair("SCRIPT_NAME", _bin_location));
-	_conversion.insert(pair("SERVER_PORT", &(_header["Host"].substr(_header["Host"].find_last_of(":"))));
+	std::map<std::string, std::string>::iterator ite = _header.end();
 
+	if (_header.find("Content-Length") != ite)
+		_conversion.insert(pair("CONTENT_LENGTH", _header["Content-Length"]));
+	if (_header.find("Content-Type") != ite)
+		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
+	if (_header.find("Method") != ite)
+		_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
+	if (_header.find("protocol") != ite)
+		_conversion.insert(pair("SERVER_PROTOCOL", _header["protocol"]));
+	if (_header.find("Host") != ite)
+	{
+		_conversion.insert(pair("SERVER_PORT", _header["Host"].substr(_header["Host"].find_last_of(":") + 1)));
+		_conversion.insert(pair("SERVER_NAME", _header["Host"].substr(0, _header["Host"].find_last_of(":"))));
+	}
+	_conversion.insert(pair("QUERY_STRING", ""));
+	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
+	_conversion.insert(pair("SCRIPT_NAME", _bin_location));
 }
 
 CGI::CGI( Client const & cli ) : _bin_location("/usr/bin/php-cgi")
@@ -96,8 +106,20 @@ int		CGI::generate_env( void )
 {
 	if (_header["Method"] == "GET")
 	{
-		this->_env = new char*[10];
-		std::cout << "HELLO" << std::endl;
+		int i = 0;
+		this->_env = new char*[_conversion.size() + 1];
+		for (std::map<std::string, std::string>::iterator it = _conversion.begin(); it != _conversion.end(); it++)
+		{
+			std::stringstream new_var;
+
+			new_var << (*it).first << "=" << (*it).second;
+			_env[i] = strdup(new_var.str().c_str());
+			_env[i][new_var.str().size()] = 0;
+			i++;
+		}
+		_env[_conversion.size()] = 0;
+		for (int j = 0; _env[j]; j++)
+			std::cout << _env[j] << std::endl;
 	}
 	else
 		std::cout << "Other Method" << std::endl;
@@ -108,6 +130,30 @@ int		CGI::generate_arg( void ){
 	return SUCCESS;
 }
 
+int		CGI::execute( void ){
+	pid_t pid = fork();
+	int fd[2];
+
+	pipe(fd);
+	if (pid == 0)
+	{
+		dup2(fd[1], STDOUT);
+		close(fd[0]);
+		close(fd[1]);
+		execlp(_bin_location.c_str(), "/usr/bin/php-cgi", "./www/php/bonjour.php", _env);
+		exit(SUCCESS);
+	}
+	char buf[1];
+	waitpid(pid, 0, 0);
+	//int fd2 = open("CGI_ret", O_WRONLY | O_CREAT | O_TRUNC);
+	//dup2(fd[0], fd2);
+	while (read(fd[0], buf, 1))
+		std::cout << *buf;
+	std::cout << std::endl;
+ 	close(fd[0]);
+	close(fd[1]);
+	return SUCCESS;
+}
 
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
