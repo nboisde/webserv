@@ -7,8 +7,8 @@ _line(0),
 _state(RECIEVING_HEADER),
 _raw_content(""),
 _body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
-_body_len_recieved(0),
-_header_len_recieved(0),
+_body_len_received(0),
+_header_len_received(0),
 _content_length(0),
 _method_type(UNKNOWN),
 _header_size(0),
@@ -34,8 +34,8 @@ Request &	Request::operator=( Request const & rhs )
 	{
 		_state = rhs._state;
 		_raw_content = rhs._raw_content;
-		_body_len_recieved = rhs._body_len_recieved;
-		_header_len_recieved = rhs._header_len_recieved;
+		_body_len_received = rhs._body_len_received;
+		_header_len_received = rhs._header_len_received;
 		_content_length = rhs._content_length;
 		_method_type = rhs._method_type;
 		_header_size = rhs._header_size;
@@ -152,11 +152,11 @@ int Request::concatenateRequest(std::string buf)
 	_line++;
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
 		return -1;
-	if (requestReceptionState() == BODY_RECIEVED)
+	if (requestReceptionState() == BODY_RECEIVED)
 		return 1;
 	if (requestReceptionState() == RECIEVING_HEADER)
 	{
-		_header_len_recieved += buf.length();
+		_header_len_received += buf.length();
 		if (checkHeaderEnd() == 1)
 		{
 			// IDENTIFY CONTENT LENGTH AND TRANSFER ENCODING. (if both render -> flag goes to REQUEST_FORMAT_ERROR)
@@ -172,20 +172,20 @@ int Request::concatenateRequest(std::string buf)
 				_body_reception_encoding = CONTENT_LENGTH;
 			else if (te == 1)
 				_body_reception_encoding = TRANSFER_ENCODING;
-			_state = HEADER_RECIEVED;
+			_state = HEADER_RECEIVED;
 		}
 	}
-	if (requestReceptionState() == HEADER_RECIEVED)
+	if (requestReceptionState() == HEADER_RECEIVED)
 	{
-		_body_len_recieved += buf.length();
+		_body_len_received += buf.length();
 		int i = _raw_content.find("\r\n\r\n");
 		// ICI -> gerer les differentes methodes d'encodage.
 		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 		{
-			_state = BODY_RECIEVED;
+			_state = BODY_RECEIVED;
 			return 1;	
 		}
-		else if (_body_reception_encoding == CONTENT_LENGTH && _body_len_recieved + _header_len_recieved < _content_length + i + 4)
+		else if (_body_reception_encoding == CONTENT_LENGTH && _body_len_received + _header_len_received < _content_length + i + 4)
 				return 0;
 		else if (_body_reception_encoding == TRANSFER_ENCODING)
 		{
@@ -194,13 +194,13 @@ int Request::concatenateRequest(std::string buf)
 				return 0;
 			else
 			{
-				_state = BODY_RECIEVED;
+				_state = BODY_RECEIVED;
 				return 1;
 			}
 		}
 		else
 		{
-			_state = BODY_RECIEVED;
+			_state = BODY_RECEIVED;
 			return 1;
 		}
 	}
@@ -249,8 +249,8 @@ void	Request::parseHeader(void)
 		ret = (*it).find(": ");
 		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
- 	/*for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
-		std::cout << (*it).first << "->" << (*it).second << std::endl;*/
+ 	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
+	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
 }
 
 int Request::fillHeaderAndBody(void){
@@ -339,12 +339,12 @@ int Request::getContentLength(void) const
 
 int Request::getHeaderSizeRevieved(void) const
 {
-	return _header_len_recieved;
+	return _header_len_received;
 }
 
-int Request::getBodySizeRecieved(void) const
+int Request::getBodySizeReceived(void) const
 {
-	return _body_len_recieved;
+	return _body_len_received;
 }
 
 int Request::getHeaderSize(void) const
