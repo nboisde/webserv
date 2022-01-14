@@ -420,4 +420,8 @@ std::map<std::string, std::string> Request::getHead( void ) const{
 	return _head;
 }
 
+std::map<std::string, std::string> Request::getHead( void ) const{
+	return _head;
+}
+
 }
