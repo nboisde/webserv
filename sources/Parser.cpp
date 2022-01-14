@@ -47,7 +47,7 @@ int	Parser::checkFileName(void)
 
 int	Parser::readFile(void)
 {
-	std::ifstream	ifs(_config_file);
+	std::ifstream	ifs(_config_file.c_str());
 	std::string		buffer;
 
 	while (getline(ifs, buffer))

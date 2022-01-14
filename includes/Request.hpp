@@ -30,7 +30,7 @@ class Request {
 		int			getMethodType(void) const;
 		int			getContentLength(void) const;
 		int			getHeaderSizeRevieved(void) const;
-		int			getBodySizeRecieved(void) const;
+		int			getBodySizeReceived(void) const;
 		int			getHeaderSize(void) const;
 		std::string	getHeader(void) const;
 		std::string	getBody(void) const;
@@ -43,8 +43,8 @@ class Request {
 		int			_state;
 		std::string	_raw_content;
 		int			_body_reception_encoding;
-		int			_body_len_recieved;
-		int			_header_len_recieved;
+		int			_body_len_received;
+		int			_header_len_received;
 		int			_content_length;
 		int			_method_type;
 		int 		_header_size;
