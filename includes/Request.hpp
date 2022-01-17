@@ -22,7 +22,7 @@ class Request {
 		void		findMethod(void);
 		int			fillHeaderAndBody(void);
 		void		ChunkedBodyProcessing(std::string body);
-		void		parseHeader(void);
+		int			parseHeader(void);
 
 		
 		// GETTERS
@@ -37,7 +37,8 @@ class Request {
 		int			getState( void ) const ;
 
 	private:
-		int		findProtocol(std::string buf);
+		int			findProtocol(std::string buf);
+		int			errorHandling(std::vector<std::string> v);
 
 		int			_line;
 		int			_state;

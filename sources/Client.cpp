@@ -66,7 +66,7 @@ int Client::receive(void)
 		_req.fillHeaderAndBody();
  		//std::cout << _req.getRawContent() << std::endl;
 		//std::cout << "--------------------------------" << std::endl << "Header:" << std::endl;
-		//std::cout << _req.getHeader() << std::endl;
+		std::cout << _req.getHeader() << std::endl;
 		//std::cout << "Body : " << std::endl << _req.getBody() << std::endl;
 		//std::cout << _req.getBody();// << std::endl;
 		//std::cout << _req.getBody().length() << std::endl;
