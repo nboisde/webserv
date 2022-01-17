@@ -39,8 +39,10 @@ class Request {
 	private:
 		int			findProtocol(std::string buf);
 		int			errorHandling(std::vector<std::string> v);
+		int 		errorReturn(void);
+		int			bodyReceived(void);
 
-		int			_line;
+
 		int			_state;
 		std::string	_raw_content;
 		int			_body_reception_encoding;
