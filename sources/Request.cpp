@@ -240,6 +240,7 @@ int Request::errorReturn(void)
 int Request::errorHandling(std::vector<std::string> v)
 {
 	//gestion de la presence de l'url requise.
+	//gestion d'une taille de header trop grosse.
 	int cl = 0;
 	int te = 0;
 	if (_method_type == UNKNOWN || !findProtocol(_header))
@@ -277,8 +278,6 @@ int Request::errorHandling(std::vector<std::string> v)
 			}
 			while (std::isdigit((*it)[i]))
 				i++;
-			//if ((*it)[i] != ' ' && (*it)[i] != '\0')
-			//	return ERROR;
 			while (i < static_cast<int>((*it).length()))
 			{
 				if ((*it)[i] != ' ')
@@ -445,54 +444,16 @@ void		Request::ChunkedBodyProcessing(std::string body)
 }
 
 
-int Request::requestReceptionState(void)
-{
-	return _state;
-}
-
-std::string Request::getRawContent(void) const
-{
-	return _raw_content;
-}
-
-int Request::getMethodType(void) const
-{
-	return _method_type;
-}
-
-int Request::getContentLength(void) const
-{
-	return _content_length;
-}
-
-int Request::getHeaderSizeRevieved(void) const
-{
-	return _header_len_received;
-}
-
-int Request::getBodySizeReceived(void) const
-{
-	return _body_len_received;
-}
-
-int Request::getHeaderSize(void) const
-{
-	return _header_size;
-}
-
-std::string Request::getHeader(void) const
-{
-	return _header;
-}
-
-std::string Request::getBody(void) const
-{
-	return _body;
-}
-
-int Request::getState( void ) const
-{
-	return _state;
-}
+int										Request::requestReceptionState(void) { return _state; }
+std::string								Request::getRawContent(void) const { return _raw_content; }
+int										Request::getMethodType(void) const { return _method_type; }
+int										Request::getContentLength(void) const { return _content_length; }
+int										Request::getHeaderSizeRevieved(void) const { return _header_len_received; }
+int										Request::getBodySizeReceived(void) const { return _body_len_received; }
+int										Request::getHeaderSize(void) const { return _header_size; }
+std::string								Request::getHeader(void) const { return _header; }
+std::string								Request::getBody(void) const { return _body; }
+int										Request::getState(void) const { return _state; }
+std::map<std::string, std::string>		Request::getHead(void) { return _head; }
 
 }
