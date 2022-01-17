@@ -102,7 +102,7 @@ const char *      Response::response( void ){
 	std::stringstream tmp;
 	
 	tmp << genStatusLine() << CRLF;
-	tmp << genHeader() << CRLF;
+	tmp << genHeader();
 
 	tmp << _content;
 
@@ -115,6 +115,11 @@ const char *      Response::response( void ){
 
 size_t      Response::response_size( void ){
 	return  _response.size();
+}
+
+void			treatCGI( int CGI_status, std::string response ){
+	(void) CGI_status;
+	(void) response;
 }
 
 //ACCESSORS - GETTERS//
@@ -148,5 +153,8 @@ void			Response::setHeader( std::string header ){
 	_header = header;
 }
 
+void			Response::setContent( std::string newcontent ){
+	_content = newcontent;
+}
 
 }

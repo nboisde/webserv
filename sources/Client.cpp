@@ -120,7 +120,8 @@ int Client::send( void )
 
 int	Client::executeCGI( void ){
 	CGI cgi(*this);
-	cgi.execute();
+
+	cgi.execute(*this);
 	return SUCCESS;
 }
 

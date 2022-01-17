@@ -45,8 +45,8 @@ void	CGI::init_conversion( void )
 CGI::CGI( Client const & cli ) : _bin_location("/usr/bin/php-cgi")
 {
 	this->_header = cli.getReq().getHead();
-	for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)
-		std::cout << (*it).first << "->" << (*it).second << std::endl;
+	//for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)
+	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
 	std::cout << std::endl;
 	init_conversion();
 	generate_env();
@@ -141,11 +141,12 @@ int		CGI::generate_arg( void ){
 	return SUCCESS;
 }
 
-int		CGI::execute( void ){
-	pid_t pid = fork();
+int		CGI::execute( Client & cli ){
+	
 	int fd[2];
-
 	pipe(fd);
+	pid_t pid = fork();
+	
 	if (pid == 0)
 	{
 		dup2(fd[1], STDOUT);
@@ -154,15 +155,28 @@ int		CGI::execute( void ){
 		execlp(_bin_location.c_str(), "/usr/bin/php-cgi", "./www/php/bonjour.php", _env);
 		exit(SUCCESS);
 	}
-	char buf[1];
 	waitpid(pid, 0, 0);
-	//int fd2 = open("CGI_ret", O_WRONLY | O_CREAT | O_TRUNC);
-	//dup2(fd[0], fd2);
-	while (read(fd[0], buf, 1))
-		std::cout << *buf;
-	std::cout << std::endl;
- 	close(fd[0]);
 	close(fd[1]);
+	
+	std::string response;
+	createResponse(fd[0], response);
+	close(fd[0]);
+	cli.getRes().setContent(response);
+	//cli.getRes().treatCGI(0, response);
+	return SUCCESS;
+}
+
+int	CGI::createResponse(int fd, std::string & response)
+{
+	size_t	buff_size = 80;
+	char buff[buff_size];
+
+	bzero(buff, buff_size);
+	while (read(fd, &buff, buff_size) != 0)
+	{
+		response += buff;
+		bzero(buff, buff_size);
+	}
 	return SUCCESS;
 }
 
