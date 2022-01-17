@@ -20,15 +20,14 @@ class Parser
 		std::vector<std::string>			_keys;
 		std::map<std::string, std::string>	_dict;
 
-
 		int		checkFileName(void);
 		int		readFile(void);
 		int		initWebServer(void);
 		int		checkHttp(void);
 		int		checkServer(void);
 		int		checkKeys(void);
-		int		checkValues(int key);
-		int		setValue(int key, std::string);
+		int		checkValues(std::string key);
+		int		setValue(std::string key, std::string);
 		int		defaultConfiguration(void);
 
 	public:
