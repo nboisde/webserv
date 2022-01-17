@@ -145,10 +145,30 @@ int Request::bodyReceived(void)
 ** 0 REQUEST_NOT_FULL -> continue to recv() to catch informations.
 */
 
+// This function must be refined.
 int Request::concatenateRequest(std::string buf)
 {
 	_raw_content += buf;
+<<<<<<< HEAD
 
+=======
+
+	// Faire une gestion d'erreur vraiment propre.
+	//Seulement une fois le HEADER RECU EN ENTIER !!!!!
+	//ICI PROBLEMATIQUE AVEC UNE TAILLE DE BUFFER QUI NE CONTIENT PAS TOUTE LA PREMIERE LIGNE DU HEADER !!!!
+	if (_line == 0)
+	{
+		findMethod();
+		if (_method_type == UNKNOWN || !findProtocol(buf))
+		{
+			_state = REQUEST_FORMAT_ERROR;
+			return -1;
+		}
+	}
+
+	//VARIANLE POURRIE A CHIER.
+	_line++;
+>>>>>>> change some prototypes and archi of returns to manage header errors properly
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
 		return ERROR;
 	if (requestReceptionState() == BODY_RECEIVED)
@@ -162,9 +182,19 @@ int Request::concatenateRequest(std::string buf)
 			int ct = identifyBodyLengthInHeader();
 			int te = isTransferEncoding();
 			findMethod();
+<<<<<<< HEAD
 			//if (_method_type == UNKNOWN || (ct == 1 && te == 1))
 			//	return errorReturn();
 			/* else  */if (ct == 1)
+=======
+			errorHandling();
+			if (_method_type == UNKNOWN || (ct == 1 && te == 1))
+			{
+				_state = REQUEST_FORMAT_ERROR;
+				return -1;
+			}
+			else if (ct == 1)
+>>>>>>> change some prototypes and archi of returns to manage header errors properly
 				_body_reception_encoding = CONTENT_LENGTH;
 			else if (te == 1)
 				_body_reception_encoding = TRANSFER_ENCODING;
@@ -275,9 +305,29 @@ int Request::errorHandling(std::vector<std::string> v)
 	return SUCCESS;
 }
 
+<<<<<<< HEAD
 /*
 ** This function parses the header and put data into _head map (also render error if the header format isn't respected).
 */
+=======
+
+// GERER LA GESTION D'ERREUR PROPRE ICI ! A retourner dans parse HEADER, puis a retourner via fill header and body !
+int Request::errorHandling(std::vector<std::string> v)
+{
+	findMethod();
+	//gestion de la presence de l'url requise.
+	if (_method_type == UNKNOWN || findProtocol(_header))
+	{
+		_state = REQUEST_FORMAT_ERROR;
+		return ERROR;
+	}
+	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)
+	{
+		std::cout << "[" << *it << "]" << std::endl;
+	}
+	return 1;
+}
+>>>>>>> change some prototypes and archi of returns to manage header errors properly
 
 int		Request::parseHeader(void)
 {
@@ -322,6 +372,7 @@ int		Request::parseHeader(void)
 		ret = (*it).find(":");
 		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
+	return 1;
  	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
 	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
 	return SUCCESS;
