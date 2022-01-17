@@ -119,6 +119,7 @@ int Request::isTransferEncoding(void) const
 int		Request::findProtocol(std::string buf)
 {
 	int ret = buf.find("HTTP/1.1");
+	std::cout << ret << std::endl;
 	if (ret != -1)
 		return 1;
 	return 0;
@@ -144,15 +145,15 @@ int Request::concatenateRequest(std::string buf)
 	// Faire une gestion d'erreur vraiment propre.
 	//Seulement une fois le HEADER RECU EN ENTIER !!!!!
 	//ICI PROBLEMATIQUE AVEC UNE TAILLE DE BUFFER QUI NE CONTIENT PAS TOUTE LA PREMIERE LIGNE DU HEADER !!!!
-	if (_line == 0)
+	/* if (_line == 0)
 	{
 		findMethod();
 		if (_method_type == UNKNOWN || !findProtocol(buf))
 		{
 			_state = REQUEST_FORMAT_ERROR;
-			return -1;
+			return ERROR;
 		}
-	}
+	} */
 
 	//VARIANLE POURRIE A CHIER.
 	_line++;
@@ -169,11 +170,10 @@ int Request::concatenateRequest(std::string buf)
 			int ct = identifyBodyLengthInHeader();
 			int te = isTransferEncoding();
 			findMethod();
-			errorHandling();
 			if (_method_type == UNKNOWN || (ct == 1 && te == 1))
 			{
 				_state = REQUEST_FORMAT_ERROR;
-				return -1;
+				return ERROR;
 			}
 			else if (ct == 1)
 				_body_reception_encoding = CONTENT_LENGTH;
@@ -215,28 +215,27 @@ int Request::concatenateRequest(std::string buf)
 }
 
 
-// GERER LA GESTION D'ERREUR PROPRE ICI ! A retourner dans parse HEADER, puis a retourner via fill header and body !
+//ERROR HANDLING to improve. (specified fields ??)
 int Request::errorHandling(std::vector<std::string> v)
 {
-	findMethod();
 	//gestion de la presence de l'url requise.
-	if (_method_type == UNKNOWN || findProtocol(_header))
+	if (_method_type == UNKNOWN || !findProtocol(_header))
 	{
 		_state = REQUEST_FORMAT_ERROR;
 		return ERROR;
 	}
-	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)
+	for (std::vector<std::string>::iterator it = v.begin() + 1; it != v.end(); it++)
 	{
-		std::cout << "[" << *it << "]" << std::endl;
+		int ret = (*it).find(":");
+		if (ret == -1)
+			return ERROR;
 	}
-	return 1;
+	return SUCCESS;
 }
 
 int		Request::parseHeader(void)
 {
 	std::vector<std::string> v;
-	//_head["url"] = _url;
-	//_head["host"] = _host;
     int ret = _header.find("\r\n");
 	std::string tmp = _header;
 	while (ret != -1)
@@ -247,6 +246,10 @@ int		Request::parseHeader(void)
 		if (tmp.find("\r\n") == 0)
 			break ;
 	}
+	int err = errorHandling(v);
+	if (err == ERROR)
+		return ERROR;
+	std::cout << "Is there error ? : " << err << std::endl;
 	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)
 	{
 		if (it == v.begin())
@@ -271,10 +274,10 @@ int		Request::parseHeader(void)
 			_head["url"] = url;
 			continue ;
 		}
-		ret = (*it).find(": ");
+		ret = (*it).find(":");
 		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
-	return 1;
+	return SUCCESS;
  	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
 	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
 }
@@ -283,7 +286,7 @@ int Request::fillHeaderAndBody(void){
 	int ret = _raw_content.find("\r\n\r\n");
 	int i = 0;
 	if (ret == -1)
-		return -1;
+		return ERROR;
 	while (i < ret + 4)
 	{
 		_header += _raw_content[i];
@@ -291,9 +294,11 @@ int Request::fillHeaderAndBody(void){
 	}
 	std::string body = _raw_content.substr(ret + 4, _raw_content.length() - i);
 	//std::cout << body << std::endl;
-	parseHeader();
+	int err = parseHeader();
+	if (err = ERROR)
+		return ERROR;
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
-		return 1;
+		return SUCCESS;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
 	{
 		while (_raw_content[i])
@@ -311,7 +316,7 @@ int Request::fillHeaderAndBody(void){
 			i++;
 		} */
 	}
-	return 1;
+	return SUCCESS;
 }
 
 void		Request::ChunkedBodyProcessing(std::string body)
