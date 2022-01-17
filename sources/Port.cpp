@@ -150,6 +150,8 @@ int				Port::getPort( void ) const { return _port; }
 void			Port::setPort( int port ) { std::cout << port << std::endl; _port = port; }
 bool			Port::getAutoindex( void ) const { return _autoindex; }
 void			Port::setAutoindex( bool status ) { _autoindex = status; }
+std::string		Port::getHost( void ) const { return _host; }
+void			Port::setHost( std::string host ) {	_host = host; }
 std::string		Port::getServerName( void ) const { return _server_name; }
 void			Port::setServerName( std::string name ) { _server_name = name; }
 int				Port::getClientMaxSize( void ) const { return _client_max_size; }

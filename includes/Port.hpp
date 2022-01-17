@@ -32,6 +32,8 @@ class Port
 		void				setFd( int fd);
 		int					getPort( void ) const;
 		void				setPort( int fd);
+		std::string			getHost( void ) const;
+		void				setHost( std::string );
 		bool				getAutoindex( void ) const;
 		void				setAutoindex( bool on );
 		std::string			getServerName( void ) const;
