@@ -2,11 +2,13 @@
 # Name of keys and values Must not contains whitespaces.
 
 IP : 127.0.0.1
-Host : Webserv.com
+host : Webserv.com
         server_name             : KIKOO          
 
-       port : 8080
+       listen : 8080
 method : GET,POST,DELETE
+client_max_body_size 100M
+error_page : 404
 #this is another comment
 
 autoindex:        off          

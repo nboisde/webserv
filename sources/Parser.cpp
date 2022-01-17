@@ -5,11 +5,7 @@ namespace ws
 
 Parser::Parser(void) : _server("127.0.0.1"), _pos(0)
 {
-	_keys.push_back("listen");
-	_keys.push_back("server_name");
-	_keys.push_back("client_max_body_size");
-	_keys.push_back("error_page");
-	_keys.push_back("autoindex");
+	defaultConfiguration();
 }
 
 Parser::~Parser(void)
@@ -134,28 +130,31 @@ int	Parser::checkServer(void)
 
 int	Parser::checkKeys(void)
 {
-	int	key_index;
-	int key_total = _keys.size();
+	std::map<std::string, std::string>::iterator it = _dict.begin();
+	std::map<std::string, std::string>::iterator ite = _dict.end();
+	int	found = 0;
 
 	while (_pos < _size && isspace(_content[_pos]))
 		_pos++;
-	for (key_index = 0; key_index < key_total; key_index++)
+	for (; it != ite; it++)
 	{
-		int	i = _content.find(_keys[key_index], _pos);
+		int i = _content.find((*it).first, _pos);
 		if (i == _pos)
 		{
-			_pos += _keys[key_index].size();
+			std::cout << (*it).first << std::endl;
+			found = 1;
+			_pos += (*it).first.size();
 			break;
 		}
 	}
-	if (key_index == key_total)
+	if (!found)
 		return (0);
-	if (!checkValues(key_index))
+	if (!checkValues((*it).first))
 		return (0);
 	return (1);
 }
 
-int	Parser::checkValues(int key)
+int	Parser::checkValues(std::string key)
 {
 	int	isspaceNb = 0;
 
@@ -179,15 +178,15 @@ int	Parser::checkValues(int key)
 	return (1);
 }
 
-int	Parser::setValue(int key, std::string value)
+int	Parser::setValue(std::string key, std::string value)
 {
-	if (key == 0)
+	if (key == "port")
 		_server.getRefPorts().back().setPort(strtol(value.c_str(), NULL, 10));
-	else if (key == 1)
+	else if (key == "server_name")
 		_server.getRefPorts().back().setServerName(value);
-	else if (key == 2)
+	else if (key == "client_max_body_size")
 		_server.getRefPorts().back().setClientMaxSize(strtol(value.c_str(), NULL, 10));
-	else if (key == 4)
+	else if (key == "autoindex")
 		_server.getRefPorts().back().setAutoindex(1);
 	else 
 		return (0);
@@ -196,7 +195,7 @@ int	Parser::setValue(int key, std::string value)
 
 int Parser::defaultConfiguration(void)
 {
-	std::ifstream file("../conf/dictConf.default");
+	std::ifstream file("./conf/dictConf.default");
 	std::string line;
 	while (std::getline(file, line))
 	{
@@ -225,8 +224,8 @@ int Parser::defaultConfiguration(void)
 			_dict[key] = value;
 		}
 	}
+	for (std::map<std::string, std::string>::iterator it = _dict.begin(); it != _dict.end(); it++)
+		std::cout << (*it).first << ", " << (*it).second << std::endl;
 	return SUCCESS;
-/* 	for (std::map<std::string, std::string>::iterator it = _dict.begin(); it != _dict.end(); it++)
-		std::cout << (*it).first << ", " << (*it).second << std::endl; */
 }
 }
