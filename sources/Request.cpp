@@ -218,6 +218,7 @@ int Request::errorHandling(std::vector<std::string> v)
 		return errorReturn();
 	for (std::vector<std::string>::iterator it = v.begin() + 1; it != v.end(); it++)
 	{
+		int len = static_cast<int>((*it).length());
 		int ret = (*it).find(":");
 		//NO double dot.
 		if (ret == -1)
@@ -230,14 +231,14 @@ int Request::errorHandling(std::vector<std::string> v)
 			if ((*it)[i] == ' ')
 				return errorReturn();
 		//NULL CHARACTER IN VALUE.
-		for (int i = ret; i < static_cast<int>((*it).length()); i++)
+		for (int i = ret; i < len; i++)
 			if ((*it)[i] == '\0')
 				return errorReturn();
 		if (static_cast<int>((*it).find("Content-Length")) != -1)
 		{
 			// ONLY NUMBER IN THE RIGHT FORMAT !
 			int i  = ret + 1;
-			while (i < static_cast<int>((*it).length()))
+			while (i < len)
 			{
 				if ((*it)[i] != ' ')
 				{
@@ -250,7 +251,7 @@ int Request::errorHandling(std::vector<std::string> v)
 			}
 			while (std::isdigit((*it)[i]))
 				i++;
-			while (i < static_cast<int>((*it).length()))
+			while (i < len)
 			{
 				if ((*it)[i] != ' ')
 					return errorReturn();
@@ -264,10 +265,16 @@ int Request::errorHandling(std::vector<std::string> v)
 			//Because we only deal with chunked transfer encoding method
 			if (chunk == -1)
 				return errorReturn();
-			if ((*it)[chunk - 1] && (*it)[chunk - 1] != ' ' && (*it)[chunk - 1] != ':')
-				return errorReturn();
-			if ((*it)[chunk + 7] && (*it)[chunk + 7] != ' ' && (*it)[chunk + 7] != '\r')
-				return errorReturn();
+			for (int i = ret + 1; i < chunk; i++)
+			{
+				if ((*it)[i] && (*it)[i] != ' ')
+					return errorReturn();
+			}
+			for (int i = chunk + 7; i != len; i++)
+			{
+				if ((*it)[i] != ' ')
+					return errorReturn();
+			}
 			te++;
 		}
 	}
