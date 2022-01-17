@@ -26,6 +26,7 @@ class Port
 		int					listening( void );
 		int					accepting( void );
 		void				addClient( int fd );
+		void				addMethod( std::string );
 		void				removeClient( int fd );
 	
 		int					getFd( void ) const ;
