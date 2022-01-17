@@ -189,6 +189,8 @@ int	Parser::setValue(std::string key, std::string value)
 		_server.getRefPorts().back().setAutoindex(1);
 	else if (key == "host")
 		_server.getRefPorts().back().setHost(value);
+	else if (key == "method")
+		_server.getRefPorts().back().addMethod(value);
 	else 
 		return (0);
 	return (1);

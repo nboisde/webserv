@@ -139,28 +139,25 @@ void	Port::removeClient( int fd )
 	}
 }
 
+void	Port::addMethod(std::string method) { _methods.push_back(method); }
 
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-int				Port::getFd( void ) const { return _fd; }
-void			Port::setFd( int fd ) {	_fd = fd; }
-int				Port::getPort( void ) const { return _port; }
-void			Port::setPort( int port ) { std::cout << port << std::endl; _port = port; }
-bool			Port::getAutoindex( void ) const { return _autoindex; }
-void			Port::setAutoindex( bool status ) { _autoindex = status; }
-std::string		Port::getHost( void ) const { return _host; }
-void			Port::setHost( std::string host ) {	_host = host; }
-std::string		Port::getServerName( void ) const { return _server_name; }
-void			Port::setServerName( std::string name ) { _server_name = name; }
-int				Port::getClientMaxSize( void ) const { return _client_max_size; }
-void			Port::setClientMaxSize( int size ) { _client_max_size = size; }
-
-std::vector<Client>	& Port::getClients( void )
-{
-	return _clients;
-}
+int						Port::getFd( void ) const { return _fd; }
+void					Port::setFd( int fd ) {	_fd = fd; }
+int						Port::getPort( void ) const { return _port; }
+void					Port::setPort( int port ) { std::cout << port << std::endl; _port = port; }
+bool					Port::getAutoindex( void ) const { return _autoindex; }
+void					Port::setAutoindex( bool status ) { _autoindex = status; }
+std::string				Port::getHost( void ) const { return _host; }
+void					Port::setHost( std::string host ) {	_host = host; }
+std::string				Port::getServerName( void ) const { return _server_name; }
+void					Port::setServerName( std::string name ) { _server_name = name; }
+int						Port::getClientMaxSize( void ) const { return _client_max_size; }
+void					Port::setClientMaxSize( int size ) { _client_max_size = size; }
+std::vector<Client>	&	Port::getClients( void ) { return _clients; }
 
 /* ************************************************************************** */
 }
