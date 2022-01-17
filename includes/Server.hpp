@@ -41,11 +41,10 @@ class Server
 		int							stopServer( void );
 
 	protected:
-		bool							_clean_fds;
-		std::string						_server_ip;
-		std::string						_server_name;
-		std::vector<Port>				_ports;
-		std::vector<struct pollfd>		_fds;
+		bool						_clean_fds;
+		std::string					_server_ip;
+		std::vector<Port>			_ports;
+		std::vector<struct pollfd>	_fds;
 
 };
 }
