@@ -264,6 +264,7 @@ int Request::errorHandling(std::vector<std::string> v)
 				return errorReturn();
 		if (static_cast<int>((*it).find("Content-Length")) != -1)
 		{
+			// ONLY NUMBER IN THE RIGHT FORMAT !
 			int i  = ret + 1;
 			while (i < static_cast<int>((*it).length()))
 			{
@@ -299,6 +300,7 @@ int Request::errorHandling(std::vector<std::string> v)
 			te++;
 		}
 	}
+	// NOT A COMBINAISON OF TE.CL or TE.TE or CL.CL
 	if ((te == 1 && cl == 1) || te > 1 || cl > 1)
 		return errorReturn();
 	return SUCCESS;
