@@ -145,10 +145,10 @@ int Request::bodyReceived(void)
 ** 0 REQUEST_NOT_FULL -> continue to recv() to catch informations.
 */
 
+// This function must be refined.
 int Request::concatenateRequest(std::string buf)
 {
 	_raw_content += buf;
-
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
 		return ERROR;
 	if (requestReceptionState() == BODY_RECEIVED)
@@ -322,6 +322,7 @@ int		Request::parseHeader(void)
 		ret = (*it).find(":");
 		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
+	return 1;
  	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
 	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
 	return SUCCESS;
