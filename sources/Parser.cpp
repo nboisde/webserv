@@ -141,7 +141,6 @@ int	Parser::checkKeys(void)
 		int i = _content.find((*it).first, _pos);
 		if (i == _pos)
 		{
-			std::cout << (*it).first << std::endl;
 			found = 1;
 			_pos += (*it).first.size();
 			break;
@@ -180,7 +179,7 @@ int	Parser::checkValues(std::string key)
 
 int	Parser::setValue(std::string key, std::string value)
 {
-	if (key == "port")
+	if (key == "listen")
 		_server.getRefPorts().back().setPort(strtol(value.c_str(), NULL, 10));
 	else if (key == "server_name")
 		_server.getRefPorts().back().setServerName(value);
@@ -224,8 +223,8 @@ int Parser::defaultConfiguration(void)
 			_dict[key] = value;
 		}
 	}
-	for (std::map<std::string, std::string>::iterator it = _dict.begin(); it != _dict.end(); it++)
-		std::cout << (*it).first << ", " << (*it).second << std::endl;
+	//for (std::map<std::string, std::string>::iterator it = _dict.begin(); it != _dict.end(); it++)
+	//	std::cout << (*it).first << ", " << (*it).second << std::endl;
 	return SUCCESS;
 }
 }

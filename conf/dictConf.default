@@ -7,7 +7,7 @@ host : Webserv.com
 
        listen : 8080
 method : GET,POST,DELETE
-client_max_body_size 100M
+client_max_body_size : 100M
 error_page : 404
 #this is another comment
 
