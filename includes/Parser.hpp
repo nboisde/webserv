@@ -12,12 +12,13 @@ namespace ws
 class Parser
 {
 	private:
-		Server						_server;
-		std::string					_config_file;
-		std::string					_content;
-		int							_size;
-		int							_pos;
-		std::vector<std::string>	_keys;
+		Server								_server;
+		std::string							_config_file;
+		std::string							_content;
+		int									_size;
+		int									_pos;
+		std::vector<std::string>			_keys;
+		std::map<std::string, std::string>	_dict;
 
 
 		int		checkFileName(void);
@@ -28,6 +29,7 @@ class Parser
 		int		checkKeys(void);
 		int		checkValues(int key);
 		int		setValue(int key, std::string);
+		int		defaultConfiguration(void);
 
 	public:
 		Parser();
