@@ -187,6 +187,8 @@ int	Parser::setValue(std::string key, std::string value)
 		_server.getRefPorts().back().setClientMaxSize(strtol(value.c_str(), NULL, 10));
 	else if (key == "autoindex")
 		_server.getRefPorts().back().setAutoindex(1);
+	else if (key == "host")
+		_server.getRefPorts().back().setHost(value);
 	else 
 		return (0);
 	return (1);
