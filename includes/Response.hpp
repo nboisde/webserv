@@ -15,6 +15,8 @@ namespace ws
 
 			Response &		operator=( Response const & rhs );
 
+			void			treatCGI( int CGI_status, std::string response );
+
 			std::string 	genStatusLine( void );
 			std::string		genDate( void );
 			std::string		genHeader( void );
@@ -29,7 +31,8 @@ namespace ws
 			void			setResponse( std::string resp );
 			void			setStatusLine( std::string status_l );
 			void			setHeader( std::string header );
-	
+			void			setContent( std::string newcontent );
+
 		private:
 			std::string		_response;
 			std::string 	_status_line;
