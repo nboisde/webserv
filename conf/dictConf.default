@@ -10,4 +10,3 @@ method : GET,POST,DELETE
 #this is another comment
 
 autoindex:        off          
-prout : caca

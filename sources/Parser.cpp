@@ -193,4 +193,40 @@ int	Parser::setValue(int key, std::string value)
 		return (0);
 	return (1);
 }
+
+int Parser::defaultConfiguration(void)
+{
+	std::ifstream file("../conf/dictConf.default");
+	std::string line;
+	while (std::getline(file, line))
+	{
+		int i = 0;
+		while (line[i] == ' ' || line[i] == '\t' || line[i] == '\r' || line[i] == '\v')
+			i++;
+		if (line[i] == '#')
+			continue ;
+		else if (!line[i] || line[i] == '\n')
+			continue ;
+		else
+		{
+			int dbl = line.find(":");
+			if (static_cast<int>(dbl) == -1)
+				return (1);
+			std::string key = line.substr(i, dbl - i);
+			std::string value = line.substr(dbl + 1, line.length());
+			while (static_cast<int>(key.find(" ")) != -1 || static_cast<int>(key.find("\t")) != -1)
+				key = key.substr(0, key.length() - 1);
+			int k = 0;
+			while (value[k] == ' ' || value[k] == '\t' || value[k] == '\r' || value[k] == '\v')
+				k++;
+			value = value.substr(k, value.length() - k);
+			while (static_cast<int>(value.find(" ")) != -1 || static_cast<int>(value.find("\t")) != -1)
+				value = value.substr(0, value.length() - 1);
+			_dict[key] = value;
+		}
+	}
+	return SUCCESS;
+/* 	for (std::map<std::string, std::string>::iterator it = _dict.begin(); it != _dict.end(); it++)
+		std::cout << (*it).first << ", " << (*it).second << std::endl; */
+}
 }
