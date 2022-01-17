@@ -140,6 +140,7 @@ void	Port::removeClient( int fd )
 }
 
 void	Port::addMethod(std::string method) { _methods.push_back(method); }
+void	Port::addError(int error_nb, std::string error_path) { _errors.insert(std::pair<int, std::string>(error_nb, error_path)); }
 
 /*
 ** --------------------------------- ACCESSOR ---------------------------------

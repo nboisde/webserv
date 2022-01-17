@@ -191,6 +191,12 @@ int	Parser::setValue(std::string key, std::string value)
 		_server.getRefPorts().back().setHost(value);
 	else if (key == "method")
 		_server.getRefPorts().back().addMethod(value);
+	else if (key == "error_page")
+	{
+		//CREATE ERROR PAIR WITH INT AND PATH
+		int error_nb = 404;
+		_server.getRefPorts().back().addError(error_nb, value);
+	}
 	else 
 		return (0);
 	return (1);
