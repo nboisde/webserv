@@ -122,7 +122,6 @@ int Request::isTransferEncoding(void) const
 int		Request::findProtocol(std::string buf)
 {
 	int ret = buf.find("HTTP/1.1");
-	std::cout << ret << std::endl;
 	if (ret != -1)
 		return 1;
 	return 0;
@@ -163,9 +162,9 @@ int Request::concatenateRequest(std::string buf)
 			int ct = identifyBodyLengthInHeader();
 			int te = isTransferEncoding();
 			findMethod();
-			if (_method_type == UNKNOWN || (ct == 1 && te == 1))
-				return errorReturn();
-			else if (ct == 1)
+			//if (_method_type == UNKNOWN || (ct == 1 && te == 1))
+			//	return errorReturn();
+			/* else  */if (ct == 1)
 				_body_reception_encoding = CONTENT_LENGTH;
 			else if (te == 1)
 				_body_reception_encoding = TRANSFER_ENCODING;
@@ -234,9 +233,27 @@ int Request::errorHandling(std::vector<std::string> v)
 				return errorReturn();
 		if (static_cast<int>((*it).find("Content-Length")) != -1)
 		{
-			for (int i = ret; i < (*it).length() - 2; i++)
+			int i  = ret + 1;
+			while (i < static_cast<int>((*it).length()))
 			{
-				
+				if ((*it)[i] != ' ')
+				{
+					if (!std::isdigit((*it)[i]))
+						return errorReturn();
+					else if (std::isdigit((*it)[i]))
+						break ;
+				}
+				i++;
+			}
+			while (std::isdigit((*it)[i]))
+				i++;
+			//if ((*it)[i] != ' ' && (*it)[i] != '\0')
+			//	return ERROR;
+			while (i < static_cast<int>((*it).length()))
+			{
+				if ((*it)[i] != ' ')
+					return errorReturn();
+				i++;
 			}
 			cl++;
 		}

@@ -55,7 +55,6 @@ int Client::receive(void)
 	int req = _req.concatenateRequest(tmp);
 	if (req == -1)
 	{
-		std::cout << buffer << std::endl;
 		std::cout << "Gerer ici une reponse d'erreur" << std::endl;
 		return WRITING;
 		//exit(EXIT_FAILURE);
@@ -66,7 +65,7 @@ int Client::receive(void)
 		int head_err = _req.fillHeaderAndBody();
 		if (head_err == ERROR)
 		{
-			std::cout << "Gerer ici une reponse d'erreur (parsing du header problematique !)" << std::endl;
+			std::cout << "Gerer ici une reponse d'erreur (parsing du header problematique !) -> Retour d'erreur 400 -> bad request." << std::endl;
 			return WRITING;
 		}
  		//std::cout << _req.getRawContent() << std::endl;
@@ -76,6 +75,7 @@ int Client::receive(void)
 		//std::cout << _req.getBody();// << std::endl;
 		//std::cout << _req.getBody().length() << std::endl;
 		write(1, _req.getBody().c_str(), _req.getBody().length());
+		std::cout << std::endl;
 		return WRITING;
 	}
 	return READING;
