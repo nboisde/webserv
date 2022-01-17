@@ -63,7 +63,12 @@ int Client::receive(void)
 	if (/* ret < BUFFER_SIZE - 1 ||  */req == 1)
 	{
 		//std::cout << "ret :" << ret << std::endl;
-		_req.fillHeaderAndBody();
+		int head_err = _req.fillHeaderAndBody();
+		if (head_err == ERROR)
+		{
+			std::cout << "Gerer ici une reponse d'erreur (parsing du header problematique !)" << std::endl;
+			return WRITING;
+		}
  		//std::cout << _req.getRawContent() << std::endl;
 		//std::cout << "--------------------------------" << std::endl << "Header:" << std::endl;
 		std::cout << _req.getHeader() << std::endl;
