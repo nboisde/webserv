@@ -75,7 +75,7 @@ int Client::receive(void)
 		//std::cout << _req.getBody();// << std::endl;
 		//std::cout << _req.getBody().length() << std::endl;
 		write(1, _req.getBody().c_str(), _req.getBody().length());
-		std::cout << std::endl;
+		//std::cout << std::endl;
 		return WRITING;
 	}
 	return READING;

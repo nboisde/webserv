@@ -149,29 +149,7 @@ int Request::bodyReceived(void)
 int Request::concatenateRequest(std::string buf)
 {
 	_raw_content += buf;
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
-
-	// Faire une gestion d'erreur vraiment propre.
-	//Seulement une fois le HEADER RECU EN ENTIER !!!!!
-	//ICI PROBLEMATIQUE AVEC UNE TAILLE DE BUFFER QUI NE CONTIENT PAS TOUTE LA PREMIERE LIGNE DU HEADER !!!!
-	if (_line == 0)
-	{
-		findMethod();
-		if (_method_type == UNKNOWN || !findProtocol(buf))
-		{
-			_state = REQUEST_FORMAT_ERROR;
-			return -1;
-		}
-	}
-
-	//VARIANLE POURRIE A CHIER.
-	_line++;
->>>>>>> change some prototypes and archi of returns to manage header errors properly
-=======
->>>>>>> 31d174e0281f851ddb1dbeb8d4a420baf10aa795
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
 		return ERROR;
 	if (requestReceptionState() == BODY_RECEIVED)
@@ -185,25 +163,9 @@ int Request::concatenateRequest(std::string buf)
 			int ct = identifyBodyLengthInHeader();
 			int te = isTransferEncoding();
 			findMethod();
-<<<<<<< HEAD
-<<<<<<< HEAD
 			//if (_method_type == UNKNOWN || (ct == 1 && te == 1))
 			//	return errorReturn();
 			/* else  */if (ct == 1)
-=======
-			errorHandling();
-			if (_method_type == UNKNOWN || (ct == 1 && te == 1))
-			{
-				_state = REQUEST_FORMAT_ERROR;
-				return -1;
-			}
-			else if (ct == 1)
->>>>>>> change some prototypes and archi of returns to manage header errors properly
-=======
-			//if (_method_type == UNKNOWN || (ct == 1 && te == 1))
-			//	return errorReturn();
-			/* else  */if (ct == 1)
->>>>>>> 31d174e0281f851ddb1dbeb8d4a420baf10aa795
 				_body_reception_encoding = CONTENT_LENGTH;
 			else if (te == 1)
 				_body_reception_encoding = TRANSFER_ENCODING;
@@ -285,7 +247,6 @@ int Request::errorHandling(std::vector<std::string> v)
 						break ;
 				}
 				i++;
-<<<<<<< HEAD
 			}
 			while (std::isdigit((*it)[i]))
 				i++;
@@ -295,17 +256,6 @@ int Request::errorHandling(std::vector<std::string> v)
 					return errorReturn();
 				i++;
 			}
-=======
-			}
-			while (std::isdigit((*it)[i]))
-				i++;
-			while (i < static_cast<int>((*it).length()))
-			{
-				if ((*it)[i] != ' ')
-					return errorReturn();
-				i++;
-			}
->>>>>>> 31d174e0281f851ddb1dbeb8d4a420baf10aa795
 			cl++;
 		}
 		if (static_cast<int>((*it).find("Transfer-Encoding")) != -1)
@@ -325,42 +275,12 @@ int Request::errorHandling(std::vector<std::string> v)
 	if ((te == 1 && cl == 1) || te > 1 || cl > 1)
 		return errorReturn();
 	return SUCCESS;
-<<<<<<< HEAD
 }
 
-<<<<<<< HEAD
-/*
-** This function parses the header and put data into _head map (also render error if the header format isn't respected).
-*/
-=======
-
-// GERER LA GESTION D'ERREUR PROPRE ICI ! A retourner dans parse HEADER, puis a retourner via fill header and body !
-int Request::errorHandling(std::vector<std::string> v)
-{
-	findMethod();
-	//gestion de la presence de l'url requise.
-	if (_method_type == UNKNOWN || findProtocol(_header))
-	{
-		_state = REQUEST_FORMAT_ERROR;
-		return ERROR;
-	}
-	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)
-	{
-		std::cout << "[" << *it << "]" << std::endl;
-	}
-	return 1;
-=======
->>>>>>> 31d174e0281f851ddb1dbeb8d4a420baf10aa795
-}
->>>>>>> change some prototypes and archi of returns to manage header errors properly
-
-<<<<<<< HEAD
-=======
 /*
 ** This function parses the header and put data into _head map (also render error if the header format isn't respected).
 */
 
->>>>>>> 31d174e0281f851ddb1dbeb8d4a420baf10aa795
 int		Request::parseHeader(void)
 {
 	std::vector<std::string> v;
