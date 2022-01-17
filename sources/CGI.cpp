@@ -129,8 +129,10 @@ int		CGI::generate_env( void )
 			i++;
 		}
 		_env[_conversion.size()] = 0;
-		for (int j = 0; _env[j]; j++)
-			std::cout << _env[j] << std::endl;
+		
+		//DEBUG//
+		//for (int j = 0; _env[j]; j++)
+		//	std::cout << _env[j] << std::endl;
 	}
 	else
 		std::cout << "Other Method" << std::endl;
@@ -138,6 +140,13 @@ int		CGI::generate_env( void )
 }
 
 int		CGI::generate_arg( void ){
+	_arg = (char**)malloc(sizeof(char *) * 3);
+
+	std::string tmp = ".";
+	tmp += _header["url"];
+
+	_arg[0] = strdup(tmp.c_str());
+	_arg[1] = NULL;
 	return SUCCESS;
 }
 
@@ -145,6 +154,7 @@ int		CGI::execute( Client & cli ){
 	
 	int fd[2];
 	pipe(fd);
+	int child_stat;
 	pid_t pid = fork();
 	
 	if (pid == 0)
@@ -152,14 +162,19 @@ int		CGI::execute( Client & cli ){
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);
+		//execve(_bin_location.c_str(), _arg, _env);
 		execlp(_bin_location.c_str(), "/usr/bin/php-cgi", "./www/php/bonjour.php", _env);
 		exit(SUCCESS);
 	}
-	waitpid(pid, 0, 0);
-	close(fd[1]);
+	waitpid(pid, &child_stat, 0);
 	
+	//DEBUG//
+	std::cout << "Child Return Value = " << WEXITSTATUS(child_stat) << std::endl;
+	
+	close(fd[1]);
 	std::string response;
 	createResponse(fd[0], response);
+	std::cout << "Child Response content = " << response << std::endl;
 	close(fd[0]);
 	cli.getRes().setContent(response);
 	//cli.getRes().treatCGI(0, response);
