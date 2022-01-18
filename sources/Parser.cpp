@@ -3,20 +3,11 @@
 namespace ws
 {
 
-Parser::Parser(void) : _server("127.0.0.1"), _pos(0)
+Parser::Parser(void) : _pos(0), _server("127.0.0.1") 
 {
-	defaultConfiguration();
+	defaultConfiguration(); 
 }
-
-Parser::~Parser(void)
-{
-}
-
-Server	Parser::getServer(void)
-{
-	return _server;
-}
-
+Parser::~Parser(void) {}
 
 int	Parser::launch(std::string file)
 {
@@ -109,7 +100,7 @@ int	Parser::checkServer(void)
 	if (_content[_pos] != '{')
 		return (0);
 	_pos++;
-	_server.addPort(Port());
+	_server.addPort(Port(_dict));
 	while (_pos < _size)
 	{
 		if (!checkKeys())
@@ -148,12 +139,12 @@ int	Parser::checkKeys(void)
 	}
 	if (!found)
 		return (0);
-	if (!checkValues((*it).first))
+	if (!setValues((*it).first))
 		return (0);
 	return (1);
 }
 
-int	Parser::checkValues(std::string key)
+int	Parser::setValues(std::string key)
 {
 	int	isspaceNb = 0;
 
@@ -168,7 +159,8 @@ int	Parser::checkValues(std::string key)
 	{
 		int	dot = _content.find_first_of(";", _pos);
 		std::string value = _content.substr(_pos, dot - _pos);
-		setValue(key, value);
+		if (!(checkValue(key, value, _server.getRefPorts().back())))
+			return (0);
 		_pos = dot;
 	}
 	if (_pos == _size)
@@ -177,28 +169,67 @@ int	Parser::checkValues(std::string key)
 	return (1);
 }
 
-int	Parser::setValue(std::string key, std::string value)
+int	Parser::checkPort(std::string value)
 {
-	if (key == "listen")
-		_server.getRefPorts().back().setPort(strtol(value.c_str(), NULL, 10));
-	else if (key == "server_name")
-		_server.getRefPorts().back().setServerName(value);
-	else if (key == "client_max_body_size")
-		_server.getRefPorts().back().setClientMaxSize(strtol(value.c_str(), NULL, 10));
-	else if (key == "autoindex")
-		_server.getRefPorts().back().setAutoindex(1);
-	else if (key == "host")
-		_server.getRefPorts().back().setHost(value);
-	else if (key == "method")
-		_server.getRefPorts().back().addMethod(value);
-	else if (key == "error_page")
-	{
-		//CREATE ERROR PAIR WITH INT AND PATH
-		int error_nb = 404;
-		_server.getRefPorts().back().addError(error_nb, value);
-	}
-	else 
+	int port = atoi(value.c_str());
+	std::cout << "Port " << port << std::endl;
+	if (port < 0 || port > 65535)
 		return (0);
+	else
+		return (1);
+}
+
+int	Parser::checkMethod(std::string value)
+{
+	std::string	method;
+	int			position;
+
+	while (value.size())
+	{
+		position = value.find("|");
+		std::cout << "position " << position << std::endl;
+		std::cout << "method " << method << std::endl;
+		std::cout << "value " << value << std::endl;
+		value = value.substr(position);
+		if (method != "GET" || method != "POST" || method != "DELETE")
+			return (0);
+		value.substr(method.size());
+	}
+	return (1);
+}
+
+int	Parser::checkAutoindex(std::string value)
+{
+	if (value == "on")
+		return (1);
+	else if (value == "off")
+		return (1);
+	else
+		return (0);
+}
+
+int	Parser::checkClientMaxSize(std::string value) { (void)value; return (1); }
+int	Parser::checkHost(std::string value) { (void)value; return (1); }
+int	Parser::checkServerName(std::string value) { (void)value; return (1); }
+int	Parser::checkErrorPage(std::string value) { (void)value; return (1); }
+int	Parser::checkRoot(std::string value) { (void)value; return (1); }
+int	Parser::checkIndex(std::string value) { (void)value; return (1); }
+
+int	Parser::checkValue(std::string key, std::string value, Port & port)
+{
+	std::map<std::string, std::string>::iterator	ite = port.getConfig().end();
+	std::map<std::string, std::string>::iterator	it = port.getConfig().find(key);
+	std::map<std::string, validity_fct>::iterator	cite = _validity_check.end();
+	std::map<std::string, validity_fct>::iterator	cit = _validity_check.find(key);
+
+	if (it == ite || cite == cit)
+		return (0);
+	if (!((this->*_validity_check[key])(value)))
+	{
+		std::cout << key << " : " << value << " is not valid" << std::endl;
+		return (0);
+	}
+	_server.getRefPorts().back().getConfig()[key] = value;
 	return (1);
 }
 
@@ -233,8 +264,18 @@ int Parser::defaultConfiguration(void)
 			_dict[key] = value;
 		}
 	}
-	//for (std::map<std::string, std::string>::iterator it = _dict.begin(); it != _dict.end(); it++)
-	//	std::cout << (*it).first << ", " << (*it).second << std::endl;
+	_validity_check["listen"] = &Parser::checkPort;
+	_validity_check["host"] = &Parser::checkHost;
+	_validity_check["server_name"] = &Parser::checkServerName;
+	_validity_check["client_max_body_size"] = &Parser::checkClientMaxSize;
+	_validity_check["error_page"] = &Parser::checkErrorPage;
+	_validity_check["autoindex"] = &Parser::checkAutoindex;
+	_validity_check["method"] = &Parser::checkMethod;
+	_validity_check["root"] = &Parser::checkRoot;
+	_validity_check["index"] = &Parser::checkIndex;
 	return SUCCESS;
 }
+
+Server	Parser::getServer( void ) { return _server; }
+
 }

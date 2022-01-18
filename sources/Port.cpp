@@ -5,21 +5,9 @@ namespace ws{
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
 
-Port::Port( void ) : _port(8080)
-{
-	return;
-}
-
-
-Port::Port( int port ) : _port(port)
-{
-}
-
-Port::Port( const Port & src )
-{
-	*this = src;
-}
-
+Port::Port( void ) {}
+Port::Port( std::map<std::string, std::string> dictionnary) : _config(dictionnary) {}
+Port::Port( const Port & src ) { *this = src; }
 
 /*
 ** -------------------------------- DESTRUCTOR --------------------------------
@@ -38,15 +26,17 @@ Port &				Port::operator=( Port const & rhs )
 {
 	if ( this != &rhs )
 	{
-		this->_port = rhs.getPort();
-		this->_fd = rhs.getFd();
+		_fd = rhs._fd;
+		_port_address = rhs._port_address;
+		_clients = rhs._clients;
+		_config = rhs._config;
 	}
 	return *this;
 }
 
 std::ostream &			operator<<( std::ostream & o, Port const & i )
 {
-	o << "Port_nb = " << i.getPort();
+	o << "Port_nb = " << (i.getConfig())["listen"];
 	return o;
 }
 
@@ -78,7 +68,7 @@ int		Port::launchPort( void ){
 	memset((char *)&_port_address, 0, sizeof(_port_address));
 	_port_address.sin_family = AF_INET; 
 	_port_address.sin_addr.s_addr = htonl(INADDR_ANY); 
-	_port_address.sin_port = htons(_port);
+	_port_address.sin_port = htons(atoi((_config["listen"]).c_str()));
 	if (bind() < 0 || listening() < 0)
 		return ERROR;
 	return SUCCESS;
@@ -114,8 +104,8 @@ int	Port::accepting( void )
 	new_socket = accept(_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
 	if (new_socket < 0)
 	{
-		//if (errno != EAGAIN)
-			//perror("In accept");
+		// if (errno != EAGAIN)
+		// 	perror("In accept");
 		return(ERROR);
 	}
 	Client newClient(new_socket);
@@ -139,26 +129,15 @@ void	Port::removeClient( int fd )
 	}
 }
 
-void	Port::addMethod(std::string method) { _methods.push_back(method); }
-void	Port::addError(int error_nb, std::string error_path) { _errors.insert(std::pair<int, std::string>(error_nb, error_path)); }
-
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-int						Port::getFd( void ) const { return _fd; }
-void					Port::setFd( int fd ) {	_fd = fd; }
-int						Port::getPort( void ) const { return _port; }
-void					Port::setPort( int port ) { std::cout << port << std::endl; _port = port; }
-bool					Port::getAutoindex( void ) const { return _autoindex; }
-void					Port::setAutoindex( bool status ) { _autoindex = status; }
-std::string				Port::getHost( void ) const { return _host; }
-void					Port::setHost( std::string host ) {	_host = host; }
-std::string				Port::getServerName( void ) const { return _server_name; }
-void					Port::setServerName( std::string name ) { _server_name = name; }
-int						Port::getClientMaxSize( void ) const { return _client_max_size; }
-void					Port::setClientMaxSize( int size ) { _client_max_size = size; }
-std::vector<Client>	&	Port::getClients( void ) { return _clients; }
+int										Port::getFd( void ) const { return _fd; }
+void									Port::setFd( int fd ) {	_fd = fd; }
+std::vector<Client>	&					Port::getClients( void ) { return _clients; }
+std::map<std::string, std::string>		Port::getConfig( void ) const { return _config; }
+std::map<std::string, std::string> &	Port::getConfig( void ) { return _config; }
 
 /* ************************************************************************** */
 }

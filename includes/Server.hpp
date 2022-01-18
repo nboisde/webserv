@@ -23,7 +23,6 @@ class Server
 
 		Server &		operator=( Server const & rhs );
 
-		std::string					printPorts( void ) const;
 		std::string					getIp( void ) const;
 		std::vector<Port>			getPorts( void ) const;
 		std::vector<Port>&			getRefPorts( void );
