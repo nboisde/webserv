@@ -23,8 +23,6 @@ class Port
 		int					listening( void );
 		int					accepting( void );
 		void				addClient( int fd );
-		void				addMethod( std::string );
-		void				addError(int error_nb, std::string error_path);
 		void				removeClient( int fd );
 	
 		int					getFd( void ) const ;
@@ -32,6 +30,7 @@ class Port
 		std::vector<Client>	&getClients( void );
 		void				setClients( int fd );
 		config_type			getConfig( void ) const;
+		config_type	&		getConfig( void );
 
 	protected:
 		Port( void );

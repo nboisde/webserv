@@ -68,7 +68,7 @@ int		Port::launchPort( void ){
 	memset((char *)&_port_address, 0, sizeof(_port_address));
 	_port_address.sin_family = AF_INET; 
 	_port_address.sin_addr.s_addr = htonl(INADDR_ANY); 
-	_port_address.sin_port = htons(_port);
+	_port_address.sin_port = htons(atoi((_config["listen"]).c_str()));
 	if (bind() < 0 || listening() < 0)
 		return ERROR;
 	return SUCCESS;
@@ -104,8 +104,8 @@ int	Port::accepting( void )
 	new_socket = accept(_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
 	if (new_socket < 0)
 	{
-		//if (errno != EAGAIN)
-			//perror("In accept");
+		if (errno != EAGAIN)
+			perror("In accept");
 		return(ERROR);
 	}
 	Client newClient(new_socket);
@@ -129,17 +129,15 @@ void	Port::removeClient( int fd )
 	}
 }
 
-void	Port::addMethod(std::string method) { _methods.push_back(method); }
-void	Port::addError(int error_nb, std::string error_path) { _errors.insert(std::pair<int, std::string>(error_nb, error_path)); }
-
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-int									Port::getFd( void ) const { return _fd; }
-void								Port::setFd( int fd ) {	_fd = fd; }
-std::vector<Client>	&				Port::getClients( void ) { return _clients; }
-std::map<std::string, std::string>	Port::getConfig( void ) const { return _config; }
+int										Port::getFd( void ) const { return _fd; }
+void									Port::setFd( int fd ) {	_fd = fd; }
+std::vector<Client>	&					Port::getClients( void ) { return _clients; }
+std::map<std::string, std::string>		Port::getConfig( void ) const { return _config; }
+std::map<std::string, std::string> &	Port::getConfig( void ) { return _config; }
 
 /* ************************************************************************** */
 }

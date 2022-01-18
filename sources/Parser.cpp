@@ -3,19 +3,9 @@
 namespace ws
 {
 
-Parser::Parser(void) : _server("127.0.0.1"), _pos(0)
-{
-	defaultConfiguration();
-}
+Parser::Parser(void) : _server("127.0.0.1"), _pos(0) { defaultConfiguration(); }
+Parser::~Parser(void) { }
 
-Parser::~Parser(void)
-{
-}
-
-Server	Parser::getServer(void)
-{
-	return _server;
-}
 
 
 int	Parser::launch(std::string file)
@@ -168,7 +158,7 @@ int	Parser::checkValues(std::string key)
 	{
 		int	dot = _content.find_first_of(";", _pos);
 		std::string value = _content.substr(_pos, dot - _pos);
-		setValue(key, value);
+		setValue(key, value, _server.getRefPorts().back());
 		_pos = dot;
 	}
 	if (_pos == _size)
@@ -177,28 +167,14 @@ int	Parser::checkValues(std::string key)
 	return (1);
 }
 
-int	Parser::setValue(std::string key, std::string value)
+int	Parser::setValue(std::string key, std::string value, Port & port)
 {
-	if (key == "listen")
-		_server.getRefPorts().back().setPort(strtol(value.c_str(), NULL, 10));
-	else if (key == "server_name")
-		_server.getRefPorts().back().setServerName(value);
-	else if (key == "client_max_body_size")
-		_server.getRefPorts().back().setClientMaxSize(strtol(value.c_str(), NULL, 10));
-	else if (key == "autoindex")
-		_server.getRefPorts().back().setAutoindex(1);
-	else if (key == "host")
-		_server.getRefPorts().back().setHost(value);
-	else if (key == "method")
-		_server.getRefPorts().back().addMethod(value);
-	else if (key == "error_page")
-	{
-		//CREATE ERROR PAIR WITH INT AND PATH
-		int error_nb = 404;
-		_server.getRefPorts().back().addError(error_nb, value);
-	}
-	else 
+	std::map<std::string, std::string>::iterator	ite = port.getConfig().end();
+	std::map<std::string, std::string>::iterator	it = port.getConfig().find(key);
+
+	if (it == ite)
 		return (0);
+	_server.getRefPorts().back().getConfig()[key] = value;
 	return (1);
 }
 
@@ -233,8 +209,9 @@ int Parser::defaultConfiguration(void)
 			_dict[key] = value;
 		}
 	}
-	//for (std::map<std::string, std::string>::iterator it = _dict.begin(); it != _dict.end(); it++)
-	//	std::cout << (*it).first << ", " << (*it).second << std::endl;
 	return SUCCESS;
 }
+
+Server	Parser::getServer( void ) { return _server; }
+
 }
