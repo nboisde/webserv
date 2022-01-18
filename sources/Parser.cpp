@@ -136,12 +136,12 @@ int	Parser::checkKeys(void)
 	}
 	if (!found)
 		return (0);
-	if (!checkValues((*it).first))
+	if (!setValues((*it).first))
 		return (0);
 	return (1);
 }
 
-int	Parser::checkValues(std::string key)
+int	Parser::setValues(std::string key)
 {
 	int	isspaceNb = 0;
 
@@ -156,7 +156,7 @@ int	Parser::checkValues(std::string key)
 	{
 		int	dot = _content.find_first_of(";", _pos);
 		std::string value = _content.substr(_pos, dot - _pos);
-		setValue(key, value, _server.getRefPorts().back());
+		checkValue(key, value, _server.getRefPorts().back());
 		_pos = dot;
 	}
 	if (_pos == _size)
@@ -165,7 +165,16 @@ int	Parser::checkValues(std::string key)
 	return (1);
 }
 
-int	Parser::setValue(std::string key, std::string value, Port & port)
+int	checkPort(std::string value)
+{
+	int port = atoi(value);
+	if (port < || port > 65535)
+		return (1);
+	else
+		return (0);
+}
+
+int	Parser::checkValue(std::string key, std::string value, Port & port)
 {
 	std::map<std::string, std::string>::iterator	ite = port.getConfig().end();
 	std::map<std::string, std::string>::iterator	it = port.getConfig().find(key);
