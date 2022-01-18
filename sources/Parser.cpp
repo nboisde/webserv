@@ -3,10 +3,8 @@
 namespace ws
 {
 
-Parser::Parser(void) : _server("127.0.0.1"), _pos(0) { defaultConfiguration(); }
-Parser::~Parser(void) { }
-
-
+Parser::Parser(void) : _pos(0), _server("127.0.0.1") { defaultConfiguration(); }
+Parser::~Parser(void) {}
 
 int	Parser::launch(std::string file)
 {
