@@ -22,7 +22,7 @@ class Request {
 		void		findMethod(void);
 		int			fillHeaderAndBody(void);
 		void		ChunkedBodyProcessing(std::string body);
-		void		parseHeader(void);
+		int			parseHeader(void);
 
 		
 		// GETTERS
@@ -35,11 +35,15 @@ class Request {
 		std::string	getHeader(void) const;
 		std::string	getBody(void) const;
 		int			getState( void ) const ;
+		std::map<std::string, std::string>	getHead(void);
 
 	private:
-		int		findProtocol(std::string buf);
+		int			findProtocol(std::string buf);
+		int			errorHandling(std::vector<std::string> v);
+		int 		errorReturn(void);
+		int			bodyReceived(void);
 
-		int			_line;
+
 		int			_state;
 		std::string	_raw_content;
 		int			_body_reception_encoding;

@@ -3,7 +3,6 @@
 namespace ws{
 
 Request::Request( void ):
-_line(0),
 _state(RECEIVING_HEADER),
 _raw_content(""),
 _body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
@@ -83,6 +82,10 @@ void Request::findMethod(void)
 	}
 }
 
+/*
+** This function get the value of content_length if it exists.
+*/
+
 int Request::identifyBodyLengthInHeader(void)
 {
 	std::string l = "content-length"; // Change with all compatible casses. ?
@@ -124,6 +127,12 @@ int		Request::findProtocol(std::string buf)
 	return 0;
 }
 
+int Request::bodyReceived(void)
+{
+	_state = BODY_RECEIVED;
+	return SUCCESS;
+}
+
 /*
 ** this function will concatenate buffer into raw Request and tell to the engine if the request is full: ie,
 ** if the header and the body is full.
@@ -136,55 +145,40 @@ int		Request::findProtocol(std::string buf)
 ** 0 REQUEST_NOT_FULL -> continue to recv() to catch informations.
 */
 
+// This function must be refined.
 int Request::concatenateRequest(std::string buf)
 {
 	_raw_content += buf;
-	if (_line == 0)
-	{
-		findMethod();
-		if (_method_type == UNKNOWN || !findProtocol(buf))
-		{
-			_state = REQUEST_FORMAT_ERROR;
-			return -1;
-		}
-	}
 
-	_line++;
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
-		return -1;
+		return ERROR;
 	if (requestReceptionState() == BODY_RECEIVED)
-		return 1;
+		return SUCCESS;
+	//HEADER CATCH
 	if (requestReceptionState() == RECEIVING_HEADER)
 	{
 		_header_len_received += buf.length();
 		if (checkHeaderEnd() == 1)
 		{
-			// IDENTIFY CONTENT LENGTH AND TRANSFER ENCODING. (if both render -> flag goes to REQUEST_FORMAT_ERROR)
 			int ct = identifyBodyLengthInHeader();
 			int te = isTransferEncoding();
 			findMethod();
-			if (_method_type == UNKNOWN || (ct == 1 && te == 1))
-			{
-				_state = REQUEST_FORMAT_ERROR;
-				return -1;
-			}
-			else if (ct == 1)
+			//if (_method_type == UNKNOWN || (ct == 1 && te == 1))
+			//	return errorReturn();
+			/* else  */if (ct == 1)
 				_body_reception_encoding = CONTENT_LENGTH;
 			else if (te == 1)
 				_body_reception_encoding = TRANSFER_ENCODING;
 			_state = HEADER_RECEIVED;
 		}
 	}
+	//BODY CATCH
 	if (requestReceptionState() == HEADER_RECEIVED)
 	{
 		_body_len_received += buf.length();
 		int i = _raw_content.find("\r\n\r\n");
-		// ICI -> gerer les differentes methodes d'encodage.
 		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
-		{
-			_state = BODY_RECEIVED;
-			return 1;	
-		}
+			return bodyReceived();
 		else if (_body_reception_encoding == CONTENT_LENGTH && _body_len_received + _header_len_received < _content_length + i + 4)
 				return 0;
 		else if (_body_reception_encoding == TRANSFER_ENCODING)
@@ -193,25 +187,110 @@ int Request::concatenateRequest(std::string buf)
 			if (ret == -1)
 				return 0;
 			else
-			{
-				_state = BODY_RECEIVED;
-				return 1;
-			}
+				return bodyReceived();
 		}
 		else
-		{
-			_state = BODY_RECEIVED;
-			return 1;
-		}
+			return bodyReceived();
 	}
 	return 0;
 }
 
-void	Request::parseHeader(void)
+int Request::errorReturn(void)
+{
+	_state = REQUEST_FORMAT_ERROR;
+	return ERROR;
+}
+
+// Prevent HACKING of the server: Article reference: https://0xn3va.gitbook.io/cheat-sheets/web-application/http-request-smuggling
+// TODO: Gestion des requetes multiples de content-length et transfer-encoding.
+
+/*
+** This function handle Errors in the format -> the result will be used in parse header and after that in the return of fillHeaderAndBody.
+*/
+
+int Request::errorHandling(std::vector<std::string> v)
+{
+	//gestion de la presence de l'url requise.
+	//gestion d'une taille de header trop grosse.
+	int cl = 0;
+	int te = 0;
+	if (_method_type == UNKNOWN || !findProtocol(_header))
+		return errorReturn();
+	for (std::vector<std::string>::iterator it = v.begin() + 1; it != v.end(); it++)
+	{
+		int len = static_cast<int>((*it).length());
+		int ret = (*it).find(":");
+		//NO double dot.
+		if (ret == -1)
+			return errorReturn();
+		//EMPTY FIELD.
+		if (ret == 0 || (*it)[ret - 1] == ' ')
+			return errorReturn();
+		//DEAL WITH SPACES.
+		for (int i = 0; i < ret; i++)
+			if ((*it)[i] == ' ')
+				return errorReturn();
+		//NULL CHARACTER IN VALUE.
+		for (int i = ret; i < len; i++)
+			if ((*it)[i] == '\0')
+				return errorReturn();
+		if (static_cast<int>((*it).find("Content-Length")) != -1)
+		{
+			// ONLY NUMBER IN THE RIGHT FORMAT !
+			int i  = ret + 1;
+			while (i < len)
+			{
+				if ((*it)[i] != ' ')
+				{
+					if (!std::isdigit((*it)[i]))
+						return errorReturn();
+					else if (std::isdigit((*it)[i]))
+						break ;
+				}
+				i++;
+			}
+			while (std::isdigit((*it)[i]))
+				i++;
+			while (i < len)
+			{
+				if ((*it)[i] != ' ')
+					return errorReturn();
+				i++;
+			}
+			cl++;
+		}
+		if (static_cast<int>((*it).find("Transfer-Encoding")) != -1)
+		{
+			int chunk = (*it).find("chunked");
+			//Because we only deal with chunked transfer encoding method
+			if (chunk == -1)
+				return errorReturn();
+			for (int i = ret + 1; i < chunk; i++)
+			{
+				if ((*it)[i] && (*it)[i] != ' ')
+					return errorReturn();
+			}
+			for (int i = chunk + 7; i != len; i++)
+			{
+				if ((*it)[i] != ' ')
+					return errorReturn();
+			}
+			te++;
+		}
+	}
+	// NOT A COMBINAISON OF TE.CL or TE.TE or CL.CL
+	if ((te == 1 && cl == 1) || te > 1 || cl > 1)
+		return errorReturn();
+	return SUCCESS;
+}
+
+/*
+** This function parses the header and put data into _head map (also render error if the header format isn't respected).
+*/
+
+int		Request::parseHeader(void)
 {
 	std::vector<std::string> v;
-	//_head["url"] = _url;
-	//_head["host"] = _host;
     int ret = _header.find("\r\n");
 	std::string tmp = _header;
 	while (ret != -1)
@@ -222,6 +301,9 @@ void	Request::parseHeader(void)
 		if (tmp.find("\r\n") == 0)
 			break ;
 	}
+	int err = errorHandling(v);
+	if (err == ERROR)
+		return errorReturn();
 	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)
 	{
 		if (it == v.begin())
@@ -246,28 +328,36 @@ void	Request::parseHeader(void)
 			_head["url"] = url;
 			continue ;
 		}
-		ret = (*it).find(": ");
+		ret = (*it).find(":");
 		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
+	return 1;
  	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
 	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
+	return SUCCESS;
 }
+
+/*
+** This function wait for all the recv to be processed and split raw content into header and body.
+** Return ERROR i.e -1 if problem in header format.
+*/
 
 int Request::fillHeaderAndBody(void){
 	int ret = _raw_content.find("\r\n\r\n");
 	int i = 0;
 	if (ret == -1)
-		return -1;
+		return errorReturn();
 	while (i < ret + 4)
 	{
 		_header += _raw_content[i];
 		i++;
 	}
 	std::string body = _raw_content.substr(ret + 4, _raw_content.length() - i);
-	//std::cout << body << std::endl;
-	parseHeader();
+	int err = parseHeader();
+	if (err == ERROR)
+		return errorReturn();
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
-		return 1;
+		return SUCCESS;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
 	{
 		while (_raw_content[i])
@@ -277,16 +367,13 @@ int Request::fillHeaderAndBody(void){
 		}
 	}
 	else if (_body_reception_encoding == TRANSFER_ENCODING)
-	{
 		ChunkedBodyProcessing(body);
-/*  		while (_raw_content[i])
-		{
-			_body += _raw_content[i];
-			i++;
-		} */
-	}
-	return 1;
+	return SUCCESS;
 }
+
+/*
+** This function implement information catching of chunked requests and concatenate chunks into the body.
+*/
 
 void		Request::ChunkedBodyProcessing(std::string body)
 {
@@ -317,54 +404,16 @@ void		Request::ChunkedBodyProcessing(std::string body)
 }
 
 
-int Request::requestReceptionState(void)
-{
-	return _state;
-}
-
-std::string Request::getRawContent(void) const
-{
-	return _raw_content;
-}
-
-int Request::getMethodType(void) const
-{
-	return _method_type;
-}
-
-int Request::getContentLength(void) const
-{
-	return _content_length;
-}
-
-int Request::getHeaderSizeRevieved(void) const
-{
-	return _header_len_received;
-}
-
-int Request::getBodySizeReceived(void) const
-{
-	return _body_len_received;
-}
-
-int Request::getHeaderSize(void) const
-{
-	return _header_size;
-}
-
-std::string Request::getHeader(void) const
-{
-	return _header;
-}
-
-std::string Request::getBody(void) const
-{
-	return _body;
-}
-
-int Request::getState( void ) const
-{
-	return _state;
-}
+int										Request::requestReceptionState(void) { return _state; }
+std::string								Request::getRawContent(void) const { return _raw_content; }
+int										Request::getMethodType(void) const { return _method_type; }
+int										Request::getContentLength(void) const { return _content_length; }
+int										Request::getHeaderSizeRevieved(void) const { return _header_len_received; }
+int										Request::getBodySizeReceived(void) const { return _body_len_received; }
+int										Request::getHeaderSize(void) const { return _header_size; }
+std::string								Request::getHeader(void) const { return _header; }
+std::string								Request::getBody(void) const { return _body; }
+int										Request::getState(void) const { return _state; }
+std::map<std::string, std::string>		Request::getHead(void) { return _head; }
 
 }
