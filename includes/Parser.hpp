@@ -3,16 +3,13 @@
 
 # include "webserv.hpp"
 # include "Server.hpp"
-# include <utility>
-# include <fstream>
-# include <cstdlib>
 
 namespace ws
 {
 class Parser
 {
 		typedef std::map<std::string, std::string>	dictionnary_type;
-		typedef	int (*validity_fct)(std::string);
+		typedef	int (Parser::*validity_fct)(std::string);
 		typedef std::map<std::string, validity_fct>	validity_map;
 
 	private:
@@ -34,6 +31,16 @@ class Parser
 		int					setValues(std::string key);
 		int					checkValue(std::string key, std::string value, Port & port);
 		int					defaultConfiguration(void);
+
+		int					checkPort(std::string value);
+		int					checkMethod(std::string value);
+		int					checkAutoindex(std::string value);	
+		int					checkClientMaxSize(std::string value);
+		int					checkHost(std::string value);
+		int					checkServerName(std::string value);
+		int					checkErrorPage(std::string value);
+		int					checkRoot(std::string value);
+		int					checkIndex(std::string value);
 
 	public:
 		
