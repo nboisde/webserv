@@ -109,7 +109,7 @@ int	Parser::checkServer(void)
 	if (_content[_pos] != '{')
 		return (0);
 	_pos++;
-	_server.addPort(Port());
+	_server.addPort(Port(_dict));
 	while (_pos < _size)
 	{
 		if (!checkKeys())

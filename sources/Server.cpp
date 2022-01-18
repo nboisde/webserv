@@ -5,21 +5,9 @@ namespace ws{
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
 
-Server::Server( void )
-{
-	return;
-}
-
-Server::Server( std::string ip) : _server_ip(ip)
-{
-	return;
-}
-
-Server::Server( const Server & src )
-{
-	*this = src;
-}
-
+Server::Server( void ) {}
+Server::Server( std::string ip) : _server_ip(ip) {}
+Server::Server( const Server & src ) { *this = src; }
 
 /*
 ** -------------------------------- DESTRUCTOR --------------------------------
@@ -48,7 +36,6 @@ Server &				Server::operator=( Server const & rhs )
 std::ostream &			operator<<( std::ostream & o, Server const & i )
 {
 	o << "Server IP = " << i.getIp() << std::endl;
-	o << "Access through ports : " << i.printPorts() << std::endl;                                                                
 	return o;
 }
 
@@ -78,10 +65,7 @@ void	Server::launchServer( void )
 		{
 			int fd = 0;
 			while ((fd = (*pt).accepting()) != -1)
-			{
-				//std::cout << "New Connection " << fd << std::endl;
 				addToPolling(fd);
-			}
 		}
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
@@ -162,25 +146,6 @@ void	Server::cleanFds( void )
 
 int		Server::stopServer( void ){
 	return (1);
-}
-
-std::string	Server::printPorts( void ) const{
-	std::vector<Port>::const_iterator it, itend; 
-	std::string ret;
-	
-	it = _ports.begin();
-	itend = _ports.end();
-	if (it == itend)
-	{
-		return "No Ports in memory";
-	}
-	for (; it != itend; it++)
-	{
-		ret += (*it).getPort();
-		if (it != itend)
-			ret += " ";
-	}
-	return ret;
 }
 
 void		Server::addPort( Port new_port )

@@ -6,9 +6,10 @@ host : Webserv.com
         server_name             : KIKOO          
 
        listen : 8080
-method : GET,POST,DELETE
+method : GET|POST|DELETE
 client_max_body_size : 100M
 error_page : 404
 #this is another comment
-
+index : index.html
+root    :       /www/html
 autoindex:        off          
