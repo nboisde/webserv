@@ -3,10 +3,7 @@
 namespace ws
 {
 
-Parser::Parser(void) : _pos(0), _server("127.0.0.1") 
-{
-	defaultConfiguration(); 
-}
+Parser::Parser(void) : _pos(0), _server("127.0.0.1") { defaultConfiguration(); }
 Parser::~Parser(void) {}
 
 int	Parser::launch(std::string file)
@@ -187,13 +184,16 @@ int	Parser::checkMethod(std::string value)
 	while (value.size())
 	{
 		position = value.find("|");
-		std::cout << "position " << position << std::endl;
-		std::cout << "method " << method << std::endl;
-		std::cout << "value " << value << std::endl;
-		value = value.substr(position);
-		if (method != "GET" || method != "POST" || method != "DELETE")
+		if (position < 0)
+		{	
+			if (value != "GET" && value != "POST" && value != "DELETE")
+				return (0);
+			break;
+		}
+		method = value.substr(0, position);
+		value = value.substr(position + 1);
+		if (method != "GET" && method != "POST" && method != "DELETE")
 			return (0);
-		value.substr(method.size());
 	}
 	return (1);
 }
