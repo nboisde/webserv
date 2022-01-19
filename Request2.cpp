@@ -3,7 +3,6 @@
 namespace ws{
 
 Request::Request( void ):
-_line(0),
 _state(RECEIVING_HEADER),
 _raw_content(""),
 _body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
@@ -49,8 +48,7 @@ Request &	Request::operator=( Request const & rhs )
 int Request::checkHeaderEnd(void) const
 {
 	int ret = _raw_content.find("\r\n\r\n");
-	int ret2 = _raw_content.find("\n\n");
-	if (ret == -1 && ret2 == -1)
+	if (ret == -1)
 		return (0);
 	else
 		return (1);
@@ -114,9 +112,8 @@ int Request::identifyBodyLengthInHeader(void)
 int Request::isTransferEncoding(void) const
 {
 	// HERE SEE DIFFERENTS TYPOS OF TRANSFER ENCODING.
-	int r = _raw_content.find("Transfer-Encoding:");
-	int r2 = _raw_content.find("chunked");
-	if (r == -1 || r2 == -1)
+	int r = _raw_content.find("Transfer-Encoding: chunked");
+	if (r == -1)
 		return 0;
 	else
 		return 1;
@@ -148,46 +145,10 @@ int Request::bodyReceived(void)
 ** 0 REQUEST_NOT_FULL -> continue to recv() to catch informations.
 */
 
-// BUG ON THE CONTROL C !!!!!
-int Request::concatenateRequest(std::string tmp)
+// This function must be refined.
+int Request::concatenateRequest(std::string buf)
 {
-	int nl = 0;
-	std::string buf;
-	if (_line == 0)
-	{
-		while (tmp[nl] == '\n')
-			nl++;
-		if (nl == static_cast<int>(tmp.length()))
-			return 0;
-		else
-		{
-			while (nl < static_cast<int>(tmp.length()))
-			{
-				buf += tmp[nl];
-				nl++;
-			}
-		}
-	}
-	else
-		buf = tmp;
-	
-	std::cout << "what ???" << std::endl;
-	
 	_raw_content += buf;
-
-	// ICI: check la premiere ligne ! Check si le protocol est bon.
-	if (_line == 0)
-	{
-		int r = _raw_content.find("\r\n");
-		int r2 = _raw_content.find("\n");
-		if ((r2 != -1) || r != -1)
-		{
-			findMethod();
-			_line++;
-			if (_method_type == UNKNOWN || !findProtocol(_raw_content))
-				return errorReturn();
-		}
-	}
 
 	if (requestReceptionState() == REQUEST_FORMAT_ERROR)
 		return ERROR;
@@ -201,10 +162,9 @@ int Request::concatenateRequest(std::string tmp)
 		{
 			int ct = identifyBodyLengthInHeader();
 			int te = isTransferEncoding();
-			if (_method_type == UNKNOWN)
-				findMethod();
-			if (_method_type == UNKNOWN)// || (ct == 1 && te == 1))
-				return errorReturn();
+			findMethod();
+			//if (_method_type == UNKNOWN || (ct == 1 && te == 1))
+			//	return errorReturn();
 			/* else  */if (ct == 1)
 				_body_reception_encoding = CONTENT_LENGTH;
 			else if (te == 1)
@@ -216,16 +176,13 @@ int Request::concatenateRequest(std::string tmp)
 	if (requestReceptionState() == HEADER_RECEIVED)
 	{
 		_body_len_received += buf.length();
-		int r = _raw_content.find("\r\n\r\n");
-		int r2 = _raw_content.find("\n\n");
-		int i = (r == -1) ? r2 : r;
+		int i = _raw_content.find("\r\n\r\n");
 		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 			return bodyReceived();
 		else if (_body_reception_encoding == CONTENT_LENGTH && _body_len_received + _header_len_received < _content_length + i + 4)
 				return 0;
 		else if (_body_reception_encoding == TRANSFER_ENCODING)
 		{
-			// ICI OBSERVER SI LE BODY FINIT BIEN PAR \r\n\r\n ou \n\n -> a mon avis ne doit pas etre traite.
 			int ret = _raw_content.find("0\r\n\r\n");
 			if (ret == -1)
 				return 0;
@@ -255,12 +212,10 @@ int Request::errorHandling(std::vector<std::string> v)
 {
 	//gestion de la presence de l'url requise.
 	//gestion d'une taille de header trop grosse.
-	// A FAIRE ABSOLUMENT !!!!!!! HOST OK ! gestion des champs sans : qui sont ok tant que l'host et la ligne 1 sont la ! A ne pas mettre dans la map !
 	int cl = 0;
 	int te = 0;
 	if (_method_type == UNKNOWN || !findProtocol(_header))
 		return errorReturn();
-	//std::cout << *(v.begin() + 2) << std::endl;
 	for (std::vector<std::string>::iterator it = v.begin() + 1; it != v.end(); it++)
 	{
 		int len = static_cast<int>((*it).length());
@@ -336,17 +291,14 @@ int Request::errorHandling(std::vector<std::string> v)
 int		Request::parseHeader(void)
 {
 	std::vector<std::string> v;
-    int i = _header.find("\r\n");
-	int i2 = _header.find("\n");
-	std::string crlf = ((i == -1 && i2 == -1) || i != -1) ? "\r\n" : "\n";
-	int ret = ((i == -1 && i2 == -1) || i != -1) ? i : i2;
+    int ret = _header.find("\r\n");
 	std::string tmp = _header;
 	while (ret != -1)
 	{
 		v.push_back(tmp.substr(0, ret));
-		tmp = tmp.substr(ret + crlf.length(), tmp.length() - ret);
-		ret = tmp.find(crlf);
-		if (tmp.find(crlf) == 0)
+		tmp = tmp.substr(ret + 2, tmp.length() - ret);
+		ret = tmp.find("\r\n");
+		if (tmp.find("\r\n") == 0)
 			break ;
 	}
 	int err = errorHandling(v);
@@ -379,7 +331,8 @@ int		Request::parseHeader(void)
 		ret = (*it).find(":");
 		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
-	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
+	return 1;
+ 	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
 	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
 	return SUCCESS;
 }
@@ -390,19 +343,16 @@ int		Request::parseHeader(void)
 */
 
 int Request::fillHeaderAndBody(void){
-	int r = _raw_content.find("\r\n\r\n");
-	int r2 = _raw_content.find("\n\n");
-	int ret = (r != -1) ? r : r2;
-	std::string crlf = (r != -1) ? "\r\n\r\n": "\n\n";
+	int ret = _raw_content.find("\r\n\r\n");
 	int i = 0;
 	if (ret == -1)
 		return errorReturn();
-	while (i < ret + static_cast<int>(crlf.length()))
+	while (i < ret + 4)
 	{
 		_header += _raw_content[i];
 		i++;
 	}
-	std::string body = _raw_content.substr(ret + crlf.length(), _raw_content.length() - i);
+	std::string body = _raw_content.substr(ret + 4, _raw_content.length() - i);
 	int err = parseHeader();
 	if (err == ERROR)
 		return errorReturn();
@@ -464,6 +414,9 @@ int										Request::getHeaderSize(void) const { return _header_size; }
 std::string								Request::getHeader(void) const { return _header; }
 std::string								Request::getBody(void) const { return _body; }
 int										Request::getState(void) const { return _state; }
-std::map<std::string, std::string>		Request::getHead(void) const { return _head; }
+
+std::map<std::string, std::string> Request::getHead( void ) const{
+	return _head;
+}
 
 }
