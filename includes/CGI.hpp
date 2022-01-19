@@ -8,6 +8,7 @@
 namespace ws
 {
 
+class Server;
 class Client;
 
 class CGI {
