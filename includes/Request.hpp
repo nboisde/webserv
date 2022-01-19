@@ -14,7 +14,7 @@ class Request {
 
 		Request &	operator=( Request const & rhs );
 
-		int			concatenateRequest(std::string buf);
+		int			concatenateRequest(std::string tmp);
 		int			requestReceptionState();
 		int			identifyBodyLengthInHeader(void);
 		int			isTransferEncoding(void) const;
@@ -43,7 +43,7 @@ class Request {
 		int 		errorReturn(void);
 		int			bodyReceived(void);
 
-
+		int			_line;
 		int			_state;
 		std::string	_raw_content;
 		int			_body_reception_encoding;
