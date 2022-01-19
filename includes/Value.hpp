@@ -1,24 +1,29 @@
 #ifndef VALUE_HPP
 # define VALUE_HPP
 
-# include <iostream>
-# include <string>
+# include "webserv.hpp"
 
+namespace ws
+{
 class Value
 {
-
 	public:
-
-		Value();
+		Value( std::string value );
 		Value( Value const & src );
-		~Value();
+		virtual ~Value();
 
 		Value &		operator=( Value const & rhs );
 
+		std::string							_value;
+		std::map<int, std::string>			_errors;
+		std::vector<std::string>			_methods;
+		std::map<std::string, std::string>	_locations;
+
 	private:
+		Value();
 
 };
 
 std::ostream &			operator<<( std::ostream & o, Value const & i );
-
+}
 #endif /* *********************************************************** VALUE_H */
