@@ -5,6 +5,7 @@
 # include "Request.hpp"
 # include "Response.hpp"
 # include "CGI.hpp"
+# include "Server.hpp"
 
 namespace ws {
 
@@ -28,7 +29,7 @@ class Client
 		Client &		operator=( Client const & rhs );
 
 		int 			receive( void );
-		int				executeCGI( void );
+		int				executeCGI( Server const & serv );
 		int				send( void );
 		void			closeConnection( void );
 

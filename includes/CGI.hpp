@@ -3,6 +3,7 @@
 
 # include <webserv.hpp>
 # include "Client.hpp"
+# include "Server.hpp"
 
 namespace ws
 {
@@ -12,13 +13,13 @@ class Client;
 class CGI {
 	public:
 
-		CGI( Client const & cli );
+		CGI( Client const & cli, Server const & serv );
 		CGI( CGI const & src );
 		virtual ~CGI( void );
 
 		CGI &		operator=( CGI const & rhs );
 
-		void								init_conversion( void );
+		void								init_conversion( Server const & serv );
 
 		int									generate_env( void );
 		int									generate_arg( void );
