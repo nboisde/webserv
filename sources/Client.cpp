@@ -118,8 +118,8 @@ int Client::send( void )
 	return CLOSING;
 }
 
-int	Client::executeCGI( void ){
-	CGI cgi(*this);
+int	Client::executeCGI( Server const & serv ){
+	CGI cgi(*this, serv);
 
 	cgi.execute(*this);
 	return SUCCESS;

@@ -1,5 +1,5 @@
 #include "CGI.hpp"
-
+#include <stdlib.h>
 /*
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
@@ -7,28 +7,32 @@
 namespace ws{
 
 
-void	CGI::init_conversion( void )
+void	CGI::init_conversion( Server const & serv )
 {
 	typedef std::pair<std::string, std::string>	pair;
 
 <<<<<<< HEAD
 	std::map<std::string, std::string>::iterator ite = _header.end();
 
+	_conversion.insert(pair("PHP_SELF", _header["url"]));
+	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
+	_conversion.insert(pair("SERVER_ADDR", serv.getIp()));
+	_conversion.insert(pair("SERVER_NAME", "webzerv"));
+	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
+	char *timestr;
+	_conversion.insert(pair("REQUEST_TIME", std::string(itoa(time(NULL), timestr, 10))))
+	if (_header.find("Method") != ite)
+		_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
 	if (_header.find("Content-Length") != ite)
 		_conversion.insert(pair("CONTENT_LENGTH", _header["Content-Length"]));
 	if (_header.find("Content-Type") != ite)
 		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
-	if (_header.find("Method") != ite)
-		_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
-	if (_header.find("protocol") != ite)
-		_conversion.insert(pair("SERVER_PROTOCOL", _header["protocol"]));
 	if (_header.find("Host") != ite)
 	{
 		_conversion.insert(pair("SERVER_PORT", _header["Host"].substr(_header["Host"].find_last_of(":") + 1)));
 		_conversion.insert(pair("SERVER_NAME", _header["Host"].substr(0, _header["Host"].find_last_of(":"))));
 	}
 	_conversion.insert(pair("QUERY_STRING", ""));
-	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
 	_conversion.insert(pair("SCRIPT_NAME", _bin_location));
 =======
 	_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
@@ -42,13 +46,13 @@ void	CGI::init_conversion( void )
 >>>>>>> CGI start
 }
 
-CGI::CGI( Client const & cli ) : _bin_location("/usr/bin/php-cgi")
+CGI::CGI( Client const & cli , Server const & serv) : _bin_location("/usr/bin/php-cgi")
 {
 	this->_header = cli.getReq().getHead();
 	//for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)
 	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
 	std::cout << std::endl;
-	init_conversion();
+	init_conversion( serv );
 	generate_env();
 	generate_arg();
 }
