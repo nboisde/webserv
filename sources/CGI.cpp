@@ -11,7 +11,6 @@ void	CGI::init_conversion( Server const & serv )
 {
 	typedef std::pair<std::string, std::string>	pair;
 
-<<<<<<< HEAD
 	std::map<std::string, std::string>::iterator ite = _header.end();
 
 	_conversion.insert(pair("PHP_SELF", _header["url"]));
@@ -34,16 +33,6 @@ void	CGI::init_conversion( Server const & serv )
 	}
 	_conversion.insert(pair("QUERY_STRING", ""));
 	_conversion.insert(pair("SCRIPT_NAME", _bin_location));
-=======
-	_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
-	_conversion.insert(pair("CONTENT_LENGTH", _header["Content-Length"]));
-	_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
-	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
-	_conversion.insert(pair("QUERY_STRING", ""));
-	_conversion.insert(pair("SCRIPT_NAME", _bin_location));
-	_conversion.insert(pair("SERVER_PORT", &(_header["Host"].substr(_header["Host"].find_last_of(":"))));
-
->>>>>>> CGI start
 }
 
 CGI::CGI( Client const & cli , Server const & serv) : _bin_location("/usr/bin/php-cgi")
