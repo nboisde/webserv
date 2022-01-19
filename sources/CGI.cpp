@@ -18,8 +18,8 @@ void	CGI::init_conversion( Server const & serv )
 	_conversion.insert(pair("SERVER_ADDR", serv.getIp()));
 	_conversion.insert(pair("SERVER_NAME", "webzerv"));
 	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
-	char *timestr;
-	_conversion.insert(pair("REQUEST_TIME", std::string(itoa(time(NULL), timestr, 10))))
+	//char *timestr;
+	//_conversion.insert(pair("REQUEST_TIME", std::string(itoa(time(NULL), timestr, 10))))
 	if (_header.find("Method") != ite)
 		_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
 	if (_header.find("Content-Length") != ite)
