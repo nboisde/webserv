@@ -3,12 +3,13 @@
 
 # include "webserv.hpp"
 # include "Server.hpp"
+# include "Value.hpp"
 
 namespace ws
 {
 class Parser
 {
-		typedef std::map<std::string, std::string>	dictionnary_type;
+		typedef std::map<std::string, Value> dictionnary_type;
 		typedef	int (Parser::*validity_fct)(std::string);
 		typedef std::map<std::string, validity_fct>	validity_map;
 

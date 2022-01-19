@@ -9,7 +9,6 @@ class Port;
 namespace ws{
 class Server
 {
-
 	typedef std::vector<struct pollfd>::iterator	it_fds;
 	typedef std::vector<Port>::iterator 			it_port;
 	typedef std::vector<Client>::iterator			it_client;

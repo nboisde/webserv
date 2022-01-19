@@ -2,6 +2,7 @@
 # define __PORT_HPP__
 
 # include "Client.hpp"
+# include "Value.hpp"
 
 namespace ws
 {
@@ -10,9 +11,11 @@ class Client;
 
 class Port
 {
-	typedef	std::map<std::string, std::string>	config_type;
+	typedef	std::map<std::string, Value>	config_type;
+	typedef	std::vector<Client>				client_type;
+
 	public:
-		Port( std::map<std::string, std::string>);
+		Port( config_type dictionnary );
 		Port( Port const & src );
 		virtual ~Port( void );
 
@@ -37,7 +40,7 @@ class Port
 
 		int					_fd;
 		struct sockaddr_in	_port_address;
-		std::vector<Client>	_clients;
+		client_type			_clients;
 		config_type			_config;
 };
 
