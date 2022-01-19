@@ -26,7 +26,8 @@ Port &				Port::operator=( Port const & rhs )
 
 std::ostream &			operator<<( std::ostream & o, Port const & i )
 {
-	o << "Port_nb = " << (i.getConfig())["listen"];
+	(void)i;
+	//o << "Port_nb = " << ((i.getConfig())["listen"])._value;
 	return o;
 }
 

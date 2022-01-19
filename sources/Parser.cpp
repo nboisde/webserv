@@ -118,8 +118,8 @@ int	Parser::checkServer(void)
 
 int	Parser::checkKeys(void)
 {
-	std::map<std::string, std::string>::iterator it = _dict.begin();
-	std::map<std::string, std::string>::iterator ite = _dict.end();
+	std::map<std::string, Value>::iterator it = _dict.begin();
+	std::map<std::string, Value>::iterator ite = _dict.end();
 	int	found = 0;
 
 	while (_pos < _size && isspace(_content[_pos]))
@@ -218,8 +218,8 @@ int	Parser::checkLocation(std::string value) { (void)value; return (1); }
 
 int	Parser::checkValue(std::string key, std::string value, Port & port)
 {
-	std::map<std::string, std::string>::iterator	ite = port.getConfig().end();
-	std::map<std::string, std::string>::iterator	it = port.getConfig().find(key);
+	std::map<std::string, Value>::iterator	ite = port.getConfig().end();
+	std::map<std::string, Value>::iterator	it = port.getConfig().find(key);
 	std::map<std::string, validity_fct>::iterator	cite = _validity_check.end();
 	std::map<std::string, validity_fct>::iterator	cit = _validity_check.find(key);
 
