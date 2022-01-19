@@ -224,7 +224,6 @@ int	Parser::checkValue(std::string key, std::string value, Port & port)
 	std::map<std::string, validity_fct>::iterator	cite = _validity_check.end();
 	std::map<std::string, validity_fct>::iterator	cit = _validity_check.find(key);
 
-	std::cout << "Key " << key << std::endl;
 	if (it == ite || cite == cit)
 		return (0);
 	if (!((this->*_validity_check[key])(value)))
