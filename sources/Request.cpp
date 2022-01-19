@@ -171,8 +171,6 @@ int Request::concatenateRequest(std::string tmp)
 	else
 		buf = tmp;
 	
-	std::cout << "what ???" << std::endl;
-	
 	_raw_content += buf;
 
 	// ICI: check la premiere ligne ! Check si le protocol est bon.
@@ -255,19 +253,27 @@ int Request::errorHandling(std::vector<std::string> v)
 {
 	//gestion de la presence de l'url requise.
 	//gestion d'une taille de header trop grosse.
-	// A FAIRE ABSOLUMENT !!!!!!! HOST OK ! gestion des champs sans : qui sont ok tant que l'host et la ligne 1 sont la ! A ne pas mettre dans la map !
 	int cl = 0;
 	int te = 0;
+	int host = 0;
 	if (_method_type == UNKNOWN || !findProtocol(_header))
 		return errorReturn();
-	//std::cout << *(v.begin() + 2) << std::endl;
 	for (std::vector<std::string>::iterator it = v.begin() + 1; it != v.end(); it++)
 	{
 		int len = static_cast<int>((*it).length());
 		int ret = (*it).find(":");
+		if (host == 0)
+			if (static_cast<int>((*it).find("Host")) != -1 && ret != -1)
+				host = 1;
 		//NO double dot.
 		if (ret == -1)
-			return errorReturn();
+		{
+			if (static_cast<int>((*it).find(" ")) != -1)
+				return errorReturn();
+			else
+				continue ;
+		}
+		//	return errorReturn();
 		//EMPTY FIELD.
 		if (ret == 0 || (*it)[ret - 1] == ' ')
 			return errorReturn();
@@ -326,6 +332,8 @@ int Request::errorHandling(std::vector<std::string> v)
 	// NOT A COMBINAISON OF TE.CL or TE.TE or CL.CL
 	if ((te == 1 && cl == 1) || te > 1 || cl > 1)
 		return errorReturn();
+	if (host == 0)
+		return errorReturn();
 	return SUCCESS;
 }
 
@@ -377,6 +385,9 @@ int		Request::parseHeader(void)
 			continue ;
 		}
 		ret = (*it).find(":");
+		// Doesn't put in header data empty lines. // Don't know if we must consider...
+		if (ret == -1)
+			continue ;
 		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
 	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
