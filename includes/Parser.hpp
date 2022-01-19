@@ -41,6 +41,7 @@ class Parser
 		int					checkErrorPage(std::string value);
 		int					checkRoot(std::string value);
 		int					checkIndex(std::string value);
+		int					checkLocation(std::string value);
 
 	public:
 		

@@ -214,6 +214,7 @@ int	Parser::checkServerName(std::string value) { (void)value; return (1); }
 int	Parser::checkErrorPage(std::string value) { (void)value; return (1); }
 int	Parser::checkRoot(std::string value) { (void)value; return (1); }
 int	Parser::checkIndex(std::string value) { (void)value; return (1); }
+int	Parser::checkLocation(std::string value) { (void)value; return (1); }
 
 int	Parser::checkValue(std::string key, std::string value, Port & port)
 {
@@ -273,6 +274,7 @@ int Parser::defaultConfiguration(void)
 	_validity_check["method"] = &Parser::checkMethod;
 	_validity_check["root"] = &Parser::checkRoot;
 	_validity_check["index"] = &Parser::checkIndex;
+	_validity_check["location"] = &Parser::checkLocation;
 	return SUCCESS;
 }
 
