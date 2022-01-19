@@ -144,7 +144,6 @@ int	Parser::checkKeys(void)
 int	Parser::setValues(std::string key)
 {
 	int	isspaceNb = 0;
-
 	while (_pos < _size && isspace(_content[_pos]))
 	{
 		_pos++;
@@ -152,9 +151,11 @@ int	Parser::setValues(std::string key)
 	}
 	if (!isspaceNb)
 		return (0);
-	while (_pos < _size && _content[_pos] != ';')
+	while (_pos < _size && _content[_pos] != ';' && _content[_pos] != '}') 
 	{
 		int	dot = _content.find_first_of(";", _pos);
+		if (key == "location")
+			dot = _content.find_first_of("}", _pos);
 		std::string value = _content.substr(_pos, dot - _pos);
 		if (!(checkValue(key, value, _server.getRefPorts().back())))
 			return (0);
@@ -218,11 +219,12 @@ int	Parser::checkLocation(std::string value) { (void)value; return (1); }
 
 int	Parser::checkValue(std::string key, std::string value, Port & port)
 {
-	std::map<std::string, Value>::iterator	ite = port.getConfig().end();
-	std::map<std::string, Value>::iterator	it = port.getConfig().find(key);
+	std::map<std::string, Value>::iterator			ite = port.getConfig().end();
+	std::map<std::string, Value>::iterator			it = port.getConfig().find(key);
 	std::map<std::string, validity_fct>::iterator	cite = _validity_check.end();
 	std::map<std::string, validity_fct>::iterator	cit = _validity_check.find(key);
 
+	std::cout << "Key " << key << std::endl;
 	if (it == ite || cite == cit)
 		return (0);
 	if (!((this->*_validity_check[key])(value)))
