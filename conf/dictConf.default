@@ -13,4 +13,4 @@ error_page : 404
 index : index.html
 root    :       /www
 location :      /www
-autoindex:        off          
+autoindex:        off

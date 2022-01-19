@@ -262,7 +262,7 @@ int Parser::defaultConfiguration(void)
 			value = value.substr(k, value.length() - k);
 			while (static_cast<int>(value.find(" ")) != -1 || static_cast<int>(value.find("\t")) != -1)
 				value = value.substr(0, value.length() - 1);
-			_dict[key] = value;
+			_dict[key] = Value(value);
 		}
 	}
 	_validity_check["listen"] = &Parser::checkPort;

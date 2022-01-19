@@ -1,22 +1,12 @@
 #include "Port.hpp"
 
-namespace ws{
-/*
-** ------------------------------- CONSTRUCTOR --------------------------------
-*/
+namespace ws
+{
 
 Port::Port( void ) {}
-Port::Port( std::map<std::string, std::string> dictionnary) : _config(dictionnary) {}
+Port::Port( config_type dictionnary ) : _config(dictionnary) {}
 Port::Port( const Port & src ) { *this = src; }
-
-/*
-** -------------------------------- DESTRUCTOR --------------------------------
-*/
-
-Port::~Port( void )
-{
-}
-
+Port::~Port( void ) {}
 
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
@@ -68,7 +58,7 @@ int		Port::launchPort( void ){
 	memset((char *)&_port_address, 0, sizeof(_port_address));
 	_port_address.sin_family = AF_INET; 
 	_port_address.sin_addr.s_addr = htonl(INADDR_ANY); 
-	_port_address.sin_port = htons(atoi((_config["listen"]).c_str()));
+	_port_address.sin_port = htons(atoi((_config["listen"]._value).c_str()));
 	if (bind() < 0 || listening() < 0)
 		return ERROR;
 	return SUCCESS;
@@ -133,11 +123,10 @@ void	Port::removeClient( int fd )
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-int										Port::getFd( void ) const { return _fd; }
-void									Port::setFd( int fd ) {	_fd = fd; }
-std::vector<Client>	&					Port::getClients( void ) { return _clients; }
-std::map<std::string, std::string>		Port::getConfig( void ) const { return _config; }
-std::map<std::string, std::string> &	Port::getConfig( void ) { return _config; }
+int								Port::getFd( void ) const { return _fd; }
+void							Port::setFd( int fd ) {	_fd = fd; }
+std::vector<Client>	&			Port::getClients( void ) { return _clients; }
+std::map<std::string, Value> &	Port::getConfig( void ) { return _config; }
 
 /* ************************************************************************** */
 }

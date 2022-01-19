@@ -18,10 +18,9 @@ class Value
 		std::map<int, std::string>			_errors;
 		std::vector<std::string>			_methods;
 		std::map<std::string, std::string>	_locations;
-
+	
 	private:
 		Value();
-
 };
 
 std::ostream &			operator<<( std::ostream & o, Value const & i );
