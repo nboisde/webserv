@@ -11,6 +11,6 @@ client_max_body_size : 100M
 error_page : 404
 #this is another comment
 index : index.html
-root    :       /www
+root    :       /www/html
 location :      /www
 autoindex:        off

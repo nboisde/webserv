@@ -10,7 +10,6 @@
 // Litteral MACROS
 # define CRLF "\r\n"
 
-
 // Requests State MACROS
 # define REQUEST_FORMAT_ERROR -1
 # define RECEIVING_HEADER 0

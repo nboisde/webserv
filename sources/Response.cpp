@@ -91,7 +91,7 @@ std::string		Response::genDate( void ){
 std::string		Response::genHeader( void ){
 	std::stringstream header;
 
-	header << genDate();
+	header << genDate() << CRLF;
 	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
 	
 	header << CRLF;
@@ -102,7 +102,7 @@ const char *      Response::response( void ){
 	std::stringstream tmp;
 	
 	tmp << genStatusLine() << CRLF;
-	tmp << genHeader();
+	tmp << genHeader() << CRLF;
 
 	tmp << _content;
 
