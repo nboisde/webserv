@@ -4,6 +4,7 @@ namespace ws{
 
 Request::Request( void ):
 _line(0),
+_cursor(0),
 _state(RECEIVING_HEADER),
 _raw_content(""),
 _body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
@@ -132,6 +133,7 @@ int		Request::findProtocol(std::string buf)
 
 int Request::bodyReceived(void)
 {
+	_line = 0;
 	_state = BODY_RECEIVED;
 	return SUCCESS;
 }
@@ -191,16 +193,41 @@ int Request::concatenateRequest(std::string tmp)
 		return ERROR;
 	if (requestReceptionState() == BODY_RECEIVED)
 		return SUCCESS;
-	//HEADER CATCH
 	if (requestReceptionState() == RECEIVING_HEADER)
 	{
 		_header_len_received += buf.length();
+		//EDIT THE VECTOR AND LAUNCH ERROR FUNCTION !
+		std::string tmp2 = _raw_content.substr(_cursor, _raw_content.length() - _cursor);
+		std::cout << "_cursor : " << _cursor << std::endl;
+		int i = tmp2.find("\r\n");
+		int i2 = tmp2.find("\n");
+		std::string crlf = ((i == -1 && i2 == -1) || i != -1) ? "\r\n" : "\n";
+		int ret = ((i == -1 && i2 == -1) || i != -1) ? i : i2;
+		while (ret != -1)
+		{
+			_vheader.push_back(tmp2.substr(0, ret));
+			if (ret > 0)
+				_cursor += ret + crlf.length();
+			tmp2 = tmp2.substr(ret + crlf.length(), tmp2.length() - ret);
+			ret = tmp2.find(crlf);
+			if (tmp2.find(crlf) == 0)
+			{
+				_cursor -= crlf.length();
+				break ;
+			}
+		}
+/* 		for (std::vector<std::string>::iterator it = _vheader.begin(); it != _vheader.end(); it++)
+			std::cout << (*it) << std::endl; */
+		if (errorHandling(_vheader, 2) == ERROR)
+			return errorReturn();
 		if (checkHeaderEnd() == 1)
 		{
+			_cursor = 0;
+			_vheader.clear();
 			int ct = identifyBodyLengthInHeader();
 			int te = isTransferEncoding();
-			if (_method_type == UNKNOWN)
-				findMethod();
+			//if (_method_type == UNKNOWN)
+			//	findMethod();
 			if (_method_type == UNKNOWN)// || (ct == 1 && te == 1))
 				return errorReturn();
 			/* else  */if (ct == 1)
@@ -217,6 +244,7 @@ int Request::concatenateRequest(std::string tmp)
 		int r = _raw_content.find("\r\n\r\n");
 		int r2 = _raw_content.find("\n\n");
 		int i = (r == -1) ? r2 : r;
+		// Attention ici a gerer si la content length ne match jamais la reception...
 		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 			return bodyReceived();
 		else if (_body_reception_encoding == CONTENT_LENGTH && _body_len_received + _header_len_received < _content_length + i + 4)
@@ -249,14 +277,14 @@ int Request::errorReturn(void)
 ** This function handle Errors in the format -> the result will be used in parse header and after that in the return of fillHeaderAndBody.
 */
 
-int Request::errorHandling(std::vector<std::string> v)
+int Request::errorHandling(std::vector<std::string> v, int i)
 {
 	//gestion de la presence de l'url requise.
 	//gestion d'une taille de header trop grosse.
 	int cl = 0;
 	int te = 0;
 	int host = 0;
-	if (_method_type == UNKNOWN || !findProtocol(_header))
+	if (_method_type == UNKNOWN || !findProtocol(_raw_content))
 		return errorReturn();
 	for (std::vector<std::string>::iterator it = v.begin() + 1; it != v.end(); it++)
 	{
@@ -332,7 +360,7 @@ int Request::errorHandling(std::vector<std::string> v)
 	// NOT A COMBINAISON OF TE.CL or TE.TE or CL.CL
 	if ((te == 1 && cl == 1) || te > 1 || cl > 1)
 		return errorReturn();
-	if (host == 0)
+	if (i == 1 && host == 0)
 		return errorReturn();
 	return SUCCESS;
 }
@@ -357,7 +385,7 @@ int		Request::parseHeader(void)
 		if (tmp.find(crlf) == 0)
 			break ;
 	}
-	int err = errorHandling(v);
+	int err = errorHandling(v, 1);
 	if (err == ERROR)
 		return errorReturn();
 	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)

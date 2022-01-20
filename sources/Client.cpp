@@ -55,7 +55,7 @@ int Client::receive(void)
 	int req = _req.concatenateRequest(tmp);
 	if (req == -1)
 	{
-		std::cout << "Gerer ici une reponse d'erreur" << std::endl;
+		std::cout << "Gerer ici une reponse d'erreur (400 -> Error Header.)" << std::endl;
 		return WRITING;
 		//exit(EXIT_FAILURE);
 	}
