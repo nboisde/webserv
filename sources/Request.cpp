@@ -502,6 +502,7 @@ int										Request::getHeaderSize(void) const { return _header_size; }
 std::string								Request::getHeader(void) const { return _header; }
 std::string								Request::getBody(void) const { return _body; }
 int										Request::getState(void) const { return _state; }
-std::map<std::string, std::string>		Request::getHead(void) const { return _head; }
+std::map<std::string, std::string>		Request::getHead( void ) const { return _head; }
+std::map<std::string, std::string> &	Request::getHead( void ) { return _head; }
 
 }

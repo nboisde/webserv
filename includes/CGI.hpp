@@ -26,7 +26,6 @@ class CGI {
 		int									generate_arg( void );
 		int									execute( Client & cli );
 
-
 		int									createResponse(int fd, std::string & response);
 
 		std::string							getBinLocation( void ) const;

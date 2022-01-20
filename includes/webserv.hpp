@@ -22,6 +22,10 @@
 # define CONTENT_LENGTH 1
 # define TRANSFER_ENCODING 2
 
+// RESPONSE TYPES
+# define R_CGI 1
+# define R_HTML 2
+
 // CLIENT STATUS
 # define CLOSING 0
 # define READING 1
@@ -59,7 +63,9 @@
 # include <sys/types.h>
 # include <unistd.h>
 # include <sys/types.h>
+# include <sys/stat.h>
 # include <sys/wait.h>
+
 //# include <sys/event.h>
 # include <sys/time.h>
 # include <sys/socket.h>

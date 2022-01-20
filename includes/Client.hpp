@@ -6,19 +6,20 @@
 # include "Response.hpp"
 # include "CGI.hpp"
 # include "Server.hpp"
+# include "Port.hpp"
 
 namespace ws {
 
-//class Request;
-//class Response;
+class Port;
 
 class Client
 {
 	protected:
-		int			_fd;
-		int			_status;
+		int				_fd;
+		int				_status;
 		ws::Request		_req;
 		ws::Response	_res;
+		std::string		_file_path;
 
 	public:
 		Client( void );
@@ -29,7 +30,9 @@ class Client
 		Client &		operator=( Client const & rhs );
 
 		int 			receive( void );
-		int				executeCGI( Server const & serv );
+		int				checkURI( Port & port );
+		int				executeCGI( Server const & serv, Port & port );
+		int				executeHtml( Port & port );
 		int				send( void );
 		void			closeConnection( void );
 

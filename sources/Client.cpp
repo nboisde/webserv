@@ -118,10 +118,49 @@ int Client::send( void )
 	return CLOSING;
 }
 
-int	Client::executeCGI( Server const & serv ){
+int	Client::checkURI( Port & port )
+{
+	std::string	url;
+	std::string	root;
+	char		*buf = NULL;
+
+	url =_req.getHead()["url"];
+	if (url == "/")
+		url = "/index.html";
+	root = (port.getConfig())["root"]._value;
+	buf = getcwd(buf, 0);
+	// check location for this specific url
+	// if locatione exists, make substituion else add root
+	// replace / by root
+	_file_path = buf;
+	_file_path += root;
+	_file_path += url;
+	std::cout << _file_path << std::endl;
+	int fd = ::open(_file_path.c_str(), O_RDONLY);
+	if (fd < 0)
+		return ERROR;
+	close(fd);
+	return (R_CGI);
+}
+
+int	Client::executeCGI( Server const & serv, Port & port )
+{
+	int	res_type;
 	CGI cgi(*this, serv);
 
-	cgi.execute(*this);
+	res_type = checkURI(port);
+	if (res_type == R_CGI)
+		cgi.execute(*this);
+	else if (res_type == R_HTML)
+		executeHtml( port );
+	else 
+		return ERROR;
+	return SUCCESS;
+}
+
+int	Client::executeHtml(Port & port )
+{
+	(void)port;
 	return SUCCESS;
 }
 
@@ -131,29 +170,10 @@ void Client::closeConnection(){}
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-int	Client::getStatus( void ) const
-{
-	return _status;
-}
-
-
-int Client::getFd(void) const
-{
-	return _fd;
-}
-
-Request & Client::getReq( void )
-{
-	return _req;
-}
-
-Request 	Client::getReq( void ) const{
-	return _req;
-}
-
-Response & Client::getRes( void )
-{
-	return _res;
-}
+int			Client::getStatus( void ) const { return _status; }
+int			Client::getFd(void) const { return _fd; }
+Request &	Client::getReq( void ) { return _req; }
+Request		Client::getReq( void ) const { return _req; }
+Response &	Client::getRes( void ) { return _res; }
 
 }
