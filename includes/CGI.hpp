@@ -26,7 +26,8 @@ class CGI {
 		int									generate_arg( void );
 		int									execute( Client & cli );
 
-		int									createResponse(int fd, std::string & response);
+
+		int									concatenateResponse(int fd, std::string & response);
 
 		std::string							getBinLocation( void ) const;
 		std::map<std::string, std::string>	getHeader( void ) const;
