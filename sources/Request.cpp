@@ -198,7 +198,6 @@ int Request::concatenateRequest(std::string tmp)
 		_header_len_received += buf.length();
 		//EDIT THE VECTOR AND LAUNCH ERROR FUNCTION !
 		std::string tmp2 = _raw_content.substr(_cursor, _raw_content.length() - _cursor);
-		std::cout << "_cursor : " << _cursor << std::endl;
 		int i = tmp2.find("\r\n");
 		int i2 = tmp2.find("\n");
 		std::string crlf = ((i == -1 && i2 == -1) || i != -1) ? "\r\n" : "\n";
