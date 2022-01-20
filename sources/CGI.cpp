@@ -155,7 +155,7 @@ int		CGI::execute( Client & cli ){
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);
-		//execve(_bin_location.c_str(), _arg, _env);
+		// execve(_bin_location.c_str(), _arg, _env);
 		execlp(_bin_location.c_str(), "/usr/bin/php-cgi", "./www/php/bonjour.php", _env);
 		exit(SUCCESS);
 	}
