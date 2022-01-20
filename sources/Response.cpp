@@ -26,6 +26,7 @@ Response::Response( void ) : _response("Hello from Server\n"), _content("<html>\
 <h1>Hello, World!</h1>\n\
 </body>\n\
 </html>"){
+	_status_line = genStatusLine();
 };
 
 Response::Response( Response const & src){
@@ -88,27 +89,29 @@ std::string		Response::genDate( void ){
 	return ret.str();
 }
 
-std::string		Response::genHeader( void ){
-	std::stringstream header;
+std::string	const &	Response::genHeader( void ){
 
-	header << genDate() << CRLF;
+	_header += genDate();
 	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
 	
-	header << CRLF;
-	return header.str();
+	_header += CRLF;
+	return _header;
 }
 
 const char *      Response::response( void ){
 	std::stringstream tmp;
 	
-	tmp << genStatusLine() << CRLF;
-	tmp << genHeader() << CRLF;
+	tmp << _status_line << CRLF;
+	tmp << genHeader();
 
 	tmp << _content;
 
 	tmp << CRLF << CRLF;
+
 	_response = tmp.str();
 	
+	std::cout << "RESPONSE = \n" << _response << std::endl;
+
 	const char * str = _response.c_str();
 	return str;
 }
@@ -117,9 +120,20 @@ size_t      Response::response_size( void ){
 	return  _response.size();
 }
 
-void			treatCGI( int CGI_status, std::string response ){
-	(void) CGI_status;
-	(void) response;
+void		Response::treatCGI( std::string response )
+{
+	int pos;
+
+	if ((pos = response.find("Status: ")) != -1)
+	{
+		pos += 8;
+		_status_line = "HTTP/1.1 ";	
+		_status_line +=  response.substr(pos, response.find("\r\n", pos) - pos);
+		_content = response.substr(0, pos - 8);
+		_content += response.substr(response.find("\r\n", pos) + 2);
+	}
+	else
+		_content = response;
 }
 
 //ACCESSORS - GETTERS//

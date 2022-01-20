@@ -163,19 +163,18 @@ int		CGI::execute( Client & cli ){
 	waitpid(pid, &child_stat, 0);
 	
 	//DEBUG//
-	std::cout << "Child Return Value = " << WEXITSTATUS(child_stat) << std::endl;
+	//std::cout << "Child Return Value = " << WEXITSTATUS(child_stat) << std::endl;
 	
 	close(fd[1]);
 	std::string response;
-	createResponse(fd[0], response);
-	std::cout << "Child Response content = \n" << response << std::endl;
+	concatenateResponse(fd[0], response);
+	//std::cout << "Child Response content = \n" << response << std::endl;
 	close(fd[0]);
-	cli.getRes().setContent(response);
-	//cli.getRes().treatCGI(0, response);
+	cli.getRes().treatCGI(response);
 	return SUCCESS;
 }
 
-int	CGI::createResponse(int fd, std::string & response)
+int	CGI::concatenateResponse(int fd, std::string & response)
 {
 	size_t	buff_size = 80;
 	char buff[buff_size];

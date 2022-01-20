@@ -17,12 +17,13 @@ namespace ws
 
 			void			treatCGI( int CGI_status, std::string response );
 
-			std::string 	genStatusLine( void );
-			std::string		genDate( void );
-			std::string		genHeader( void );
+			std::string 		genStatusLine( void );
+			std::string			genDate( void );
+			std::string	const &	genHeader( void );
 
 			const char *	response( void ); //CREER LA REPONSE A PARTIR DE ENTETE ET DONNES DE RETOUR
 			size_t			response_size( void ); //RENVOIE LA TAILLE DE LA REP
+			void			treatCGI( std::string response); //DISSEQUE LA REPONSE DU CGI
 
 			std::string		getResponse( void ) const;
 			std::string		getStatusLine(void) const;
