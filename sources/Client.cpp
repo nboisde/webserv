@@ -128,6 +128,7 @@ int	Client::checkURI( Port & port )
 	if (url == "/")
 		url = "/index.html";
 	root = (port.getConfig())["root"]._value;
+	std::cout << "ROOT " << root << std::endl;
 	buf = getcwd(buf, 0);
 	// check location for this specific url
 	// if locatione exists, make substituion else add root
@@ -140,7 +141,11 @@ int	Client::checkURI( Port & port )
 	if (fd < 0)
 		return ERROR;
 	close(fd);
-	return (R_CGI);
+	int pos = _file_path.find(".php");
+	int size = _file_path.size();
+	if (size - pos == 4)
+		return (R_CGI);
+	return (R_HTML);
 }
 
 int	Client::executeCGI( Server const & serv, Port & port )
@@ -149,6 +154,7 @@ int	Client::executeCGI( Server const & serv, Port & port )
 	CGI cgi(*this, serv);
 
 	res_type = checkURI(port);
+	std::cout << "Response " << res_type << std::endl;
 	if (res_type == R_CGI)
 		cgi.execute(*this);
 	else if (res_type == R_HTML)
@@ -161,6 +167,16 @@ int	Client::executeCGI( Server const & serv, Port & port )
 int	Client::executeHtml(Port & port )
 {
 	(void)port;
+	std::ifstream	ifs(_file_path.c_str());
+	std::string		buffer;
+	std::string		content;
+
+	while (getline(ifs, buffer))
+		content += buffer;
+	ifs.close();
+	_res.setContent(content);
+	_res.response();
+	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
 }
 
