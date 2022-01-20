@@ -15,7 +15,6 @@ class Request {
 		Request &	operator=( Request const & rhs );
 
 		int			concatenateRequest(std::string tmp);
-		int			concatenateRequest2(std::string tmp);
 		int			requestReceptionState();
 		int			identifyBodyLengthInHeader(void);
 		int			isTransferEncoding(void) const;
