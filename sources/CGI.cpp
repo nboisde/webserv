@@ -66,14 +66,14 @@ CGI::~CGI( void )
 	if (!_arg)
 	{
 		for (int i = 0; _arg[i] != NULL; i++)
-			delete(_arg[i]);
-		delete(_arg);
+			free(_arg[i]);
+		free(_arg);
 	}
 	if (!_env)
 	{
 		for (int i = 0; _env[i] != NULL; i++)
-				delete(_env[i]);
-		delete(_env);
+				free(_env[i]);
+		free(_env);
 	}
 	return;
 }
@@ -168,7 +168,7 @@ int		CGI::execute( Client & cli ){
 	close(fd[1]);
 	std::string response;
 	createResponse(fd[0], response);
-	std::cout << "Child Response content = " << response << std::endl;
+	std::cout << "Child Response content = \n" << response << std::endl;
 	close(fd[0]);
 	cli.getRes().setContent(response);
 	//cli.getRes().treatCGI(0, response);
