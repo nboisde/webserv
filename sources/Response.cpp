@@ -24,6 +24,7 @@ std::map<int, std::string>  Response::_status_code = init_responseMap();
 Response::Response( void ) 
 {
 	_status_line = genStatusLine();
+	_header = genHeader();
 };
 
 Response::Response( Response const & src){
@@ -92,7 +93,6 @@ std::string	const &	Response::genHeader( void ){
 	_header += genDate();
 	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
 	
-	_header += CRLF;
 	return _header;
 }
 
@@ -100,11 +100,9 @@ const char *      Response::response( void ){
 	std::stringstream tmp;
 	
 	tmp << _status_line << CRLF;
-	tmp << genHeader();
-
+	tmp << _header << CRLF;
+	tmp << CRLF;
 	tmp << _body;
-
-	tmp << CRLF << CRLF;
 
 	_response = tmp.str();
 	
@@ -126,12 +124,16 @@ void		Response::treatCGI( std::string cgi_output )
 	{
 		pos += 8;
 		_status_line = "HTTP/1.1 ";	
-		_status_line +=  cgi_output.substr(pos, cgi_output.find("\r\n", pos) - pos);
+		_status_line +=  cgi_output.substr(pos, cgi_output.find(CRLF, pos) - pos);
 		_body = cgi_output.substr(0, pos - 8);
-		_body += cgi_output.substr(cgi_output.find("\r\n", pos) + 2);
+		_body += cgi_output.substr(cgi_output.find(CRLF, pos) + 2);
 	}
-	else
-		_body = cgi_output;
+	else if ((pos = cgi_output.find(BODY_CRLF)) != -1)
+	{
+		_body = cgi_output. substr(pos + 4);
+		_header += CRLF;
+		_header += cgi_output. substr(0, pos);
+	}
 }
 
 //ACCESSORS - GETTERS//

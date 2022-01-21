@@ -9,6 +9,7 @@
 
 // Litteral MACROS
 # define CRLF "\r\n"
+# define BODY_CRLF "\r\n\r\n"
 
 // Requests State MACROS
 # define REQUEST_FORMAT_ERROR -1
