@@ -21,11 +21,8 @@ std::map<int, std::string>	init_responseMap( void ){
 
 std::map<int, std::string>  Response::_status_code = init_responseMap();
 
-Response::Response( void ) : _response("Hello from Server\n"), _content("<html>\n\
-<body>\n\
-<h1>Hello, World!</h1>\n\
-</body>\n\
-</html>"){
+Response::Response( void ) 
+{
 	_status_line = genStatusLine();
 };
 
@@ -43,6 +40,7 @@ Response &  Response::operator=( Response const & rhs)
 		_response = rhs.getResponse();
 		_status_line = rhs.getStatusLine();
 		_header = rhs.getHeader();
+		_content = rhs.getContent();
 	}
 	return *this;
 }
