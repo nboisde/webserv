@@ -101,13 +101,32 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
 				{
+/* 					int ret = 1;
+					if ((*ct).getReq().getConnection() == CLOSE)
+					{
+						ret = (*ct).send();
+ 						closeConnection(ct, pt);
+					}
+					else
+					{
+						ret = (*ct).send();
+						findFds((*ct).getFd()).events = POLLIN | POLLHUP;
+						findFds((*ct).getFd()).revents = 0;
+					} */
 					int ret = (*ct).send();
 					//(findFds((*ct).getFd())).events = POLLOUT;
 					if (ret == CLOSING)
 					{
 						// THIS SHOULD BE PERFORMED IF in header Connection: close.
 						//if keep-alive, maybe we don't close the file descriptor of the client.
- 						closeConnection(ct, pt);
+						if ((*ct).getReq().getConnection() == CLOSE)
+ 							closeConnection(ct, pt);
+						else
+						{
+							(*ct).getReq().resetValues();
+							findFds((*ct).getFd()).revents = 0;
+							findFds((*ct).getFd()).events = POLLIN | POLLHUP;
+						}
 					}
 					else
 						ct++;

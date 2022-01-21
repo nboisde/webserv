@@ -26,6 +26,8 @@ class Request
 		int				fillHeaderAndBody(void);
 		void			ChunkedBodyProcessing(std::string body);
 		int				parseHeader(void);
+		void			manageConnection( std::string str );
+		void			resetValues(void);
 
 		
 		// GETTERS
@@ -40,6 +42,7 @@ class Request
 		int				getState( void ) const;
 		head_type		getHead( void ) const;
 		head_type &		getHead( void );
+		int				getConnection( void ) const;
 
 	private:
 		int			findProtocol(std::string buf);
@@ -50,6 +53,7 @@ class Request
 		int							_line;
 		int							_cursor;
 		int							_state;
+		int							_connection;
 		std::string					_raw_content;
 		int							_body_reception_encoding;
 		int							_body_len_received;
