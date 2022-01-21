@@ -40,7 +40,7 @@ Response &  Response::operator=( Response const & rhs)
 		_response = rhs.getResponse();
 		_status_line = rhs.getStatusLine();
 		_header = rhs.getHeader();
-		_content = rhs.getContent();
+		_body = rhs.getBody();
 	}
 	return *this;
 }
@@ -102,7 +102,7 @@ const char *      Response::response( void ){
 	tmp << _status_line << CRLF;
 	tmp << genHeader();
 
-	tmp << _content;
+	tmp << _body;
 
 	tmp << CRLF << CRLF;
 
@@ -118,20 +118,20 @@ size_t      Response::response_size( void ){
 	return  _response.size();
 }
 
-void		Response::treatCGI( std::string response )
+void		Response::treatCGI( std::string cgi_output )
 {
 	int pos;
 
-	if ((pos = response.find("Status: ")) != -1)
+	if ((pos = cgi_output.find("Status: ")) != -1)
 	{
 		pos += 8;
 		_status_line = "HTTP/1.1 ";	
-		_status_line +=  response.substr(pos, response.find("\r\n", pos) - pos);
-		_content = response.substr(0, pos - 8);
-		_content += response.substr(response.find("\r\n", pos) + 2);
+		_status_line +=  cgi_output.substr(pos, cgi_output.find("\r\n", pos) - pos);
+		_body = cgi_output.substr(0, pos - 8);
+		_body += cgi_output.substr(cgi_output.find("\r\n", pos) + 2);
 	}
 	else
-		_content = response;
+		_body = cgi_output;
 }
 
 //ACCESSORS - GETTERS//
@@ -148,8 +148,8 @@ std::string		Response::getHeader( void ) const{
 	return _header;
 }
 
-std::string		Response::getContent( void ) const{
-	return _content;
+std::string		Response::getBody( void ) const{
+	return _body;
 }
 
 //ACCESSORS - SETTERS//
@@ -165,8 +165,8 @@ void			Response::setHeader( std::string header ){
 	_header = header;
 }
 
-void			Response::setContent( std::string newcontent ){
-	_content = newcontent;
+void			Response::setBody( std::string newbody ){
+	_body = newbody;
 }
 
 }
