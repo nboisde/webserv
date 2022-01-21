@@ -14,7 +14,7 @@ class Request {
 
 		Request &	operator=( Request const & rhs );
 
-		int			concatenateRequest(std::string buf);
+		int			concatenateRequest(std::string tmp);
 		int			requestReceptionState();
 		int			identifyBodyLengthInHeader(void);
 		int			isTransferEncoding(void) const;
@@ -39,11 +39,12 @@ class Request {
 
 	private:
 		int			findProtocol(std::string buf);
-		int			errorHandling(std::vector<std::string> v);
+		int			errorHandling(std::vector<std::string> v, int i);
 		int 		errorReturn(void);
 		int			bodyReceived(void);
 
-
+		int			_line;
+		int			_cursor;
 		int			_state;
 		std::string	_raw_content;
 		int			_body_reception_encoding;
@@ -54,6 +55,7 @@ class Request {
 		int 		_header_size;
 		std::string	_header;
 		std::string	_body;
+		std::vector<std::string> _vheader;
 		std::map<std::string, std::string> _head;
 };
 
