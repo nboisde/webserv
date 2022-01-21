@@ -100,6 +100,7 @@ const char *      Response::response( void ){
 	std::stringstream tmp;
 	
 	tmp << _status_line << CRLF;
+	addContentLength();
 	tmp << _header << CRLF;
 	tmp << CRLF;
 	tmp << _body;
@@ -112,8 +113,12 @@ const char *      Response::response( void ){
 	return str;
 }
 
-size_t      Response::response_size( void ){
-	return  _response.size();
+void	Response::addContentLength( void ){
+	std::stringstream length;
+	
+	length << "Content-Length: " << _body.size();
+	_header += CRLF;
+	_header += length.str();
 }
 
 void		Response::treatCGI( std::string cgi_output )
