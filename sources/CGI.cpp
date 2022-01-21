@@ -170,7 +170,7 @@ int		CGI::execute( Client & cli ){
 	
 	close(fd[1]);
 	std::string response = concatenateResponse(fd[0]);
-	std::cout << "Child Response content = \n" << response << std::endl << "----EOR----" << std::endl;
+	//std::cout << "Child Response content = \n" << response << std::endl << "----EOR----" << std::endl;
 	//close(fd[0]); //CHECK IF FCLOSE IN CONCATENATE RESPONSE IS ENOUGH
 	cli.getRes().treatCGI(response);
 	return SUCCESS;

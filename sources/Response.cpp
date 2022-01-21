@@ -106,6 +106,8 @@ const char *      Response::response( void ){
 
 	_response = tmp.str();
 
+	std::cout << _response << std::endl;
+
 	const char * str = _response.c_str();
 	return str;
 }
@@ -123,15 +125,15 @@ void		Response::treatCGI( std::string cgi_output )
 		pos += 8;
 		_status_line = "HTTP/1.1 ";	
 		_status_line +=  cgi_output.substr(pos, cgi_output.find(CRLF, pos) - pos);
-		_body = cgi_output.substr(0, pos - 8);
-		_body += cgi_output.substr(cgi_output.find(CRLF, pos) + 2);
 	}
-	else if ((pos = cgi_output.find(BODY_CRLF)) != -1)
+	else
 	{
-		_body = cgi_output. substr(pos + 4);
+		pos = cgi_output.find(BODY_CRLF);
 		_header += CRLF;
-		_header += cgi_output. substr(0, pos);
+		_header += cgi_output.substr(0, pos);
 	}
+	if ((pos = cgi_output.find(BODY_CRLF)) != -1)
+		_body = cgi_output.substr(pos + 4);		
 }
 
 //ACCESSORS - GETTERS//
