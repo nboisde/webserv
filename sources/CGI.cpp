@@ -89,6 +89,9 @@ CGI &				CGI::operator=( CGI const & rhs )
 	{
 		this->_bin_location = rhs.getBinLocation();
 		this->_header = rhs.getHeader();
+		this->_arg = rhs.getArg();
+		this->_env = rhs.getEnv();
+		this->_conversion = rhs.getConversion();
 	}
 	return *this;
 }
@@ -197,6 +200,18 @@ std::string	CGI::getBinLocation( void ) const{
 }
 std::map<std::string, std::string> CGI::getHeader( void ) const{
 	return (_header);
+}
+
+std::map<std::string, std::string>	CGI::getConversion( void ) const{
+	return (_conversion);
+}
+
+char **		CGI::getArg( void ) const{
+	return (_arg);
+}
+
+char **		CGI::getEnv( void ) const {
+	return (_env);
 }
 
 }
