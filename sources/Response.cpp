@@ -105,8 +105,6 @@ const char *      Response::response( void ){
 	tmp << _body;
 
 	_response = tmp.str();
-	
-	std::cout << "RESPONSE = \n" << _response << std::endl;
 
 	const char * str = _response.c_str();
 	return str;
