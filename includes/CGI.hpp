@@ -29,8 +29,11 @@ class CGI {
 
 		int									concatenateResponse(int fd, std::string & response);
 
+		std::map<std::string, std::string>	getConversion( void ) const;
 		std::string							getBinLocation( void ) const;
 		std::map<std::string, std::string>	getHeader( void ) const;
+		char **								getArg( void ) const;
+		char **								getEnv( void ) const;
 
 	private:
 
