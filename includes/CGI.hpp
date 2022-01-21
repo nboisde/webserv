@@ -27,7 +27,7 @@ class CGI {
 		int									execute( Client & cli );
 
 
-		int									concatenateResponse(int fd, std::string & response);
+		std::string							concatenateResponse(int fd);
 
 		std::map<std::string, std::string>	getConversion( void ) const;
 		std::string							getBinLocation( void ) const;

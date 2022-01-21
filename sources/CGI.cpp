@@ -169,26 +169,28 @@ int		CGI::execute( Client & cli ){
 	//std::cout << "Child Return Value = " << WEXITSTATUS(child_stat) << std::endl;
 	
 	close(fd[1]);
-	std::string response;
-	concatenateResponse(fd[0], response);
+	std::string response = concatenateResponse(fd[0]);
 	std::cout << "Child Response content = \n" << response << std::endl << "----EOR----" << std::endl;
-	close(fd[0]);
+	//close(fd[0]); //CHECK IF FCLOSE IN CONCATENATE RESPONSE IS ENOUGH
 	cli.getRes().treatCGI(response);
 	return SUCCESS;
 }
 
-int	CGI::concatenateResponse(int fd, std::string & response)
+std::string	CGI::concatenateResponse(int fd)
 {
-	size_t	buff_size = 80;
-	char buff[buff_size];
+	std::string response;
+	char *line = NULL;
+	size_t line_size = 0;
+	FILE * pipe_end = fdopen(fd, "r");
 
-	bzero(buff, buff_size);
-	while (read(fd, &buff, buff_size) != 0)
+	while (getline(&line, &line_size, pipe_end) != -1)
 	{
-		response += buff;
-		bzero(buff, buff_size);
+		response += line;
+		free(line);
+		line = NULL;
 	}
-	return SUCCESS;
+	fclose(pipe_end);
+	return response;
 }
 
 /*
