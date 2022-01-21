@@ -35,6 +35,7 @@ class Server
 		void						setRevents( void );
 		void						cleanFds( void ) ;
 		struct pollfd	&			findFds( int fd );
+		void						closeConnection(it_client & ct, it_port & pt);
 		void						launchServer( void );
 		int							stopServer( void );
 
