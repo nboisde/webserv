@@ -21,7 +21,7 @@ namespace ws
 
 			const char *	response( void ); //CREER LA REPONSE A PARTIR DE ENTETE ET DONNES DE RETOUR
 			size_t			response_size( void ); //RENVOIE LA TAILLE DE LA REP
-			void			treatCGI( std::string cgi_output); //DISSEQUE LA REPONSE DU CGI
+			void			treatCGI( std::string cgi_output ); //DISSEQUE LA REPONSE DU CGI
 
 			std::string		getResponse( void ) const;
 			std::string		getStatusLine(void) const;
