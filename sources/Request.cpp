@@ -6,7 +6,7 @@ Request::Request( void ):
 _line(0),
 _cursor(0),
 _state(RECEIVING_HEADER),
-_connection(CLOSE),
+_connection(KEEP_ALIVE),
 _raw_content(""),
 _body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
 _body_len_received(0),
@@ -139,9 +139,9 @@ void	Request::manageConnection( std::string str )
 		return ;
 	else
 	{
-		int r2 = str.find("keep-alive");
+		int r2 = str.find("close");
 		if (r2 != -1)
-			_connection = KEEP_ALIVE;
+			_connection = CLOSE;
 		return ;
 	}
 }
@@ -512,7 +512,8 @@ void	Request::resetValues(void){
 	_line = 0;
 	_cursor = 0;
 	_state = RECEIVING_HEADER;
-	_connection = CLOSE;
+	_connection = KEEP_ALIVE;
+	_raw_content.clear();
 	_raw_content = "";
 	_body_reception_encoding = BODY_RECEPTION_NOT_SPECIFIED;
 	_body_len_received = 0;
@@ -520,7 +521,9 @@ void	Request::resetValues(void){
 	_content_length = 0;
 	_method_type = UNKNOWN;
 	_header_size = 0;
+	_header.clear();
 	_header = "";
+	_body.clear();
 	_body = "";
 }
 
