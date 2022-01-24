@@ -234,7 +234,24 @@ int	Parser::checkAutoindex(std::string raw_value, Value & new_value)
 int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1); }
 int	Parser::checkHost(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
 int	Parser::checkServerName(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
-int	Parser::checkErrorPage(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
+int	Parser::checkErrorPage(std::string raw_value, Value & new_value) 
+{
+	int pos = 0;
+	int	size = raw_value.size();
+	std::string	str_error;
+	int			nbr_error;
+
+	new_value._value = raw_value;
+	for (; pos < size && !isspace(raw_value[pos]); pos++) {}
+	str_error = raw_value.substr(0, pos);
+	nbr_error = atoi(raw_value.c_str());
+	if (nbr_error < 100 || nbr_error > 600)
+		return (0);
+	for (; pos < size && isspace(raw_value[pos]); pos++) {}
+	str_error = raw_value.substr(pos);
+	new_value._errors.insert(std::pair<int, std::string>(nbr_error, str_error));
+	return (SUCCESS);  
+}
 int	Parser::checkRoot(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
 int	Parser::checkIndex(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
 int	Parser::checkLocation(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
