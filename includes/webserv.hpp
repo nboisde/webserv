@@ -22,6 +22,10 @@
 # define CONTENT_LENGTH 1
 # define TRANSFER_ENCODING 2
 
+// Connection handling.
+# define CLOSE 0
+# define KEEP_ALIVE 1
+
 // RESPONSE TYPES
 # define R_CGI 1
 # define R_HTML 2
