@@ -174,7 +174,7 @@ int	Client::executeHtml(Port & port )
 	while (getline(ifs, buffer))
 		content += buffer;
 	ifs.close();
-	_res.setContent(content);
+	_res.setBody(content);
 	_res.response();
 	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
