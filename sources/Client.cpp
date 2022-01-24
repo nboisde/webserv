@@ -126,7 +126,6 @@ int	Client::checkURI( Port & port )
 	_file_path = buf;
 	_file_path += root;
 	_file_path += url;
-	//utiliser stream pour concatener 
 	std::cout << _file_path << std::endl;
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
@@ -155,7 +154,7 @@ int	Client::executeCGI( Server const & serv, Port & port )
 	return SUCCESS;
 }
 
-int	Client::executeHtml(Port & port)
+int	Client::executeHtml(Port & port )
 {
 	(void)port;
 	std::ifstream	ifs(_file_path.c_str());
@@ -171,7 +170,7 @@ int	Client::executeHtml(Port & port)
 	return SUCCESS;
 }
 
-void Client::closeConnection() {}
+void Client::closeConnection(){}
 
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
