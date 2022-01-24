@@ -330,4 +330,3 @@ Server	Parser::getServer( void ) { return _server; }
 // }
 
 }
-}

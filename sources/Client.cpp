@@ -39,8 +39,6 @@ int Client::receive(void)
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
-	//std::cout << "RECEIVED CONTENT = [" << buffer << "]" << std::endl;
-	//std::cout << buffer;
 	if ( ret < 0 )
 	{
 		perror("\nIn recv");
@@ -51,29 +49,23 @@ int Client::receive(void)
 	int req = _req.concatenateRequest(tmp);
 	if (req == -1)
 	{
-		std::cout << "Gerer ici une reponse d'erreur (400 -> Error Header.)" << std::endl;
+		std::cout << RED << "400 bad request (Header reception)" << RESET << std::endl;
 		_status = 400;
 		return WRITING;
-		//exit(EXIT_FAILURE);
 	}
-	if (/* ret < BUFFER_SIZE - 1 ||  */req == 1)
+	if (req == SUCCESS)
 	{
-		//std::cout << "ret :" << ret << std::endl;
 		int head_err = _req.fillHeaderAndBody();
 		if (head_err == ERROR)
 		{
-			std::cout << "Gerer ici une reponse d'erreur (parsing du header problematique !) -> Retour d'erreur 400 -> bad request." << std::endl;
+			std::cout << RED << "400 bad request (Header reception)" << RESET << std::endl;
 			_status = 400;
 			return WRITING;
 		}
- 		//std::cout << _req.getRawContent() << std::endl;
-		//std::cout << "--------------------------------" << std::endl << "Header:" << std::endl;
+		std::cout << BLUE;
 		std::cout << _req.getHeader() << std::endl;
-		//std::cout << "Body : " << std::endl << _req.getBody() << std::endl;
-		//std::cout << _req.getBody();// << std::endl;
-		//std::cout << _req.getBody().length() << std::endl;
+		std::cout << RESET;
 		write(1, _req.getBody().c_str(), _req.getBody().length());
-		//std::cout << std::endl;
 		_status = 200;
 		return WRITING;
 	}
