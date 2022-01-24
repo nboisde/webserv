@@ -79,7 +79,7 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLERR)))
 				{
-					std::cout << "Error on the fd : " << findFds((*ct).getFd()).fd << std::endl;
+					std::cout << "Client socket fd : " << findFds((*ct).getFd()).fd << " failed." << std::endl;
  					closeConnection(ct, pt);
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLHUP)))
@@ -106,18 +106,6 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
 				{
-/* 					int ret = 1;
-					if ((*ct).getReq().getConnection() == CLOSE)
-					{
-						ret = (*ct).send();
- 						closeConnection(ct, pt);
-					}
-					else
-					{
-						ret = (*ct).send();
-						findFds((*ct).getFd()).events = POLLIN | POLLHUP;
-						findFds((*ct).getFd()).revents = 0;
-					} */
 					int ret = (*ct).send();
 					//(findFds((*ct).getFd())).events = POLLOUT;
 					if (ret == CLOSING)
