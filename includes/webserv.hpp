@@ -56,6 +56,12 @@
 # define NOT_FOUND 404
 # define INTERNAL_SERVER_ERROR 500
 
+// COLORS
+# define RED "\033[38;5;124m"
+# define RESET "\033[0m"
+# define BLUE "\033[38;5;63m"
+# define GREEN "\033[38;5;42m"
+
 //CPP_LIBRARIES//
 # include <fstream>
 # include <utility>
