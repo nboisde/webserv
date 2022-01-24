@@ -144,9 +144,13 @@ const char *	Response::response( int status )
 	tmp << _body;
 
 	_response = tmp.str();
+<<<<<<< HEAD
 
 	//std::cout << _response << std::endl;
 
+=======
+	
+>>>>>>> progress on env var
 	const char * str = _response.c_str();
 	return str;
 }

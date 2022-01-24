@@ -72,7 +72,11 @@ int Client::send( void )
 {
 	int			ret;
 	const char* prov;
+<<<<<<< HEAD
 	std::string str = _res.response(_status);
+=======
+	std::string str = _res.getResponse();
+>>>>>>> progress on env var
 
 	prov = str.c_str();
 	ret = ::send(_fd, prov, str.size(), 0);
@@ -135,10 +139,16 @@ int	Client::checkURI( Port & port )
 
 	url =_req.getHead()["url"];
 	if (url == "/")
+<<<<<<< HEAD
 		url = port.getConfig()["index"]._value;
 	checkPath(url, port);
 	checkExtension(url, port);
 	root = port.getConfig()["root"]._value;
+=======
+		url = "/index.html";
+	root = (port.getConfig())["root"]._value;
+	//std::cout << "ROOT " << root << std::endl;
+>>>>>>> progress on env var
 	buf = getcwd(buf, 0);
 	file_path << buf << root << url;
 	_file_path = file_path.str();
@@ -162,6 +172,8 @@ int	Client::executeCGI( Server const & serv, Port & port )
 	{
 		CGI cgi(*this, serv);
 		cgi.execute(*this);
+		//DEBUG//	
+		std::cout << "\n----DOR---- \n" << _res.getResponse() << std::endl << "----EOR----" << std::endl;
 	}
 	else if (res_type == R_HTML)
 		executeHtml( port );
@@ -181,9 +193,14 @@ int	Client::executeHtml(Port & port )
 		content += buffer;
 	ifs.close();
 	_res.setBody(content);
+<<<<<<< HEAD
 	_res.setContentType(_file_path);
 	_res.response(_status);
 	std::cout << _res.getResponse() << std::endl;
+=======
+	_res.response();
+	//std::cout << _res.getResponse() << std::endl;
+>>>>>>> progress on env var
 	return SUCCESS;
 }
 
