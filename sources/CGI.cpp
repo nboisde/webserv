@@ -1,5 +1,6 @@
 #include "CGI.hpp"
 #include <stdlib.h>
+
 /*
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
@@ -10,40 +11,45 @@ namespace ws{
 CGI::CGI( Client const & cli , Server const & serv) : _bin_location("/usr/bin/php-cgi")
 {
 	this->_header = cli.getReq().getHead();
-	//for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)
-	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
-	std::cout << std::endl;
-	init_conversion( serv );
+	init_conversion( cli, serv );
 	generate_env();
 	generate_arg(cli);
 }
 
-void	CGI::init_conversion( Server const & serv )
+void	CGI::init_conversion( Client const & cli, Server const & serv )
 {
+	(void)cli;
+	(void)serv;
 	typedef std::pair<std::string, std::string>	pair;
 
 	std::map<std::string, std::string>::iterator ite = _header.end();
 
-	_conversion.insert(pair("PHP_SELF", _header["url"]));
-	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
-	_conversion.insert(pair("SERVER_ADDR", serv.getIp()));
-	_conversion.insert(pair("SERVER_NAME", "webzerv"));
-	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
 	//char *timestr;
 	//_conversion.insert(pair("REQUEST_TIME", std::string(itoa(time(NULL), timestr, 10))))
-	if (_header.find("Method") != ite)
-		_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
 	if (_header.find("Content-Length") != ite)
 		_conversion.insert(pair("CONTENT_LENGTH", _header["Content-Length"]));
 	if (_header.find("Content-Type") != ite)
 		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
+	
+	//CAUSE PB
+	//_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
+	//_conversion.insert(pair("REDIRECT_STATUS", "1"));
+	//if (_header.find("Method") != ite)
+	//	_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
+	//
+
+	//URL MANAGEMENT//
+	std::string url(_header["url"]);
+	std::cout << url << std::endl;
+	//_conversion.insert(pair("PATH_INFO", url.substr(url.find(".php") + 4)));
+
 	if (_header.find("Host") != ite)
 	{
-		_conversion.insert(pair("SERVER_PORT", _header["Host"].substr(_header["Host"].find_last_of(":") + 1)));
-		_conversion.insert(pair("SERVER_NAME", _header["Host"].substr(0, _header["Host"].find_last_of(":"))));
+	//	_conversion.insert(pair("SERVER_PORT", _header["Host"].substr(_header["Host"].find_last_of(":") + 1)));
+	//	_conversion.insert(pair("SERVER_NAME", _header["Host"].substr(0, _header["Host"].find_last_of(":"))));
 	}
-	_conversion.insert(pair("QUERY_STRING", ""));
-	_conversion.insert(pair("SCRIPT_NAME", _bin_location));
+	//_conversion.insert(pair("QUERY_STRING", ""));
+	//_conversion.insert(pair("SCRIPT_NAME", _bin_location));
 }
 
 CGI::CGI( void )
@@ -136,10 +142,14 @@ int		CGI::generate_env( void )
 }
 
 int		CGI::generate_arg( Client const & cli ){
+	std::string file_path = cli.getFilePath();
+	
+	file_path = file_path.substr(0, file_path.find_last_of(".php") + 4);
+	std::cout << "FILE PATH = " << file_path << std::endl;
 	_arg = (char**)malloc(sizeof(char *) * 3);
 
 	_arg[0] = strdup(_bin_location.c_str());
-	_arg[1] = strdup(cli.getFilePath().c_str());
+	_arg[1] = strdup(file_path.c_str());
 	_arg[2] = NULL;
 	return SUCCESS;
 }
@@ -156,8 +166,7 @@ int		CGI::execute( Client & cli ){
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);
-		execve(_bin_location.c_str(), _arg, NULL);
-		//execlp(_bin_location.c_str(), "/usr/bin/php-cgi", "./www/php/bonjour.php", _env);
+		execve(_bin_location.c_str(), _arg, _env);
 		exit(SUCCESS);
 	}
 	waitpid(pid, &child_stat, 0);
@@ -167,9 +176,8 @@ int		CGI::execute( Client & cli ){
 	
 	close(fd[1]);
 	std::string response = concatenateResponse(fd[0]);
-	//std::cout << "Child Response content = \n" << response << std::endl << "----EOR----" << std::endl;
-	//close(fd[0]); //CHECK IF FCLOSE IN CONCATENATE RESPONSE IS ENOUGH
 	cli.getRes().treatCGI(response);
+	cli.getRes().response();
 	return SUCCESS;
 }
 

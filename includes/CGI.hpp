@@ -20,7 +20,7 @@ class CGI {
 
 		CGI &		operator=( CGI const & rhs );
 
-		void								init_conversion( Server const & serv );
+		void								init_conversion( Client const & cli, Server const & serv );
 
 		int									generate_env( void );
 		int									generate_arg( Client const & cli );
