@@ -174,7 +174,8 @@ int	Client::executeHtml(Port & port )
 		content += buffer;
 	ifs.close();
 	_res.setBody(content);
-	_res.response();
+	_res.response(_status);
+	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
 }
 
