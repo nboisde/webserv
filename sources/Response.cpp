@@ -26,22 +26,14 @@ Response::Response( void )
 {
 	_status_line = genStatusLine(200);
 	_status = 200;
-	_header = genHeader();
-};
-
-Response::Response( int status )
-{
-	_status_line = genStatusLine(status);
-	_status = status;
-	_header = genHeader();
+	//_header = genHeader();
 }
 
 Response::Response( Response const & src){
 	*this = src;
 }
 
-Response::~Response( void ){
-};
+Response::~Response( void ){}
 
 Response &  Response::operator=( Response const & rhs)
 {
@@ -62,11 +54,11 @@ std::string 	Response::genStatusLine( int status ){
 	int ret_code = 200;
 	std::stringstream ret;
 
-	std::map<std::string, std::string>::iterator it = _status_code.find(std::to_string(status));
-	//if (it == _status_code.end())
-		ret << "HTTP/1.1" << ret_code << " " << _status_code[ret_code];	
-	//else
-	//	ret << "HTTP/1.1" << status << " " << _status_code[status];	
+	std::map<int, std::string>::iterator it = _status_code.find(status);
+	if (it == _status_code.end())
+		ret << "HTTP/1.1 " << ret_code << " " << _status_code[ret_code];
+	else
+		ret << "HTTP/1.1 " << status << " " << _status_code[status];	
 	return ret.str();
 }
 
@@ -109,6 +101,7 @@ std::string 	Response::genConnection( void )
 		co += "close";
 	else
 		co += "keep-alive";
+	return co;
 }
 
 std::string	const &	Response::genHeader( void ){
@@ -124,9 +117,13 @@ std::string	const &	Response::genHeader( void ){
 	return _header;
 }
 
-const char *      Response::response( void ){
+const char *      Response::response( int status ){
 	std::stringstream tmp;
 	
+	resetResponse();
+	_status_line = genStatusLine(status);
+	_status = status;
+	genHeader();
 	tmp << _status_line << CRLF;
 	addContentLength();
 	tmp << _header << CRLF;
@@ -169,18 +166,27 @@ void		Response::treatCGI( std::string cgi_output )
 		_body = cgi_output.substr(pos + 4);		
 }
 
+void		Response::resetResponse( void )
+{
+	_status_line.clear();
+	_header.clear();
+	_status = 200;
+	_status_line = genStatusLine(_status);
+}
+
 //ACCESSORS - GETTERS//
 
 std::string 	Response::getResponse( void ) const { return _response; }
 std::string		Response::getStatusLine(void) const { return _status_line; }
 std::string		Response::getHeader( void ) const { return _header; }
 std::string		Response::getBody( void ) const { return _body; }
-int				Response::setStatus( void ) const { return _status; }
+int				Response::getStatus( void ) const { return _status; }
 
 //ACCESSORS - SETTERS//
 void			Response::setResponse( std::string resp ){ _response = resp; }
 void			Response::setStatusLine( std::string status_l ){ _status_line = status_l; }
 void			Response::setHeader( std::string header ){ _header = header; }
 void			Response::setBody( std::string newbody ){ _body = newbody; }
+void			Response::setStatus ( int status ) { _status = status; }
 
 }
