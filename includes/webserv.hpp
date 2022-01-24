@@ -46,7 +46,7 @@
 # define DELETE 3
 
 // RESPONSE HEADER STATUS
-# define COMTINUE 100
+# define CONTINUE 100
 # define OK 200
 # define MULTIPLE_CHOICE 300
 # define MOVED_PERMANETLY 301
