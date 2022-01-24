@@ -77,6 +77,11 @@ void	Server::launchServer( void )
 					ct++;
 					continue;
 				}
+				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLERR)))
+				{
+					std::cout << "Error on the fd : " << findFds((*ct).getFd()).fd << std::endl;
+ 					closeConnection(ct, pt);
+				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLHUP)))
 				{
 					std::cout << "Client " << findFds((*ct).getFd()).fd << " interrupted the connection." << std::endl;
