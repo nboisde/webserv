@@ -173,11 +173,9 @@ int	Parser::setValues(std::string key)
 	}
 	if (!isspaceNb)
 		return (0);
-	while (_pos < _size && _content[_pos] != ';' && _content[_pos] != '}') 
+	while (_pos < _size && _content[_pos] != ';')
 	{
 		int	dot = _content.find_first_of(";", _pos);
-		if (key == "location")
-			dot = _content.find_first_of("}", _pos);
 		std::string value = _content.substr(_pos, dot - _pos);
 		if (!(checkValue(key, value, _server.getRefPorts().back())))
 			return (0);
@@ -249,12 +247,32 @@ int	Parser::checkErrorPage(std::string raw_value, Value & new_value)
 		return (0);
 	for (; pos < size && isspace(raw_value[pos]); pos++) {}
 	str_error = raw_value.substr(pos);
+	for (; pos < size && !isspace(raw_value[pos]); pos++) {}
+	if (pos != size)
+		return (0);
 	new_value._errors.insert(std::pair<int, std::string>(nbr_error, str_error));
 	return (SUCCESS);  
 }
 int	Parser::checkRoot(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
 int	Parser::checkIndex(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
-int	Parser::checkLocation(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
+int	Parser::checkLocation(std::string raw_value, Value & new_value) 
+{
+	int pos = 0;
+	int	size = raw_value.size();
+	std::string	location;
+	std::string	substitute;
+
+	new_value._value = raw_value;
+	for (; pos < size && !isspace(raw_value[pos]); pos++) {}
+	location = raw_value.substr(0, pos);
+	for (; pos < size && isspace(raw_value[pos]); pos++) {}
+	substitute = raw_value.substr(pos);
+	for (; pos < size && !isspace(raw_value[pos]); pos++) {}
+	if (pos != size)
+		return (0);
+	new_value._locations.insert(std::pair<std::string, std::string>(location, substitute));
+	return (SUCCESS);  
+}
 
 int	Parser::checkValue(std::string key, std::string value, Port & port)
 {
@@ -272,7 +290,7 @@ int	Parser::checkValue(std::string key, std::string value, Port & port)
 		return (0);
 	}
 	_server.getRefPorts().back().getConfig()[key] = Value(value);
-	return (1);
+	return (SUCCESS);
 }
 
 Server	Parser::getServer( void ) { return _server; }
