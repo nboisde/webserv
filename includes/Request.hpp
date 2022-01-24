@@ -42,7 +42,10 @@ class Request
 		int				getState( void ) const;
 		head_type		getHead( void ) const;
 		head_type &		getHead( void );
+<<<<<<< HEAD
 		int				getConnection( void ) const;
+=======
+>>>>>>> d96995087805e28e82e1e301f705666cf67a1851
 
 	private:
 		int			findProtocol(std::string buf);
@@ -53,7 +56,10 @@ class Request
 		int							_line;
 		int							_cursor;
 		int							_state;
+<<<<<<< HEAD
 		int							_connection;
+=======
+>>>>>>> d96995087805e28e82e1e301f705666cf67a1851
 		std::string					_raw_content;
 		int							_body_reception_encoding;
 		int							_body_len_received;
