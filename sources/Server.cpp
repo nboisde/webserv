@@ -124,10 +124,6 @@ void	Server::launchServer( void )
 					{
 						// THIS SHOULD BE PERFORMED IF in header Connection: close.
 						//if keep-alive, maybe we don't close the file descriptor of the client.
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Working on keep-alive connection, and don't close fd if we dont need to
 						if ((*ct).getReq().getConnection() == CLOSE)
  							closeConnection(ct, pt);
 						else
@@ -136,12 +132,6 @@ void	Server::launchServer( void )
 							findFds((*ct).getFd()).revents = 0;
 							findFds((*ct).getFd()).events = POLLIN | POLLHUP;
 						}
-<<<<<<< HEAD
-=======
- 						closeConnection(ct, pt);
->>>>>>> Pollhup handled, function closeConnection created in server Class.
-=======
->>>>>>> Working on keep-alive connection, and don't close fd if we dont need to
 					}
 					else
 						ct++;
