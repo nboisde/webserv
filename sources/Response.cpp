@@ -184,8 +184,8 @@ void		Response::treatCGI( std::string cgi_output )
 		_header += CRLF;
 		_header += cgi_output.substr(0, pos);
 	}
-	if ((pos = cgi_output.find(BODY_CRLF)) != -1)
-		_body = cgi_output.substr(pos + 4);		
+	if ((pos = cgi_output.find(BODY_CRLF)) != -1 && !cgi_output.substr(pos + 4).empty())
+		_body = cgi_output.substr(pos + 4);
 }
 
 void		Response::resetResponse( void )

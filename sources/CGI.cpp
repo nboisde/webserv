@@ -7,6 +7,17 @@
 namespace ws{
 
 
+CGI::CGI( Client const & cli , Server const & serv) : _bin_location("/usr/bin/php-cgi")
+{
+	this->_header = cli.getReq().getHead();
+	//for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)
+	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
+	std::cout << std::endl;
+	init_conversion( serv );
+	generate_env();
+	generate_arg(cli);
+}
+
 void	CGI::init_conversion( Server const & serv )
 {
 	typedef std::pair<std::string, std::string>	pair;
@@ -33,17 +44,6 @@ void	CGI::init_conversion( Server const & serv )
 	}
 	_conversion.insert(pair("QUERY_STRING", ""));
 	_conversion.insert(pair("SCRIPT_NAME", _bin_location));
-}
-
-CGI::CGI( Client const & cli , Server const & serv) : _bin_location("/usr/bin/php-cgi")
-{
-	this->_header = cli.getReq().getHead();
-	//for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)
-	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
-	std::cout << std::endl;
-	init_conversion( serv );
-	generate_env();
-	generate_arg();
 }
 
 CGI::CGI( void )
@@ -135,14 +135,11 @@ int		CGI::generate_env( void )
 	return SUCCESS;
 }
 
-int		CGI::generate_arg( void ){
+int		CGI::generate_arg( Client const & cli ){
 	_arg = (char**)malloc(sizeof(char *) * 3);
 
-	std::string tmp = ".";
-	tmp += _header["url"];
-
 	_arg[0] = strdup(_bin_location.c_str());
-	_arg[1] = strdup(tmp.c_str());
+	_arg[1] = strdup(cli.getFilePath().c_str());
 	_arg[2] = NULL;
 	return SUCCESS;
 }

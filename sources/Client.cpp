@@ -155,12 +155,14 @@ int	Client::checkURI( Port & port )
 int	Client::executeCGI( Server const & serv, Port & port )
 {
 	int	res_type;
-	CGI cgi(*this, serv);
 
 	res_type = checkURI(port);
-	std::cout << "Response " << res_type << std::endl;
+//	std::cout << "Response " << res_type << std::endl;
 	if (res_type == R_CGI)
+	{
+		CGI cgi(*this, serv);
 		cgi.execute(*this);
+	}
 	else if (res_type == R_HTML)
 		executeHtml( port );
 	else
@@ -196,5 +198,9 @@ int			Client::getFd(void) const { return _fd; }
 Request &	Client::getReq( void ) { return _req; }
 Request		Client::getReq( void ) const { return _req; }
 Response &	Client::getRes( void ) { return _res; }
+
+std::string	Client::getFilePath( void ) const{
+	return (_file_path);
+}
 
 }
