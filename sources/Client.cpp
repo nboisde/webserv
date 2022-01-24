@@ -7,18 +7,8 @@ namespace ws
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */ 
 Client::Client( void ) {}
-
 Client::Client( int fd ) : _fd(fd), _status(WRITING) {}
-
-Client::Client( Client const & src ) 
-{
-	*this = src;
-}
-
-/*
-** -------------------------------- DESTRUCTOR --------------------------------
-*/
-
+Client::Client( Client const & src ) { *this = src; }
 Client::~Client() {}
 
 /*
@@ -176,7 +166,6 @@ int	Client::executeHtml(Port & port )
 	ifs.close();
 	_res.setBody(content);
 	_res.response();
-	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
 }
 
