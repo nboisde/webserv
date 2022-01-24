@@ -7,7 +7,7 @@ namespace ws
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */ 
 Client::Client( void ) {}
-Client::Client( int fd ) : _fd(fd), _status(200) {}
+Client::Client( int fd ) : _fd(fd), _status(OK) {}
 Client::Client( Client const & src ) { *this = src; }
 
 /*
@@ -42,7 +42,7 @@ int Client::receive(void)
 	if ( ret < 0 )
 	{
 		perror("\nIn recv");
-		_status = 500;
+		_status = INTERNAL_SERVER_ERROR;
 		return WRITING;
 	}
 	std::string tmp(buffer, ret);
@@ -50,7 +50,7 @@ int Client::receive(void)
 	if (req == -1)
 	{
 		std::cout << RED << "400 bad request (Header reception)" << RESET << std::endl;
-		_status = 400;
+		_status = BAD_REQUEST;
 		return WRITING;
 	}
 	if (req == SUCCESS)
@@ -59,14 +59,14 @@ int Client::receive(void)
 		if (head_err == ERROR)
 		{
 			std::cout << RED << "400 bad request (Header reception)" << RESET << std::endl;
-			_status = 400;
+			_status = BAD_REQUEST;
 			return WRITING;
 		}
 		std::cout << BLUE;
 		std::cout << _req.getHeader() << std::endl;
 		std::cout << RESET;
 		write(1, _req.getBody().c_str(), _req.getBody().length());
-		_status = 200;
+		_status = OK;
 		return WRITING;
 	}
 	return READING;
