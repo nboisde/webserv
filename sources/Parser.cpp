@@ -37,7 +37,7 @@ int	Parser::launch(std::string file)
 		return (0);
 	if (!initWebServer())
 		return (0);
-	return (1);
+	return (SUCCESS);
 }
 
 int	Parser::checkFileName(void)
@@ -48,7 +48,7 @@ int	Parser::checkFileName(void)
 		return (0);
 	else if ((size - pos) != 5)
 		return (0);
-	return (1);
+	return (SUCCESS);
 }
 
 int	Parser::readFile(void)
@@ -60,7 +60,7 @@ int	Parser::readFile(void)
 		_content += buffer;
 	_size = _content.size();
 	ifs.close();
-	return (1);
+	return (SUCCESS);
 }
 
 int	Parser::initWebServer(void)
@@ -83,7 +83,7 @@ int	Parser::initWebServer(void)
 		_pos++;
 	if (_pos != _size)
 		return (0);
-	return (1);
+	return (SUCCESS);
 }
 
 int	Parser::checkHttp(void)
@@ -101,7 +101,7 @@ int	Parser::checkHttp(void)
 	if (_content[_pos] != '{')
 		return (0);
 	_pos++;
-	return (1);
+	return (SUCCESS);
 }
 
 int	Parser::checkServer(void)
@@ -134,7 +134,7 @@ int	Parser::checkServer(void)
 	}
 	if (_pos == _size)
 		return (0);
-	return (1);
+	return (SUCCESS);
 }
 
 
@@ -160,7 +160,7 @@ int	Parser::checkKeys(void)
 		return (0);
 	if (!setValues((*it).first))
 		return (0);
-	return (1);
+	return (SUCCESS);
 }
 
 int	Parser::setValues(std::string key)
@@ -186,58 +186,58 @@ int	Parser::setValues(std::string key)
 	if (_pos == _size)
 		return (0);
 	_pos++;
-	return (1);
+	return (SUCCESS);
 }
 
-int	Parser::checkPort(std::string value)
+int	Parser::checkPort(std::string raw_value, Value & new_value)
 {
-	int port = atoi(value.c_str());
+	int port = atoi(raw_value.c_str());
 	std::cout << "Port " << port << std::endl;
 	if (port < 0 || port > 65535)
 		return (0);
-	else
-		return (1);
+	new_value._value = raw_value;
+	return (SUCCESS);
 }
 
-int	Parser::checkMethod(std::string value)
+int	Parser::checkMethod(std::string raw_value, Value & new_value)
 {
 	std::string	method;
 	int			position;
 
-	while (value.size())
+	new_value._value = raw_value;
+	while (raw_value.size())
 	{
-		position = value.find("|");
+		position = raw_value.find("|");
 		if (position < 0)
 		{	
-			if (value != "GET" && value != "POST" && value != "DELETE")
+			if (raw_value != "GET" && raw_value != "POST" && raw_value != "DELETE")
 				return (0);
 			break;
 		}
-		method = value.substr(0, position);
-		value = value.substr(position + 1);
+		method = raw_value.substr(0, position);
+		raw_value = raw_value.substr(position + 1);
 		if (method != "GET" && method != "POST" && method != "DELETE")
 			return (0);
+		new_value._methods.push_back(method);
 	}
-	return (1);
+	return (SUCCESS);
 }
 
-int	Parser::checkAutoindex(std::string value)
+int	Parser::checkAutoindex(std::string raw_value, Value & new_value)
 {
-	if (value == "on")
-		return (1);
-	else if (value == "off")
-		return (1);
-	else
+	if (raw_value != "on" && raw_value != "off")
 		return (0);
+	new_value._value = raw_value;
+	return (SUCCESS);
 }
 
-int	Parser::checkClientMaxSize(std::string value) { (void)value; return (1); }
-int	Parser::checkHost(std::string value) { (void)value; return (1); }
-int	Parser::checkServerName(std::string value) { (void)value; return (1); }
-int	Parser::checkErrorPage(std::string value) { (void)value; return (1); }
-int	Parser::checkRoot(std::string value) { (void)value; return (1); }
-int	Parser::checkIndex(std::string value) { (void)value; return (1); }
-int	Parser::checkLocation(std::string value) { (void)value; return (1); }
+int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1); }
+int	Parser::checkHost(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
+int	Parser::checkServerName(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
+int	Parser::checkErrorPage(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
+int	Parser::checkRoot(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
+int	Parser::checkIndex(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
+int	Parser::checkLocation(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
 
 int	Parser::checkValue(std::string key, std::string value, Port & port)
 {
@@ -245,15 +245,16 @@ int	Parser::checkValue(std::string key, std::string value, Port & port)
 	std::map<std::string, Value>::iterator			it = port.getConfig().find(key);
 	std::map<std::string, validity_fct>::iterator	cite = _key_checker.end();
 	std::map<std::string, validity_fct>::iterator	cit = _key_checker.find(key);
+	Value											new_value;
 
 	if (it == ite || cite == cit)
 		return (0);
-	if (!((this->*_key_checker[key])(value)))
+	if (!((this->*_key_checker[key])(value, new_value)))
 	{
 		std::cout << key << " : " << value << " is not valid" << std::endl;
 		return (0);
 	}
-	_server.getRefPorts().back().getConfig()[key] = value;
+	_server.getRefPorts().back().getConfig()[key] = Value(value);
 	return (1);
 }
 
@@ -293,6 +294,5 @@ Server	Parser::getServer( void ) { return _server; }
 // 	}
 // 	return SUCCESS;
 // }
-
 
 }
