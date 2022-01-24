@@ -95,8 +95,8 @@ int	Port::accepting( void )
 	new_socket = accept(_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
 	if (new_socket < 0)
 	{
-		// if (errno != EAGAIN)
-		// 	perror("In accept");
+		if (errno != EAGAIN)
+		 	perror("In accept");
 		return(ERROR);
 	}
 	Client newClient(new_socket);
