@@ -23,7 +23,7 @@ class CGI {
 		void								init_conversion( Server const & serv );
 
 		int									generate_env( void );
-		int									generate_arg( void );
+		int									generate_arg( Client const & cli );
 		int									execute( Client & cli );
 
 

@@ -45,6 +45,7 @@ class Client
 		ws::Request 	getReq( void ) const ;
 		ws::Request &	getReq( void );
 		ws::Response &	getRes( void );
+		std::string		getFilePath( void ) const;
 };
 
 }
