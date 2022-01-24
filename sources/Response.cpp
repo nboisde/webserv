@@ -24,8 +24,8 @@ std::map<int, std::string>  Response::_status_code = init_responseMap();
 
 Response::Response( void ) 
 {
-	_status_line = genStatusLine(200);
-	_status = 200;
+	_status_line = genStatusLine(OK);
+	_status = OK;
 	//_header = genHeader();
 }
 
@@ -51,7 +51,7 @@ Response &  Response::operator=( Response const & rhs)
 //METHODS - //
 
 std::string 	Response::genStatusLine( int status ){
-	int ret_code = 200;
+	int ret_code = OK;
 	std::stringstream ret;
 
 	std::map<int, std::string>::iterator it = _status_code.find(status);
@@ -97,7 +97,7 @@ std::string		Response::genDate( void ){
 std::string 	Response::genConnection( void )
 {
 	std::string co = "Connection: ";
-	if (_status == 400)
+	if (_status == BAD_REQUEST)
 		co += "close";
 	else
 		co += "keep-alive";
@@ -108,7 +108,7 @@ std::string	const &	Response::genHeader( void ){
 
 	_header += genDate();
 	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
-	if (_status == 400) // Maybe we will modify this and add Connection behavior all the time.
+	if (_status == BAD_REQUEST) // Maybe we will modify this and add Connection behavior all the time.
 	{
 		_header += CRLF;
 		_header += genConnection();
@@ -170,7 +170,7 @@ void		Response::resetResponse( void )
 {
 	_status_line.clear();
 	_header.clear();
-	_status = 200;
+	_status = OK;
 	_status_line = genStatusLine(_status);
 }
 
