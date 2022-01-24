@@ -8,7 +8,7 @@ namespace ws
 */ 
 Client::Client( void ) {}
 
-Client::Client( int fd ) : _fd(fd), _status(WRITING) {}
+Client::Client( int fd ) : _fd(fd), _status(200) {}
 
 Client::Client( Client const & src ) 
 {
@@ -49,6 +49,7 @@ int Client::receive(void)
 	if ( ret < 0 )
 	{
 		perror("\nIn recv");
+		_status = 500;
 		return WRITING;
 	}
 	std::string tmp(buffer, ret);
@@ -56,6 +57,7 @@ int Client::receive(void)
 	if (req == -1)
 	{
 		std::cout << "Gerer ici une reponse d'erreur (400 -> Error Header.)" << std::endl;
+		_status = 400;
 		return WRITING;
 		//exit(EXIT_FAILURE);
 	}
@@ -66,6 +68,7 @@ int Client::receive(void)
 		if (head_err == ERROR)
 		{
 			std::cout << "Gerer ici une reponse d'erreur (parsing du header problematique !) -> Retour d'erreur 400 -> bad request." << std::endl;
+			_status = 400;
 			return WRITING;
 		}
  		//std::cout << _req.getRawContent() << std::endl;
@@ -76,6 +79,7 @@ int Client::receive(void)
 		//std::cout << _req.getBody().length() << std::endl;
 		write(1, _req.getBody().c_str(), _req.getBody().length());
 		//std::cout << std::endl;
+		_status = 200;
 		return WRITING;
 	}
 	return READING;
@@ -87,7 +91,7 @@ int Client::send( void )
 	int			ret;
 	//int			len;
 	const char* prov;
-	std::string str = _res.response();
+	std::string str = _res.response(_status);
 
 	//len = str.size();
 	prov = str.c_str();

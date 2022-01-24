@@ -15,6 +15,7 @@ std::map<int, std::string>	init_responseMap( void ){
 	m[401] = "Unauthorized";
 	m[403] = "Forbidden";
 	m[404] = "Not Found";
+	m[405] = "Not Allowed"; //For non implemented methods.
 	m[500] =  "Internal Server Error";
 	return m;
 }
@@ -23,9 +24,17 @@ std::map<int, std::string>  Response::_status_code = init_responseMap();
 
 Response::Response( void ) 
 {
-	_status_line = genStatusLine();
+	_status_line = genStatusLine(200);
+	_status = 200;
 	_header = genHeader();
 };
+
+Response::Response( int status )
+{
+	_status_line = genStatusLine(status);
+	_status = status;
+	_header = genHeader();
+}
 
 Response::Response( Response const & src){
 	*this = src;
@@ -42,17 +51,22 @@ Response &  Response::operator=( Response const & rhs)
 		_status_line = rhs.getStatusLine();
 		_header = rhs.getHeader();
 		_body = rhs.getBody();
+		_status = rhs.getStatus();
 	}
 	return *this;
 }
 
 //METHODS - //
 
-std::string 	Response::genStatusLine( void ){
+std::string 	Response::genStatusLine( int status ){
 	int ret_code = 200;
 	std::stringstream ret;
 
-	ret << "HTTP/1.1 " << ret_code << " " << _status_code[ret_code];	
+	std::map<std::string, std::string>::iterator it = _status_code.find(std::to_string(status));
+	//if (it == _status_code.end())
+		ret << "HTTP/1.1" << ret_code << " " << _status_code[ret_code];	
+	//else
+	//	ret << "HTTP/1.1" << status << " " << _status_code[status];	
 	return ret.str();
 }
 
@@ -88,10 +102,24 @@ std::string		Response::genDate( void ){
 	return ret.str();
 }
 
+std::string 	Response::genConnection( void )
+{
+	std::string co = "Connection: ";
+	if (_status == 400)
+		co += "close";
+	else
+		co += "keep-alive";
+}
+
 std::string	const &	Response::genHeader( void ){
 
 	_header += genDate();
 	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
+	if (_status == 400) // Maybe we will modify this and add Connection behavior all the time.
+	{
+		_header += CRLF;
+		_header += genConnection();
+	}
 	
 	return _header;
 }
@@ -143,37 +171,16 @@ void		Response::treatCGI( std::string cgi_output )
 
 //ACCESSORS - GETTERS//
 
-std::string Response::getResponse( void ) const{
-	return _response;
-}
-
-std::string		Response::getStatusLine(void) const{
-	return _status_line;
-}
-
-std::string		Response::getHeader( void ) const{
-	return _header;
-}
-
-std::string		Response::getBody( void ) const{
-	return _body;
-}
+std::string 	Response::getResponse( void ) const { return _response; }
+std::string		Response::getStatusLine(void) const { return _status_line; }
+std::string		Response::getHeader( void ) const { return _header; }
+std::string		Response::getBody( void ) const { return _body; }
+int				Response::setStatus( void ) const { return _status; }
 
 //ACCESSORS - SETTERS//
-void			Response::setResponse( std::string resp ){
-	_response = resp;
-}
-
-void			Response::setStatusLine( std::string status_l ){
-	_status_line = status_l;
-}
-
-void			Response::setHeader( std::string header ){
-	_header = header;
-}
-
-void			Response::setBody( std::string newbody ){
-	_body = newbody;
-}
+void			Response::setResponse( std::string resp ){ _response = resp; }
+void			Response::setStatusLine( std::string status_l ){ _status_line = status_l; }
+void			Response::setHeader( std::string header ){ _header = header; }
+void			Response::setBody( std::string newbody ){ _body = newbody; }
 
 }
