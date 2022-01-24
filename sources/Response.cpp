@@ -113,9 +113,7 @@ const char *      Response::response( void ){
 	return str;
 }
 
-size_t      Response::response_size( void ){
-	return  _response.size();
-}
+size_t      Response::response_size( void ) { return  _response.size(); }
 
 void			treatCGI( int CGI_status, std::string response ){
 	(void) CGI_status;
@@ -124,37 +122,15 @@ void			treatCGI( int CGI_status, std::string response ){
 
 //ACCESSORS - GETTERS//
 
-std::string Response::getResponse( void ) const{
-	return _response;
-}
-
-std::string		Response::getStatusLine(void) const{
-	return _status_line;
-}
-
-std::string		Response::getHeader( void ) const{
-	return _header;
-}
-
-std::string		Response::getContent( void ) const{
-	return _content;
-}
+std::string Response::getResponse( void ) const { return _response; }
+std::string	Response::getStatusLine(void) const { return _status_line; }
+std::string	Response::getHeader( void ) const { return _header; }
+std::string	Response::getContent( void ) const { return _content; }
 
 //ACCESSORS - SETTERS//
-void			Response::setResponse( std::string resp ){
-	_response = resp;
-}
-
-void			Response::setStatusLine( std::string status_l ){
-	_status_line = status_l;
-}
-
-void			Response::setHeader( std::string header ){
-	_header = header;
-}
-
-void			Response::setContent( std::string newcontent ){
-	_content = newcontent;
-}
+void	Response::setResponse( std::string resp ) { _response = resp; }
+void	Response::setStatusLine( std::string status_l ) { _status_line = status_l; }
+void	Response::setHeader( std::string header ) { _header = header; }
+void	Response::setContent( std::string newcontent ){ _content = newcontent; }
 
 }

@@ -40,6 +40,17 @@
 # define POST 2
 # define DELETE 3
 
+// RESPONSE HEADER STATUS
+# define COMTINUE 100
+# define OK 200
+# define MULTIPLE_CHOICE 300
+# define MOVED_PERMANETLY 301
+# define BAD_REQUEST 400
+# define UNAUTHORIZED 401
+# define NOT_ALLOWED 405
+# define NOT_FOUND 404
+# define INTERNAL_SERVER_ERROR 500
+
 //CPP_LIBRARIES//
 # include <fstream>
 # include <utility>
