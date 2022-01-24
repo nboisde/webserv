@@ -295,7 +295,6 @@ int	Parser::checkValue(std::string key, std::string value, Port & port)
 
 Server	Parser::getServer( void ) { return _server; }
 
-
 // int Parser::defaultConfiguration(void)
 // {
 // 	std::ifstream file("./conf/dictConf.default");
@@ -330,4 +329,5 @@ Server	Parser::getServer( void ) { return _server; }
 // 	return SUCCESS;
 // }
 
+}
 }
