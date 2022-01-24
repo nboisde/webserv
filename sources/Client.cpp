@@ -166,7 +166,6 @@ int	Client::executeHtml(Port & port )
 	ifs.close();
 	_res.setBody(content);
 	_res.response();
-	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
 }
 

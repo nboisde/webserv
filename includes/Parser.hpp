@@ -9,9 +9,9 @@ namespace ws
 {
 class Parser
 {
-		typedef std::map<std::string, Value> dictionnary_type;
 		typedef	int (Parser::*validity_fct)(std::string);
-		typedef std::map<std::string, validity_fct>	validity_map;
+		typedef std::map<std::string, validity_fct>		checker_type;
+		typedef	std::map<std::string, Value>			keys_type;
 
 	private:
 
@@ -20,8 +20,8 @@ class Parser
 		std::string			_config_file;
 		std::string			_content;
 		Server				_server;
-		dictionnary_type	_dict;
-		validity_map		_validity_check;
+		checker_type		_key_checker;
+		keys_type			_default_keys;
 
 		int					checkFileName(void);
 		int					readFile(void);
@@ -31,7 +31,6 @@ class Parser
 		int					checkKeys(void);
 		int					setValues(std::string key);
 		int					checkValue(std::string key, std::string value, Port & port);
-		int					defaultConfiguration(void);
 
 		int					checkPort(std::string value);
 		int					checkMethod(std::string value);

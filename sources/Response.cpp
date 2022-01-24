@@ -107,7 +107,7 @@ const char *      Response::response( void ){
 
 	_response = tmp.str();
 
-	std::cout << _response << std::endl;
+	//std::cout << _response << std::endl;
 
 	const char * str = _response.c_str();
 	return str;

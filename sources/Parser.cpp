@@ -3,7 +3,29 @@
 namespace ws
 {
 
-Parser::Parser(void) : _pos(0), _server("127.0.0.1") { defaultConfiguration(); }
+Parser::Parser(void) : _pos(0), _server("127.0.0.1") 
+{ 
+	_key_checker["listen"] = &Parser::checkPort;
+	_key_checker["host"] = &Parser::checkHost;
+	_key_checker["server_name"] = &Parser::checkServerName;
+	_key_checker["client_max_body_size"] = &Parser::checkClientMaxSize;
+	_key_checker["error_page"] = &Parser::checkErrorPage;
+	_key_checker["autoindex"] = &Parser::checkAutoindex;
+	_key_checker["method"] = &Parser::checkMethod;
+	_key_checker["root"] = &Parser::checkRoot;
+	_key_checker["index"] = &Parser::checkIndex;
+	_key_checker["location"] = &Parser::checkLocation;
+	_default_keys["listen"] = Value("8080");
+	_default_keys["host"] = Value("Webserv.com");
+	_default_keys["server_name"] = Value("webserv");
+	_default_keys["client_max_body_size"] = Value("100M");
+	_default_keys["error_page"] = Value("");
+	_default_keys["autoindex"] = Value("off");
+	_default_keys["method"] = Value("GET|POST|DELETE");
+	_default_keys["root"] = Value("/www");
+	_default_keys["index"] = Value("index.html");
+	_default_keys["location"] = Value(""); 
+}
 Parser::~Parser(void) {}
 
 int	Parser::launch(std::string file)
@@ -97,7 +119,7 @@ int	Parser::checkServer(void)
 	if (_content[_pos] != '{')
 		return (0);
 	_pos++;
-	_server.addPort(Port(_dict));
+	_server.addPort(Port(_default_keys));
 	while (_pos < _size)
 	{
 		if (!checkKeys())
@@ -118,8 +140,8 @@ int	Parser::checkServer(void)
 
 int	Parser::checkKeys(void)
 {
-	std::map<std::string, Value>::iterator it = _dict.begin();
-	std::map<std::string, Value>::iterator ite = _dict.end();
+	std::map<std::string, Value>::iterator it = _default_keys.begin();
+	std::map<std::string, Value>::iterator ite = _default_keys.end();
 	int	found = 0;
 
 	while (_pos < _size && isspace(_content[_pos]))
@@ -221,12 +243,12 @@ int	Parser::checkValue(std::string key, std::string value, Port & port)
 {
 	std::map<std::string, Value>::iterator			ite = port.getConfig().end();
 	std::map<std::string, Value>::iterator			it = port.getConfig().find(key);
-	std::map<std::string, validity_fct>::iterator	cite = _validity_check.end();
-	std::map<std::string, validity_fct>::iterator	cit = _validity_check.find(key);
+	std::map<std::string, validity_fct>::iterator	cite = _key_checker.end();
+	std::map<std::string, validity_fct>::iterator	cit = _key_checker.find(key);
 
 	if (it == ite || cite == cit)
 		return (0);
-	if (!((this->*_validity_check[key])(value)))
+	if (!((this->*_key_checker[key])(value)))
 	{
 		std::cout << key << " : " << value << " is not valid" << std::endl;
 		return (0);
@@ -235,50 +257,42 @@ int	Parser::checkValue(std::string key, std::string value, Port & port)
 	return (1);
 }
 
-int Parser::defaultConfiguration(void)
-{
-	std::ifstream file("./conf/dictConf.default");
-	std::string line;
-	while (std::getline(file, line))
-	{
-		int i = 0;
-		while (line[i] == ' ' || line[i] == '\t' || line[i] == '\r' || line[i] == '\v')
-			i++;
-		if (line[i] == '#')
-			continue ;
-		else if (!line[i] || line[i] == '\n')
-			continue ;
-		else
-		{
-			int dbl = line.find(":");
-			if (static_cast<int>(dbl) == -1)
-				return (1);
-			std::string key = line.substr(i, dbl - i);
-			std::string value = line.substr(dbl + 1, line.length());
-			while (static_cast<int>(key.find(" ")) != -1 || static_cast<int>(key.find("\t")) != -1)
-				key = key.substr(0, key.length() - 1);
-			int k = 0;
-			while (value[k] == ' ' || value[k] == '\t' || value[k] == '\r' || value[k] == '\v')
-				k++;
-			value = value.substr(k, value.length() - k);
-			while (static_cast<int>(value.find(" ")) != -1 || static_cast<int>(value.find("\t")) != -1)
-				value = value.substr(0, value.length() - 1);
-			_dict[key] = Value(value);
-		}
-	}
-	_validity_check["listen"] = &Parser::checkPort;
-	_validity_check["host"] = &Parser::checkHost;
-	_validity_check["server_name"] = &Parser::checkServerName;
-	_validity_check["client_max_body_size"] = &Parser::checkClientMaxSize;
-	_validity_check["error_page"] = &Parser::checkErrorPage;
-	_validity_check["autoindex"] = &Parser::checkAutoindex;
-	_validity_check["method"] = &Parser::checkMethod;
-	_validity_check["root"] = &Parser::checkRoot;
-	_validity_check["index"] = &Parser::checkIndex;
-	_validity_check["location"] = &Parser::checkLocation;
-	return SUCCESS;
-}
-
 Server	Parser::getServer( void ) { return _server; }
+
+
+// int Parser::defaultConfiguration(void)
+// {
+// 	std::ifstream file("./conf/dictConf.default");
+// 	std::string line;
+// 	while (std::getline(file, line))
+// 	{
+// 		int i = 0;
+// 		while (line[i] == ' ' || line[i] == '\t' || line[i] == '\r' || line[i] == '\v')
+// 			i++;
+// 		if (line[i] == '#')
+// 			continue ;
+// 		else if (!line[i] || line[i] == '\n')
+// 			continue ;
+// 		else
+// 		{
+// 			int dbl = line.find(":");
+// 			if (static_cast<int>(dbl) == -1)
+// 				return (1);
+// 			std::string key = line.substr(i, dbl - i);
+// 			std::string value = line.substr(dbl + 1, line.length());
+// 			while (static_cast<int>(key.find(" ")) != -1 || static_cast<int>(key.find("\t")) != -1)
+// 				key = key.substr(0, key.length() - 1);
+// 			int k = 0;
+// 			while (value[k] == ' ' || value[k] == '\t' || value[k] == '\r' || value[k] == '\v')
+// 				k++;
+// 			value = value.substr(k, value.length() - k);
+// 			while (static_cast<int>(value.find(" ")) != -1 || static_cast<int>(value.find("\t")) != -1)
+// 				value = value.substr(0, value.length() - 1);
+// 			_default_key_checker[key] = Value(value);
+// 		}
+// 	}
+// 	return SUCCESS;
+// }
+
 
 }
