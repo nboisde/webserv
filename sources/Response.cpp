@@ -108,10 +108,12 @@ void	Response::setContentType( std::string file_path )
 {
 	std::string extension = file_path.substr(file_path.find("."));
 	std::string content_type = "Content-Type: ";
-	std::string default_type = "text/html; charset=UTF-8";
+	std::string default_type = "text/html";
 	
 	if (extension == "gif" || extension == "ico" || extension == "png" || extension == "jpeg")
-		default_type = "image/" + extension;
+		content_type = "image/" + extension;
+	else
+		_content_type = default_type;
 }
 
 std::string	const &	Response::genHeader( void ){
@@ -127,7 +129,8 @@ std::string	const &	Response::genHeader( void ){
 	return _header;
 }
 
-const char *	Response::response( int status ){
+const char *	Response::response( int status )
+{
 	std::stringstream tmp;
 	
 	resetResponse();
@@ -136,6 +139,7 @@ const char *	Response::response( int status ){
 	genHeader();
 	tmp << _status_line << CRLF;
 	addContentLength();
+	addContentType();
 	tmp << _header << CRLF;
 	tmp << CRLF;
 	tmp << _body;
@@ -152,6 +156,15 @@ void	Response::addContentLength( void ){
 	std::stringstream length;
 	
 	length << "Content-Length: " << _body.size();
+	_header += CRLF;
+	_header += length.str();
+}
+
+void	Response::addContentType( void )
+{
+	std::stringstream length;
+	
+	length << "Content-Type: " << _content_type;
 	_header += CRLF;
 	_header += length.str();
 }
@@ -187,6 +200,7 @@ void		Response::resetResponse( void )
 //ACCESSORS - GETTERS//
 
 std::string 	Response::getResponse( void ) const { return _response; }
+std::string 	Response::getContentType( void ) const { return _content_type; }
 std::string		Response::getStatusLine(void) const { return _status_line; }
 std::string		Response::getHeader( void ) const { return _header; }
 std::string		Response::getBody( void ) const { return _body; }

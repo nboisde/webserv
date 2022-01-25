@@ -100,19 +100,18 @@ void	Client::checkExtension( std::string & url, Port & port )
 	Value							location = config["location"];
 	std::string						path = location._locations[extension];
 
-
 	if (path.size())
 		url = path + url;
 }
 
 int	Client::checkURI( Port & port )
 {
-	std::string	url;
-	std::string	root;
-	char		*buf = NULL;
-	size_t		pos;
-	size_t		size;
-	std::stringstream file_path;
+	std::string			url;
+	std::string			root;
+	char				*buf = NULL;
+	size_t				pos;
+	size_t				size;
+	std::stringstream	file_path;
 
 	url =_req.getHead()["url"];
 	pos = url.find("?");

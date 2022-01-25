@@ -23,14 +23,17 @@ namespace ws
 
 			const char *	response( int status ); //CREER LA REPONSE A PARTIR DE ENTETE ET DONNES DE RETOUR
 			void			addContentLength( void );
+			void			addContentType( void );
 			void			treatCGI( std::string cgi_output ); //DISSEQUE LA REPONSE DU CGI
 			void			resetResponse( void );
 
 			std::string		getResponse( void ) const;
+			std::string		getContentType( void ) const;
 			std::string		getStatusLine(void) const;
 			std::string		getHeader( void ) const;
 			std::string		getBody( void ) const;
 			int				getStatus( void ) const;
+
 			void			setContentType( std::string file_path );
 			void			setResponse( std::string resp );
 			void			setStatusLine( std::string status_l );
