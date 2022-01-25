@@ -17,13 +17,15 @@ class Client
 	protected:
 		int				_fd;
 		int				_status;
+		std::string		_ip;
+		std::string		_port;
 		ws::Request		_req;
 		ws::Response	_res;
 		std::string		_file_path;
 
 	public:
 		Client( void );
-		Client( int fd );
+		Client( int fd, struct sockaddr_in *cli_addr);
 		Client( Client const & src );
 		virtual ~Client();
 			
@@ -46,6 +48,8 @@ class Client
 		ws::Request &	getReq( void );
 		ws::Response &	getRes( void );
 		std::string		getFilePath( void ) const;
+		std::string		getIp( void ) const;
+		std::string		getPort( void ) const;
 };
 
 }
