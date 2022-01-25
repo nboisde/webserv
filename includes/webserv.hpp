@@ -72,6 +72,7 @@
 # include <sstream>
 # include <vector>
 # include <map>
+# include <csignal>
 
 //C_LIBRARIES//#include <string.h>
 # include <string.h>
@@ -93,5 +94,9 @@
 # include <sys/socket.h>
 # include <fcntl.h>
 # include <stdio.h>
+
+// Function prototypes.
+
+void	signalHandler(int signum);
 
 #endif
