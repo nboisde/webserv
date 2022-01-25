@@ -110,11 +110,11 @@ int Client::send( void )
 
 void	Client::checkPath( std::string & url, Port & port )
 {
-	std::map<std::string, std::string>::iterator	it = port.getConfig()["location"]._locations.find(url);
-	std::map<std::string, std::string>::iterator	ite = port.getConfig()["location"]._locations.end();
-
-	if (it != ite)
-		url = (*it).second + (*it).first;
+	std::map<std::string, Value> config = port.getConfig();
+	Value location = config["location"];
+	std::string	path = location._locations[url];
+	if (path.size())
+		url = path + url;
 }
 void	Client::checkExtension( std::string & url, Port & port )
 {
