@@ -7,8 +7,24 @@ namespace ws
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */ 
 Client::Client( void ) {}
-Client::Client( int fd ) : _fd(fd), _status(OK) {}
-Client::Client( Client const & src ) { *this = src; }
+
+Client::Client( int fd, struct sockaddr_in *cli_addr ) : _fd(fd), _status(OK) {
+	_ip = inet_ntoa(cli_addr->sin_addr);
+	
+	std::stringstream port;
+	port << cli_addr->sin_port;
+	_port += port.str();
+}
+
+Client::Client( Client const & src ) 
+{
+	*this = src;
+}
+
+/*
+** -------------------------------- DESTRUCTOR --------------------------------
+*/
+
 Client::~Client() {}
 
 /*
@@ -72,11 +88,7 @@ int Client::send( void )
 {
 	int			ret;
 	const char* prov;
-<<<<<<< HEAD
 	std::string str = _res.response(_status);
-=======
-	std::string str = _res.getResponse();
->>>>>>> progress on env var
 
 	prov = str.c_str();
 	ret = ::send(_fd, prov, str.size(), 0);
@@ -139,16 +151,10 @@ int	Client::checkURI( Port & port )
 
 	url =_req.getHead()["url"];
 	if (url == "/")
-<<<<<<< HEAD
 		url = port.getConfig()["index"]._value;
 	checkPath(url, port);
 	checkExtension(url, port);
 	root = port.getConfig()["root"]._value;
-=======
-		url = "/index.html";
-	root = (port.getConfig())["root"]._value;
-	//std::cout << "ROOT " << root << std::endl;
->>>>>>> progress on env var
 	buf = getcwd(buf, 0);
 	file_path << buf << root << url;
 	_file_path = file_path.str();
@@ -218,6 +224,14 @@ Response &	Client::getRes( void ) { return _res; }
 
 std::string	Client::getFilePath( void ) const{
 	return (_file_path);
+}
+
+std::string		Client::getIp( void ) const{
+	return (_ip);
+}
+
+std::string		Client::getPort( void ) const{
+	return (_port);
 }
 
 }

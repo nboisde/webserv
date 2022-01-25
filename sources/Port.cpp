@@ -92,14 +92,18 @@ int	Port::accepting( void )
 	struct sockaddr_in	cli_addr;
 	socklen_t			addrlen = sizeof(cli_addr);
 
+	memset(&cli_addr, 0, sizeof (struct sockaddr_in));
+	cli_addr.sin_family = AF_INET;
+	cli_addr.sin_addr.s_addr = INADDR_ANY;
 	new_socket = accept(_fd, (struct sockaddr *)&cli_addr, (socklen_t*)&addrlen);
+	
 	if (new_socket < 0)
 	{
 		if (errno != EAGAIN)
 		 	perror("In accept");
 		return(ERROR);
 	}
-	Client newClient(new_socket);
+	Client newClient(new_socket, &cli_addr);
 	_clients.push_back(newClient);
 	return (new_socket);
 }

@@ -24,24 +24,26 @@ void	CGI::init_conversion( Client const & cli, Server const & serv )
 
 	std::map<std::string, std::string>::iterator ite = _header.end();
 
-	//char *timestr;
-	//_conversion.insert(pair("REQUEST_TIME", std::string(itoa(time(NULL), timestr, 10))))
 	if (_header.find("Content-Length") != ite)
 		_conversion.insert(pair("CONTENT_LENGTH", _header["Content-Length"]));
 	if (_header.find("Content-Type") != ite)
 		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
+	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
+	
+	//std::cout << "CLI_IP = " << cli.getIp()<< std::endl;
+	//std::cout << "CLI_PORT = " << cli.getPort() << std::endl;
 	
 	//CAUSE PB
 	//_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
-	//_conversion.insert(pair("REDIRECT_STATUS", "1"));
+	//_conversion.insert(pair("REDIRECT_STATUS", "200"));
 	//if (_header.find("Method") != ite)
 	//	_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
+	//_conversion.insert(pair("SERVER_SOFTWARE", "webzerver/0.9"));
 	//
 
 	//URL MANAGEMENT//
 	std::string url(_header["url"]);
 	std::cout << url << std::endl;
-	//_conversion.insert(pair("PATH_INFO", url.substr(url.find(".php") + 4)));
 
 	if (_header.find("Host") != ite)
 	{
