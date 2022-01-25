@@ -129,6 +129,7 @@ void	Port::removeClient( int fd )
 */
 
 int								Port::getFd( void ) const { return _fd; }
+struct sockaddr_in				Port::getPortAddr( void ) const { return _port_address; }
 void							Port::setFd( int fd ) {	_fd = fd; }
 std::vector<Client>	&			Port::getClients( void ) { return _clients; }
 std::map<std::string, Value> &	Port::getConfig( void ) { return _config; }

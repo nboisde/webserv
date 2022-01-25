@@ -12,7 +12,7 @@ Client::Client( int fd, struct sockaddr_in *cli_addr ) : _fd(fd), _status(OK) {
 	_ip = inet_ntoa(cli_addr->sin_addr);
 	
 	std::stringstream port;
-	port << cli_addr->sin_port;
+	port << ntohs(cli_addr->sin_port);
 	_port += port.str();
 }
 
@@ -179,7 +179,7 @@ int	Client::executeCGI( Server const & serv, Port & port )
 //	std::cout << "Response " << res_type << std::endl;
 	if (res_type == R_CGI)
 	{
-		CGI cgi(*this, serv);
+		CGI cgi(*this, port, serv);
 		cgi.execute(*this);
 		//DEBUG//	
 		std::cout << "\n----DOR---- \n" << _res.getResponse() << std::endl << "----EOR----" << std::endl;

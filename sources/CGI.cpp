@@ -8,17 +8,16 @@
 namespace ws{
 
 
-CGI::CGI( Client const & cli , Server const & serv) : _bin_location("/usr/bin/php-cgi")
+CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _bin_location("/usr/bin/php-cgi")
 {
 	this->_header = cli.getReq().getHead();
-	init_conversion( cli, serv );
+	init_conversion( cli, port, serv );
 	generate_env();
 	generate_arg(cli);
 }
 
-void	CGI::init_conversion( Client const & cli, Server const & serv )
+void	CGI::init_conversion( Client const & cli, Port const & port, Server const & serv )
 {
-	(void)serv;
 	typedef std::pair<std::string, std::string>	pair;
 
 	std::map<std::string, std::string>::iterator ite = _header.end();
@@ -28,9 +27,11 @@ void	CGI::init_conversion( Client const & cli, Server const & serv )
 	if (_header.find("Content-Type") != ite)
 		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
 	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
-	
-	std::cout << "CLI_IP = " << cli.getIp() << std::endl;
-	std::cout << "CLI_PORT = " << cli.getPort() << std::endl;
+	_conversion.insert(pair("REMOTE_ADDR", cli.getIp()));
+	_conversion.insert(pair("REMOTE_PORT", cli.getPort()));
+	_conversion.insert(pair("SERVER_ADDR", serv.getIp()));
+	_conversion.insert(pair("SERVER_PORT", ntohs(port.getPortAddr().sin_port)));
+
 	
 	//CAUSE PB
 	//_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
