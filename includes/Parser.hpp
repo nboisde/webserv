@@ -23,6 +23,8 @@ class Parser
 		checker_type		_key_checker;
 		keys_type			_default_keys;
 
+		void				initParser(void);
+
 		int					checkFileName(void);
 		int					readFile(void);
 		int					initWebServer(void);
