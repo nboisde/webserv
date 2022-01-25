@@ -109,31 +109,52 @@ int Client::send( void )
 	return CLOSING;
 }
 
+void	Client::checkPath( std::string & url, Port & port )
+{
+	std::map<std::string, Value> config = port.getConfig();
+	Value location = config["location"];
+	std::string	path = location._locations[url];
+	if (path.size())
+		url = path + url;
+}
+void	Client::checkExtension( std::string & url, Port & port )
+{
+	std::string extension = url.substr(url.find("."));
+	std::map<std::string, Value> config = port.getConfig();
+	Value location = config["location"];
+	std::string	path = location._locations[extension];
+	if (path.size())
+		url = path + url;
+}
+
 int	Client::checkURI( Port & port )
 {
 	std::string	url;
 	std::string	root;
 	char		*buf = NULL;
+	size_t		pos;
+	size_t		size;
+	std::stringstream file_path;
 
 	url =_req.getHead()["url"];
+	pos = url.find("?");
+	size = url.size();
+	if (pos >= 0 && pos < size)
+		url = url.substr(0, pos);
 	if (url == "/")
-		url = "/index.html";
-	root = (port.getConfig())["root"]._value;
-	std::cout << "ROOT " << root << std::endl;
+		url = port.getConfig()["index"]._value;
+	checkPath(url, port);
+	checkExtension(url, port);
+	root = port.getConfig()["root"]._value;
 	buf = getcwd(buf, 0);
-	// check location for this specific url
-	// if locatione exists, make substituion else add root
-	// replace / by root
-	_file_path = buf;
-	_file_path += root;
-	_file_path += url;
-	std::cout << _file_path << std::endl;
+	file_path << buf << root << url;
+	_file_path = file_path.str();
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
 		return ERROR;
 	close(fd);
-	int pos = _file_path.find(".php");
-	int size = _file_path.size();
+	pos = _file_path.find(".php");
+	size = _file_path.size();
 	if (size - pos == 4)
 		return (R_CGI);
 	return (R_HTML);
