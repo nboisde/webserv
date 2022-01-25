@@ -45,6 +45,7 @@ class Client
 		int				getFd( void ) const;
 		int				getStatus( void ) const;
 		ws::Request 	getReq( void ) const ;
+		ws::Response	getRes(void ) const;
 		ws::Request &	getReq( void );
 		ws::Response &	getRes( void );
 		std::string		getFilePath( void ) const;

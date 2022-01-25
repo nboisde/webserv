@@ -18,7 +18,6 @@ CGI::CGI( Client const & cli , Server const & serv) : _bin_location("/usr/bin/ph
 
 void	CGI::init_conversion( Client const & cli, Server const & serv )
 {
-	(void)cli;
 	(void)serv;
 	typedef std::pair<std::string, std::string>	pair;
 
@@ -30,8 +29,8 @@ void	CGI::init_conversion( Client const & cli, Server const & serv )
 		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
 	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
 	
-	//std::cout << "CLI_IP = " << cli.getIp()<< std::endl;
-	//std::cout << "CLI_PORT = " << cli.getPort() << std::endl;
+	std::cout << "CLI_IP = " << cli.getIp() << std::endl;
+	std::cout << "CLI_PORT = " << cli.getPort() << std::endl;
 	
 	//CAUSE PB
 	//_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
