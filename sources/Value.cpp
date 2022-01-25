@@ -3,8 +3,8 @@
 namespace ws
 {
 
-Value::Value( void ) {}
-Value::Value( std::string value) : _value(value) {}
+Value::Value( void ) : _max_body_size(-1) {}
+Value::Value( std::string value) : _value(value), _max_body_size(-1) {}
 Value::Value( Value const & src ) { *this = src; }
 Value::~Value( void ) {}
 

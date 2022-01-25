@@ -230,7 +230,21 @@ int	Parser::checkAutoindex(std::string raw_value, Value & new_value)
 	return (SUCCESS);
 }
 
-int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1); }
+int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value)
+{
+	int i = 0;
+	int size = raw_value.size();
+
+	for (; i < size; i++)
+		if (!::isdigit(raw_value[i]))
+			break;
+	if (raw_value[i] != 'M' || i != (size - 1))
+		return (0);
+	int body_size = atoi(raw_value.c_str());
+	new_value._value = raw_value;
+	new_value._max_body_size = body_size * 1000000;
+	return (SUCCESS);
+}
 int	Parser::checkHost(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkServerName(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkErrorPage(std::string raw_value, Value & new_value) 
