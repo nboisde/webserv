@@ -95,11 +95,13 @@ void	Client::checkPath( std::string & url, Port & port )
 }
 void	Client::checkExtension( std::string & url, Port & port )
 {
-	std::string						extension = url.substr(url.find("."));
-	std::map<std::string, Value>	config = port.getConfig();
-	Value							location = config["location"];
-	std::string						path = location._locations[extension];
-
+	int	pos = url.find(".");
+	if (pos < 0)
+		return ;
+	std::string	extension = url.substr(url.find("."));
+	std::map<std::string, Value> config = port.getConfig();
+	Value location = config["location"];
+	std::string	path = location._locations[extension];
 	if (path.size())
 		url = path + url;
 }
@@ -128,7 +130,10 @@ int	Client::checkURI( Port & port )
 	_file_path = file_path.str();
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
+	{
+		_status = NOT_FOUND;
 		return ERROR;
+	}
 	close(fd);
 	pos = _file_path.find(".php");
 	size = _file_path.size();
@@ -148,8 +153,8 @@ int	Client::executeCGI( Server const & serv, Port & port )
 		cgi.execute(*this);
 	else if (res_type == R_HTML)
 		executeHtml( port );
-	else 
-		return ERROR;
+	else
+		_res.response(_status);
 	return SUCCESS;
 }
 
