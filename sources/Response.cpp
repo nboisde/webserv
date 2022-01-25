@@ -107,11 +107,10 @@ std::string 	Response::genConnection( void )
 void	Response::setContentType( std::string file_path )
 {
 	std::string extension = file_path.substr(file_path.find("."));
-	std::string content_type = "Content-Type: ";
 	std::string default_type = "text/html";
 	
-	if (extension == "gif" || extension == "ico" || extension == "png" || extension == "jpeg")
-		content_type = "image/" + extension;
+	if (extension == ".gif" || extension == ".ico" || extension == ".png" || extension == ".jpeg")
+		_content_type = "image/" + extension.substr(1);
 	else
 		_content_type = default_type;
 }
