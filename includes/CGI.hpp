@@ -26,10 +26,14 @@ class CGI {
 		int									generate_arg( void );
 		int									execute( Client & cli );
 
-		int									createResponse(int fd, std::string & response);
 
+		std::string							concatenateResponse(int fd);
+
+		std::map<std::string, std::string>	getConversion( void ) const;
 		std::string							getBinLocation( void ) const;
 		std::map<std::string, std::string>	getHeader( void ) const;
+		char **								getArg( void ) const;
+		char **								getEnv( void ) const;
 
 	private:
 

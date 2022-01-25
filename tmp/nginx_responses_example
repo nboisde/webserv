@@ -1,0 +1,87 @@
+GET /dsagjh HTTP/1.1
+Host:host
+
+HTTP/1.1 404 Not Found
+Server: nginx/1.21.5
+Date: Mon, 24 Jan 2022 09:49:22 GMT
+Content-Type: text/html
+Content-Length: 153
+Connection: keep-alive
+
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.21.5</center>
+</body>
+</html>
+POST / HTTP/1.1
+Host: host
+
+HTTP/1.1 405 Not Allowed
+Server: nginx/1.21.5
+Date: Mon, 24 Jan 2022 09:50:27 GMT
+Content-Type: text/html
+Content-Length: 157
+Connection: keep-alive
+
+<html>
+<head><title>405 Not Allowed</title></head>
+<body>
+<center><h1>405 Not Allowed</h1></center>
+<hr><center>nginx/1.21.5</center>
+</body>
+</html>
+GET /index.html HTTP/1.1
+Host: host
+
+HTTP/1.1 200 OK
+Server: nginx/1.21.5
+Date: Mon, 24 Jan 2022 09:50:55 GMT
+Content-Type: text/html
+Content-Length: 615
+Last-Modified: Tue, 28 Dec 2021 15:28:38 GMT
+Connection: keep-alive
+ETag: "61cb2d26-267"
+Accept-Ranges: bytes
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+GET / HTTP/1.1
+Host: host
+skjghfd sdfkjsgh sdk  hkjdfsh kg
+HTTP/1.1 400 Bad Request
+Server: nginx/1.21.5
+Date: Mon, 24 Jan 2022 09:51:38 GMT
+Content-Type: text/html
+Content-Length: 157
+Connection: close
+
+<html>
+<head><title>400 Bad Request</title></head>
+<body>
+<center><h1>400 Bad Request</h1></center>
+<hr><center>nginx/1.21.5</center>
+</body>
+</html>

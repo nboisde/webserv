@@ -9,6 +9,7 @@
 
 // Litteral MACROS
 # define CRLF "\r\n"
+# define BODY_CRLF "\r\n\r\n"
 
 // Requests State MACROS
 # define REQUEST_FORMAT_ERROR -1
@@ -20,6 +21,10 @@
 # define BODY_RECEPTION_NOT_SPECIFIED 0
 # define CONTENT_LENGTH 1
 # define TRANSFER_ENCODING 2
+
+// Connection handling.
+# define CLOSE 0
+# define KEEP_ALIVE 1
 
 // RESPONSE TYPES
 # define R_CGI 1
@@ -39,6 +44,17 @@
 # define GET 1
 # define POST 2
 # define DELETE 3
+
+// RESPONSE HEADER STATUS
+# define COMTINUE 100
+# define OK 200
+# define MULTIPLE_CHOICE 300
+# define MOVED_PERMANETLY 301
+# define BAD_REQUEST 400
+# define UNAUTHORIZED 401
+# define NOT_ALLOWED 405
+# define NOT_FOUND 404
+# define INTERNAL_SERVER_ERROR 500
 
 //CPP_LIBRARIES//
 # include <fstream>

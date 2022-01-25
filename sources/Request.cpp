@@ -6,6 +6,7 @@ Request::Request( void ):
 _line(0),
 _cursor(0),
 _state(RECEIVING_HEADER),
+_connection(KEEP_ALIVE),
 _raw_content(""),
 _body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
 _body_len_received(0),
@@ -131,6 +132,21 @@ int		Request::findProtocol(std::string buf)
 	return 0;
 }
 
+void	Request::manageConnection( std::string str )
+{
+	int ret = str.find("Connection:");
+	if (ret == -1)
+		return ;
+	else
+	{
+		int r2 = str.find("close");
+		if (r2 != -1)
+			_connection = CLOSE;
+		return ;
+	}
+}
+
+
 int Request::bodyReceived(void)
 {
 	_line = 0;
@@ -205,6 +221,7 @@ int Request::concatenateRequest(std::string tmp)
 		while (ret != -1)
 		{
 			_vheader.push_back(tmp2.substr(0, ret));
+			manageConnection(tmp2.substr(0, ret));
 			if (ret > 0)
 				_cursor += ret + crlf.length();
 			tmp2 = tmp2.substr(ret + crlf.length(), tmp2.length() - ret);
@@ -491,6 +508,25 @@ void		Request::ChunkedBodyProcessing(std::string body)
 	}
 }
 
+void	Request::resetValues(void){
+	_line = 0;
+	_cursor = 0;
+	_state = RECEIVING_HEADER;
+	_connection = KEEP_ALIVE;
+	_raw_content.clear();
+	_raw_content = "";
+	_body_reception_encoding = BODY_RECEPTION_NOT_SPECIFIED;
+	_body_len_received = 0;
+	_header_len_received = 0;
+	_content_length = 0;
+	_method_type = UNKNOWN;
+	_header_size = 0;
+	_header.clear();
+	_header = "";
+	_body.clear();
+	_body = "";
+}
+
 
 int										Request::requestReceptionState(void) { return _state; }
 std::string								Request::getRawContent(void) const { return _raw_content; }
@@ -504,5 +540,7 @@ std::string								Request::getBody(void) const { return _body; }
 int										Request::getState(void) const { return _state; }
 std::map<std::string, std::string>		Request::getHead( void ) const { return _head; }
 std::map<std::string, std::string> &	Request::getHead( void ) { return _head; }
+int										Request::getConnection( void ) const { return _connection; }
+
 
 }

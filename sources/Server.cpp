@@ -77,6 +77,16 @@ void	Server::launchServer( void )
 					ct++;
 					continue;
 				}
+				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLERR)))
+				{
+					std::cout << "Client socket fd : " << findFds((*ct).getFd()).fd << " failed." << std::endl;
+ 					closeConnection(ct, pt);
+				}
+				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLHUP)))
+				{
+					std::cout << "Client " << findFds((*ct).getFd()).fd << " interrupted the connection." << std::endl;
+ 					closeConnection(ct, pt);
+				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
 					//std::cout << "FD = " << (*ct).getFd() << std::endl;
@@ -99,14 +109,17 @@ void	Server::launchServer( void )
 					int ret = (*ct).send();
 					//(findFds((*ct).getFd())).events = POLLOUT;
 					if (ret == CLOSING)
-					{	
-						int tempo = (*ct).getFd();
-						findFds(tempo).revents = 0;
-						findFds(tempo).fd = -1;
-						((*pt).getClients()).erase(ct);
-						//(*pt).removeClient(tempo);
-						close(tempo);
-						_clean_fds = 1;
+					{
+						// THIS SHOULD BE PERFORMED IF in header Connection: close.
+						//if keep-alive, maybe we don't close the file descriptor of the client.
+						if ((*ct).getReq().getConnection() == CLOSE)
+ 							closeConnection(ct, pt);
+						else
+						{
+							(*ct).getReq().resetValues();
+							findFds((*ct).getFd()).revents = 0;
+							findFds((*ct).getFd()).events = POLLIN | POLLHUP;
+						}
 					}
 					else
 						ct++;
@@ -121,6 +134,17 @@ void	Server::launchServer( void )
 		if (_clean_fds)
 			cleanFds();
 	}
+}
+
+void	Server::closeConnection(it_client & ct, it_port & pt)
+{
+	int tempo = (*ct).getFd();
+	findFds(tempo).revents = 0;
+	findFds(tempo).fd = -1;
+	((*pt).getClients()).erase(ct);
+	//(*pt).removeClient(tempo);
+	close(tempo);
+	_clean_fds = 1;
 }
 
 struct pollfd & Server::findFds( int fd)
@@ -165,7 +189,7 @@ void		Server::addToPolling( int fd )
 {
 	struct pollfd new_elem;
 	new_elem.fd = fd;
-	new_elem.events = POLLIN;
+	new_elem.events = POLLIN | POLLHUP;
 	new_elem.revents = 0;
 	_fds.push_back(new_elem);
 }

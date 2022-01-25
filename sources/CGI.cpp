@@ -66,14 +66,14 @@ CGI::~CGI( void )
 	if (!_arg)
 	{
 		for (int i = 0; _arg[i] != NULL; i++)
-			delete(_arg[i]);
-		delete(_arg);
+			free(_arg[i]);
+		free(_arg);
 	}
 	if (!_env)
 	{
 		for (int i = 0; _env[i] != NULL; i++)
-				delete(_env[i]);
-		delete(_env);
+				free(_env[i]);
+		free(_env);
 	}
 	return;
 }
@@ -89,6 +89,9 @@ CGI &				CGI::operator=( CGI const & rhs )
 	{
 		this->_bin_location = rhs.getBinLocation();
 		this->_header = rhs.getHeader();
+		this->_arg = rhs.getArg();
+		this->_env = rhs.getEnv();
+		this->_conversion = rhs.getConversion();
 	}
 	return *this;
 }
@@ -138,8 +141,9 @@ int		CGI::generate_arg( void ){
 	std::string tmp = ".";
 	tmp += _header["url"];
 
-	_arg[0] = strdup(tmp.c_str());
-	_arg[1] = NULL;
+	_arg[0] = strdup(_bin_location.c_str());
+	_arg[1] = strdup(tmp.c_str());
+	_arg[2] = NULL;
 	return SUCCESS;
 }
 
@@ -155,37 +159,38 @@ int		CGI::execute( Client & cli ){
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);
-		// execve(_bin_location.c_str(), _arg, _env);
-		execlp(_bin_location.c_str(), "/usr/bin/php-cgi", "./www/php/bonjour.php", _env);
+		execve(_bin_location.c_str(), _arg, NULL);
+		//execlp(_bin_location.c_str(), "/usr/bin/php-cgi", "./www/php/bonjour.php", _env);
 		exit(SUCCESS);
 	}
 	waitpid(pid, &child_stat, 0);
 	
 	//DEBUG//
-	std::cout << "Child Return Value = " << WEXITSTATUS(child_stat) << std::endl;
+	//std::cout << "Child Return Value = " << WEXITSTATUS(child_stat) << std::endl;
 	
 	close(fd[1]);
-	std::string response;
-	createResponse(fd[0], response);
-	std::cout << "Child Response content = " << response << std::endl;
-	close(fd[0]);
-	cli.getRes().setContent(response);
-	//cli.getRes().treatCGI(0, response);
+	std::string response = concatenateResponse(fd[0]);
+	//std::cout << "Child Response content = \n" << response << std::endl << "----EOR----" << std::endl;
+	//close(fd[0]); //CHECK IF FCLOSE IN CONCATENATE RESPONSE IS ENOUGH
+	cli.getRes().treatCGI(response);
 	return SUCCESS;
 }
 
-int	CGI::createResponse(int fd, std::string & response)
+std::string	CGI::concatenateResponse(int fd)
 {
-	size_t	buff_size = 80;
-	char buff[buff_size];
+	std::string response;
+	char *line = NULL;
+	size_t line_size = 0;
+	FILE * pipe_end = fdopen(fd, "r");
 
-	bzero(buff, buff_size);
-	while (read(fd, &buff, buff_size) != 0)
+	while (getline(&line, &line_size, pipe_end) != -1)
 	{
-		response += buff;
-		bzero(buff, buff_size);
+		response += line;
+		free(line);
+		line = NULL;
 	}
-	return SUCCESS;
+	fclose(pipe_end);
+	return response;
 }
 
 /*
@@ -197,6 +202,18 @@ std::string	CGI::getBinLocation( void ) const{
 }
 std::map<std::string, std::string> CGI::getHeader( void ) const{
 	return (_header);
+}
+
+std::map<std::string, std::string>	CGI::getConversion( void ) const{
+	return (_conversion);
+}
+
+char **		CGI::getArg( void ) const{
+	return (_arg);
+}
+
+char **		CGI::getEnv( void ) const {
+	return (_env);
 }
 
 }

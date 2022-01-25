@@ -21,11 +21,10 @@ std::map<int, std::string>	init_responseMap( void ){
 
 std::map<int, std::string>  Response::_status_code = init_responseMap();
 
-Response::Response( void ) : _response("Hello from Server\n"), _content("<html>\n\
-<body>\n\
-<h1>Hello, World!</h1>\n\
-</body>\n\
-</html>"){
+Response::Response( void ) 
+{
+	_status_line = genStatusLine();
+	_header = genHeader();
 };
 
 Response::Response( Response const & src){
@@ -42,6 +41,7 @@ Response &  Response::operator=( Response const & rhs)
 		_response = rhs.getResponse();
 		_status_line = rhs.getStatusLine();
 		_header = rhs.getHeader();
+		_body = rhs.getBody();
 	}
 	return *this;
 }
@@ -88,73 +88,70 @@ std::string		Response::genDate( void ){
 	return ret.str();
 }
 
-std::string		Response::genHeader( void ){
-	std::stringstream header;
+std::string	const &	Response::genHeader( void ){
 
-	header << genDate() << CRLF;
+	_header += genDate();
 	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
 	
-	header << CRLF;
-	return header.str();
+	return _header;
 }
 
 const char *      Response::response( void ){
 	std::stringstream tmp;
 	
-	tmp << genStatusLine() << CRLF;
-	tmp << genHeader() << CRLF;
+	tmp << _status_line << CRLF;
+	addContentLength();
+	tmp << _header << CRLF;
+	tmp << CRLF;
+	tmp << _body;
 
-	tmp << _content;
-
-	tmp << CRLF << CRLF;
 	_response = tmp.str();
-	
+
+	//std::cout << _response << std::endl;
+
 	const char * str = _response.c_str();
 	return str;
 }
 
-size_t      Response::response_size( void ){
-	return  _response.size();
+void	Response::addContentLength( void ){
+	std::stringstream length;
+	
+	length << "Content-Length: " << _body.size();
+	_header += CRLF;
+	_header += length.str();
 }
 
-void			treatCGI( int CGI_status, std::string response ){
-	(void) CGI_status;
-	(void) response;
+void		Response::treatCGI( std::string cgi_output )
+{
+	int pos;
+
+	if ((pos = cgi_output.find("Status: ")) != -1)
+	{
+		pos += 8;
+		_status_line = "HTTP/1.1 ";	
+		_status_line +=  cgi_output.substr(pos, cgi_output.find(CRLF, pos) - pos);
+	}
+	else
+	{
+		pos = cgi_output.find(BODY_CRLF);
+		_header += CRLF;
+		_header += cgi_output.substr(0, pos);
+	}
+	if ((pos = cgi_output.find(BODY_CRLF)) != -1)
+		_body = cgi_output.substr(pos + 4);		
 }
 
 //ACCESSORS - GETTERS//
 
-std::string Response::getResponse( void ) const{
-	return _response;
-}
-
-std::string		Response::getStatusLine(void) const{
-	return _status_line;
-}
-
-std::string		Response::getHeader( void ) const{
-	return _header;
-}
-
-std::string		Response::getContent( void ) const{
-	return _content;
-}
+std::string Response::getResponse( void ) const { return _response; }
+std::string	Response::getStatusLine(void) const { return _status_line; }
+std::string	Response::getHeader( void ) const { return _header; }
+std::string	Response::getBody( void ) const { return _body; }
 
 //ACCESSORS - SETTERS//
-void			Response::setResponse( std::string resp ){
-	_response = resp;
-}
-
-void			Response::setStatusLine( std::string status_l ){
-	_status_line = status_l;
-}
-
-void			Response::setHeader( std::string header ){
-	_header = header;
-}
-
-void			Response::setContent( std::string newcontent ){
-	_content = newcontent;
-}
+void	Response::setResponse( std::string resp ) { _response = resp; }
+void	Response::setStatusLine( std::string status_l ) { _status_line = status_l; }
+void	Response::setHeader( std::string header ) { _header = header; }
+void	Response::setBody( std::string newbody ){ _body = newbody; }
 
 }
