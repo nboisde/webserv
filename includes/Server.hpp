@@ -22,13 +22,7 @@ class Server
 
 		Server &		operator=( Server const & rhs );
 
-		std::string					getIp( void ) const;
-		std::vector<Port>			getPorts( void ) const;
-		std::vector<Port>&			getRefPorts( void );
-		std::vector<struct pollfd>	getFds( void ) const;
-		void						setIp( std::string new_ip );
-		void						setPorts( std::vector<Port> new_ports);
-		void						setFds( std::vector<struct pollfd> fds);
+
 		void						addPort( Port new_port);
 		int							polling( void );
 		void						addToPolling( int fd );
@@ -38,6 +32,15 @@ class Server
 		void						closeConnection(it_client & ct, it_port & pt);
 		void						launchServer( void );
 		int							stopServer( void );
+
+		std::string					getIp( void ) const;
+		std::vector<Port>			getPorts( void ) const;
+		bool						getCleanFds( void ) const;
+		std::vector<Port>&			getRefPorts( void );
+		std::vector<struct pollfd>	getFds( void ) const;
+		void						setIp( std::string new_ip );
+		void						setPorts( std::vector<Port> new_ports);
+		void						setFds( std::vector<struct pollfd> fds);
 
 	protected:
 		bool						_clean_fds;

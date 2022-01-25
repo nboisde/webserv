@@ -29,6 +29,7 @@ class Port
 		void				removeClient( int fd );
 	
 		int					getFd( void ) const ;
+		struct sockaddr_in	getPortAddr( void ) const;
 		void				setFd( int fd);
 		std::vector<Client>	&getClients( void );
 		void				setClients( int fd );

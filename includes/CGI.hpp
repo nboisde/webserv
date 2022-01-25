@@ -4,23 +4,25 @@
 # include <webserv.hpp>
 # include "Client.hpp"
 # include "Server.hpp"
+# include "Port.hpp"
 
 namespace ws
 {
 
 class Server;
 class Client;
+class Port;
 
 class CGI {
 	public:
 
-		CGI( Client const & cli, Server const & serv );
+		CGI( Client const & cli, Port const & port, Server const & serv );
 		CGI( CGI const & src );
 		virtual ~CGI( void );
 
 		CGI &		operator=( CGI const & rhs );
 
-		void								init_conversion( Client const & cli, Server const & serv );
+		void								init_conversion( Client const & cli, Port const & port, Server const & serv);
 
 		int									generate_env( void );
 		int									generate_arg( Client const & cli );
