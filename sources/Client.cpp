@@ -144,14 +144,11 @@ int	Client::checkURI( Port & port )
 	if (url == "/")
 		url = port.getConfig()["index"]._value;
 	checkPath(url, port);
-	std::cout << "URL " << url << std::endl;
 	checkExtension(url, port);
-	std::cout << "URL " << url << std::endl;
 	root = port.getConfig()["root"]._value;
 	buf = getcwd(buf, 0);
 	file_path << buf << root << url;
 	_file_path = file_path.str();
-	std::cout << "PATH " << _file_path << std::endl;
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
 		return ERROR;
