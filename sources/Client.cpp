@@ -113,12 +113,18 @@ int	Client::checkURI( Port & port )
 	std::string	url;
 	std::string	root;
 	char		*buf = NULL;
+	size_t		pos;
+	size_t		size;
 
 	url =_req.getHead()["url"];
+	pos = url.find("?");
+	size = url.size();
+	if (pos >= 0 && pos < size)
+		url = url.substr(0, pos);
+	std::cout << "URL " << url << std::endl;
 	if (url == "/")
 		url = "/index.html";
 	root = (port.getConfig())["root"]._value;
-	std::cout << "ROOT " << root << std::endl;
 	buf = getcwd(buf, 0);
 	// check location for this specific url
 	// if locatione exists, make substituion else add root
@@ -131,8 +137,8 @@ int	Client::checkURI( Port & port )
 	if (fd < 0)
 		return ERROR;
 	close(fd);
-	int pos = _file_path.find(".php");
-	int size = _file_path.size();
+	pos = _file_path.find(".php");
+	size = _file_path.size();
 	if (size - pos == 4)
 		return (R_CGI);
 	return (R_HTML);
