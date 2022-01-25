@@ -29,10 +29,13 @@ class Client
 			
 		Client &		operator=( Client const & rhs );
 
-		int 			receive( void );
 		int				checkURI( Port & port );
+		void			checkPath( std::string & url, Port & port );
+		void			checkExtension( std::string & url, Port & port );
 		int				executeCGI( Server const & serv, Port & port );
 		int				executeHtml( Port & port );
+
+		int 			receive( void );
 		int				send( void );
 		void			closeConnection( void );
 

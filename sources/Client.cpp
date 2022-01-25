@@ -108,6 +108,24 @@ int Client::send( void )
 	return CLOSING;
 }
 
+void	Client::checkPath( std::string & url, Port & port )
+{
+	std::map<std::string, std::string>::iterator	it = port.getConfig()["location"]._locations.find(url);
+	std::map<std::string, std::string>::iterator	ite = port.getConfig()["location"]._locations.end();
+
+	if (it != ite)
+		url = (*it).second + (*it).first;
+}
+void	Client::checkExtension( std::string & url, Port & port )
+{
+	std::string extension = url.substr(url.find("."));
+	std::map<std::string, Value> config = port.getConfig();
+	Value location = config["location"];
+	std::string	path = location._locations[extension];
+	if (path.size())
+		url = path + url;
+}
+
 int	Client::checkURI( Port & port )
 {
 	std::string	url;
@@ -115,24 +133,24 @@ int	Client::checkURI( Port & port )
 	char		*buf = NULL;
 	size_t		pos;
 	size_t		size;
+	std::stringstream file_path;
 
 	url =_req.getHead()["url"];
 	pos = url.find("?");
 	size = url.size();
 	if (pos >= 0 && pos < size)
 		url = url.substr(0, pos);
-	std::cout << "URL " << url << std::endl;
 	if (url == "/")
-		url = "/index.html";
-	root = (port.getConfig())["root"]._value;
+		url = port.getConfig()["index"]._value;
+	checkPath(url, port);
+	std::cout << "URL " << url << std::endl;
+	checkExtension(url, port);
+	std::cout << "URL " << url << std::endl;
+	root = port.getConfig()["root"]._value;
 	buf = getcwd(buf, 0);
-	// check location for this specific url
-	// if locatione exists, make substituion else add root
-	// replace / by root
-	_file_path = buf;
-	_file_path += root;
-	_file_path += url;
-	std::cout << _file_path << std::endl;
+	file_path << buf << root << url;
+	_file_path = file_path.str();
+	std::cout << "PATH " << _file_path << std::endl;
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
 		return ERROR;

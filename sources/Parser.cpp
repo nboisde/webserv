@@ -3,7 +3,7 @@
 namespace ws
 {
 
-Parser::Parser(void) : _pos(0), _server("127.0.0.1") 
+Parser::Parser(void) : _pos(0), _server("127.0.0.1")
 { 
 	_key_checker["listen"] = &Parser::checkPort;
 	_key_checker["host"] = &Parser::checkHost;
@@ -26,6 +26,7 @@ Parser::Parser(void) : _pos(0), _server("127.0.0.1")
 	_default_keys["index"] = Value("index.html");
 	_default_keys["location"] = Value(""); 
 }
+
 Parser::~Parser(void) {}
 
 int	Parser::launch(std::string file)
@@ -229,9 +230,9 @@ int	Parser::checkAutoindex(std::string raw_value, Value & new_value)
 	return (SUCCESS);
 }
 
-int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1); }
-int	Parser::checkHost(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
-int	Parser::checkServerName(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
+int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1); }
+int	Parser::checkHost(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
+int	Parser::checkServerName(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkErrorPage(std::string raw_value, Value & new_value) 
 {
 	int pos = 0;
@@ -239,7 +240,7 @@ int	Parser::checkErrorPage(std::string raw_value, Value & new_value)
 	std::string	str_error;
 	int			nbr_error;
 
-	new_value._value = raw_value;
+	new_value._value += raw_value;
 	for (; pos < size && !isspace(raw_value[pos]); pos++) {}
 	str_error = raw_value.substr(0, pos);
 	nbr_error = atoi(raw_value.c_str());
@@ -253,8 +254,8 @@ int	Parser::checkErrorPage(std::string raw_value, Value & new_value)
 	new_value._errors.insert(std::pair<int, std::string>(nbr_error, str_error));
 	return (SUCCESS);  
 }
-int	Parser::checkRoot(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
-int	Parser::checkIndex(std::string raw_value, Value & new_value) { (void)raw_value; (void)new_value; return (1);  }
+int	Parser::checkRoot(std::string raw_value, Value & new_value) { 	new_value._value = raw_value; return (1);  }
+int	Parser::checkIndex(std::string raw_value, Value & new_value) { 	new_value._value = raw_value; return (1);  }
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
 	int pos = 0;
@@ -262,7 +263,7 @@ int	Parser::checkLocation(std::string raw_value, Value & new_value)
 	std::string	location;
 	std::string	substitute;
 
-	new_value._value = raw_value;
+	new_value._value += raw_value;
 	for (; pos < size && !isspace(raw_value[pos]); pos++) {}
 	location = raw_value.substr(0, pos);
 	for (; pos < size && isspace(raw_value[pos]); pos++) {}
@@ -280,16 +281,15 @@ int	Parser::checkValue(std::string key, std::string value, Port & port)
 	std::map<std::string, Value>::iterator			it = port.getConfig().find(key);
 	std::map<std::string, validity_fct>::iterator	cite = _key_checker.end();
 	std::map<std::string, validity_fct>::iterator	cit = _key_checker.find(key);
-	Value											new_value;
 
 	if (it == ite || cite == cit)
 		return (0);
-	if (!((this->*_key_checker[key])(value, new_value)))
+	if (!((this->*_key_checker[key])(value, _default_keys[key])))
 	{
 		std::cout << key << " : " << value << " is not valid" << std::endl;
 		return (0);
 	}
-	_server.getRefPorts().back().getConfig()[key] = Value(value);
+	_server.getRefPorts().back().getConfig()[key] = _default_keys[key];
 	return (SUCCESS);
 }
 
