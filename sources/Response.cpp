@@ -104,6 +104,16 @@ std::string 	Response::genConnection( void )
 	return co;
 }
 
+void	Response::setContentType( std::string file_path )
+{
+	std::string extension = file_path.substr(file_path.find("."));
+	std::string content_type = "Content-Type: ";
+	std::string default_type = "text/html; charset=UTF-8";
+	
+	if (extension == "gif" || extension == "ico" || extension == "png" || extension == "jpeg")
+		default_type = "image/" + extension;
+}
+
 std::string	const &	Response::genHeader( void ){
 
 	_header += genDate();
@@ -117,7 +127,7 @@ std::string	const &	Response::genHeader( void ){
 	return _header;
 }
 
-const char *      Response::response( int status ){
+const char *	Response::response( int status ){
 	std::stringstream tmp;
 	
 	resetResponse();

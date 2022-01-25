@@ -9,11 +9,6 @@ namespace ws
 Client::Client( void ) {}
 Client::Client( int fd ) : _fd(fd), _status(OK) {}
 Client::Client( Client const & src ) { *this = src; }
-
-/*
-** -------------------------------- DESTRUCTOR --------------------------------
-*/
-
 Client::~Client() {}
 
 /*
@@ -76,53 +71,36 @@ int Client::receive(void)
 int Client::send( void )
 {
 	int			ret;
-	//int			len;
 	const char* prov;
 	std::string str = _res.response(_status);
 
-	//len = str.size();
 	prov = str.c_str();
 	ret = ::send(_fd, prov, str.size(), 0);
 	if (ret < 0)
 	{
 		perror(" send() failed");
-		return (ERROR);		
+		return (ERROR);
 	}
-
-	// DEUX CAS A GERER SUR CETTE FONCTION supposement. (avec content-length ou transfer encoding.)
-	/*
-	if (len > BUFFER_SIZE)
-		len = BUFFER_SIZE;
-	//std::cout << "SEND FD = " << _fd << std::endl;
-	ret = ::send(_fd, prov, len, 0);
-	//std::cout << "RET IN SENDING " << ret << std::endl;
-	if (ret < 0)
-	{
-		perror(" send() failed");
-		return (ERROR);		
-	}
-	//str.erase(0, ret - 1);
-	if (str.empty())
-		return CLOSING;
-	//return (WRITING);
-	return (SUCCESS);*/
 	return CLOSING;
 }
 
 void	Client::checkPath( std::string & url, Port & port )
 {
-	std::map<std::string, Value> config = port.getConfig();
-	Value location = config["location"];
-	std::string	path = location._locations[url];
+	std::map<std::string, Value>	config = port.getConfig();
+	Value							location = config["location"];
+	std::string	path =				location._locations[url];
+
 	if (path.size())
 		url = path + url;
 }
 void	Client::checkExtension( std::string & url, Port & port )
 {
-	std::string extension = url.substr(url.find("."));
-	std::map<std::string, Value> config = port.getConfig();
-	Value location = config["location"];
-	std::string	path = location._locations[extension];
+	std::string						extension = url.substr(url.find("."));
+	std::map<std::string, Value>	config = port.getConfig();
+	Value							location = config["location"];
+	std::string						path = location._locations[extension];
+
+
 	if (path.size())
 		url = path + url;
 }
@@ -183,10 +161,11 @@ int	Client::executeHtml(Port & port )
 	std::string		buffer;
 	std::string		content;
 
-	while (getline(ifs, buffer))
+ 	while (getline(ifs, buffer))
 		content += buffer;
 	ifs.close();
 	_res.setBody(content);
+	_res.setContentType(_file_path);
 	_res.response(_status);
 	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
