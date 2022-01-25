@@ -37,8 +37,11 @@ Client &	Client::operator=( Client const & rhs )
 	{
 		this->_fd = rhs.getFd();
 		this->_status = rhs.getStatus();
-		this->_req = rhs._req;
-		this->_res = rhs._res;
+		this->_req = rhs.getReq();
+		this->_res = rhs.getRes();
+		this->_file_path = rhs.getFilePath();
+		this->_ip = rhs.getIp();
+		this->_port = rhs.getPort();
 	}
 	return *this;
 }
@@ -232,6 +235,10 @@ std::string		Client::getIp( void ) const{
 
 std::string		Client::getPort( void ) const{
 	return (_port);
+}
+
+ws::Response		Client::getRes(void ) const{
+	return (_res);
 }
 
 }
