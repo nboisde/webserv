@@ -7,15 +7,6 @@
 
 namespace ws{
 
-struct	url_parser
-{
-	std::string script_name;
-	std::string	document_root;
-	std::string	path_info;
-	std::string	script_filename;
-	std::string	request_uri;
-	std::string	document_uri;
-};
 
 CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _bin_location("/usr/bin/php-cgi")
 {
@@ -36,6 +27,9 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	if (_header.find("Content-Type") != ite)
 		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
 	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
+	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
+	_conversion.insert(pair("SERVER_SOFTWARE", "webzerver/0.9"));
+	_conversion.insert(pair("REDIRECT_STATUS", "200"));
 
 	_conversion.insert(pair("REMOTE_ADDR", cli.getIp()));
 	_conversion.insert(pair("REMOTE_PORT", cli.getPort()));
@@ -44,20 +38,22 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	server_port << ntohs(port.getPortAddr().sin_port);
 	_conversion.insert(pair("SERVER_PORT", server_port.str()));
 	
-	_conversion.insert(pair("REDIRECT_STATUS", "200"));
-
-	struct url_parser	my_url;
+	std::string url = _header["url"];
+	std::string root = cli.getFilePath().substr(0, cli.getFilePath().find(url));
+	_conversion.insert(pair("DOCUMENT_ROOT", root));
+	_conversion.insert(pair("DOCUMENT_URI", url.substr(0, url.find(".php") + 4)));
+	_conversion.insert(pair("SCRIPT_NAME", url.substr(0, url.find(".php") + 4)));
+	_conversion.insert(pair("PHP_SELF", url.substr(0, url.find(".php") + 4)));	
+	_conversion.insert(pair("REQUEST_URI", url));
 	
-	//CAUSE PB
-	//_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
-	//if (_header.find("Method") != ite)
-	//	_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
-	//_conversion.insert(pair("SERVER_SOFTWARE", "webzerver/0.9"));
-	//
+	std::string query;
+	if (url.find(".php?") != std::string::npos)
+		query = url.substr(url.find(".php?") + 4);
+	_conversion.insert(pair("QUERY_STRING", query));
 
-	//URL MANAGEMENT//
-	std::string url(_header["url"]);
-	std::cout << "URL BRUT = " << url << std::endl;
+	_conversion.insert(pair("SCRIPT_FILENAME", cli.getFilePath()));
+	if (_header.find("Method") != ite)
+		_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
 }
 
 CGI::CGI( void )
