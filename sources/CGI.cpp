@@ -180,7 +180,7 @@ int		CGI::execute( Client & cli ){
 	close(fd[1]);
 	std::string response = concatenateResponse(fd[0]);
 	cli.getRes().treatCGI(response);
-	cli.getRes().response();
+	cli.getRes().response(CGI_FLAG);
 	return SUCCESS;
 }
 
