@@ -7,6 +7,15 @@
 
 namespace ws{
 
+struct	url_parser
+{
+	std::string script_name;
+	std::string	document_root;
+	std::string	path_info;
+	std::string	script_filename;
+	std::string	request_uri;
+	std::string	document_uri;
+};
 
 CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _bin_location("/usr/bin/php-cgi")
 {
@@ -27,15 +36,20 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	if (_header.find("Content-Type") != ite)
 		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
 	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
+
 	_conversion.insert(pair("REMOTE_ADDR", cli.getIp()));
 	_conversion.insert(pair("REMOTE_PORT", cli.getPort()));
 	_conversion.insert(pair("SERVER_ADDR", serv.getIp()));
-	_conversion.insert(pair("SERVER_PORT", ntohs(port.getPortAddr().sin_port)));
+	std::stringstream server_port;
+	server_port << ntohs(port.getPortAddr().sin_port);
+	_conversion.insert(pair("SERVER_PORT", server_port.str()));
+	
+	_conversion.insert(pair("REDIRECT_STATUS", "200"));
 
+	struct url_parser	my_url;
 	
 	//CAUSE PB
 	//_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
-	//_conversion.insert(pair("REDIRECT_STATUS", "200"));
 	//if (_header.find("Method") != ite)
 	//	_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
 	//_conversion.insert(pair("SERVER_SOFTWARE", "webzerver/0.9"));
@@ -43,15 +57,7 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 
 	//URL MANAGEMENT//
 	std::string url(_header["url"]);
-	std::cout << url << std::endl;
-
-	if (_header.find("Host") != ite)
-	{
-	//	_conversion.insert(pair("SERVER_PORT", _header["Host"].substr(_header["Host"].find_last_of(":") + 1)));
-	//	_conversion.insert(pair("SERVER_NAME", _header["Host"].substr(0, _header["Host"].find_last_of(":"))));
-	}
-	//_conversion.insert(pair("QUERY_STRING", ""));
-	//_conversion.insert(pair("SCRIPT_NAME", _bin_location));
+	std::cout << "URL BRUT = " << url << std::endl;
 }
 
 CGI::CGI( void )
@@ -147,7 +153,6 @@ int		CGI::generate_arg( Client const & cli ){
 	std::string file_path = cli.getFilePath();
 	
 	file_path = file_path.substr(0, file_path.find_last_of(".php") + 4);
-	std::cout << "FILE PATH = " << file_path << std::endl;
 	_arg = (char**)malloc(sizeof(char *) * 3);
 
 	_arg[0] = strdup(_bin_location.c_str());
