@@ -15,7 +15,7 @@ Client::~Client() {}
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-Client &				Client::operator=( Client const & rhs )
+Client &	Client::operator=( Client const & rhs )
 {
 	if ( this != &rhs )
 	{
@@ -106,6 +106,16 @@ void	Client::checkExtension( std::string & url, Port & port )
 		url = path + url;
 }
 
+int	Client::checkCGI(int query_pos)
+{	
+	if (query_pos >= 0)
+		return (R_CGI);
+	int php_pos = _file_path.find(".php");
+	if (php_pos >= 0)
+		return (R_CGI);
+	return R_HTML;
+}
+
 int	Client::checkURI( Port & port )
 {
 	std::string			url;
@@ -135,11 +145,7 @@ int	Client::checkURI( Port & port )
 		return ERROR;
 	}
 	close(fd);
-	pos = _file_path.find(".php");
-	size = _file_path.size();
-	if (size - pos == 4)
-		return (R_CGI);
-	return (R_HTML);
+	return (checkCGI(pos));
 }
 
 int	Client::executeCGI( Server const & serv, Port & port )
