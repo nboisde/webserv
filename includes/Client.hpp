@@ -30,6 +30,7 @@ class Client
 		Client &		operator=( Client const & rhs );
 
 		int				checkURI( Port & port );
+		int				checkCGI( void );
 		void			checkPath( std::string & url, Port & port );
 		void			checkExtension( std::string & url, Port & port );
 		int				executeCGI( Server const & serv, Port & port );

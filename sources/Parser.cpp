@@ -3,30 +3,7 @@
 namespace ws
 {
 
-Parser::Parser(void) : _pos(0), _server("127.0.0.1")
-{ 
-	_key_checker["listen"] = &Parser::checkPort;
-	_key_checker["host"] = &Parser::checkHost;
-	_key_checker["server_name"] = &Parser::checkServerName;
-	_key_checker["client_max_body_size"] = &Parser::checkClientMaxSize;
-	_key_checker["error_page"] = &Parser::checkErrorPage;
-	_key_checker["autoindex"] = &Parser::checkAutoindex;
-	_key_checker["method"] = &Parser::checkMethod;
-	_key_checker["root"] = &Parser::checkRoot;
-	_key_checker["index"] = &Parser::checkIndex;
-	_key_checker["location"] = &Parser::checkLocation;
-	_default_keys["listen"] = Value("8080");
-	_default_keys["host"] = Value("Webserv.com");
-	_default_keys["server_name"] = Value("webserv");
-	_default_keys["client_max_body_size"] = Value("100M");
-	_default_keys["error_page"] = Value("");
-	_default_keys["autoindex"] = Value("off");
-	_default_keys["method"] = Value("GET|POST|DELETE");
-	_default_keys["root"] = Value("/www");
-	_default_keys["index"] = Value("index.html");
-	_default_keys["location"] = Value(""); 
-}
-
+Parser::Parser(void) : _pos(0), _server("127.0.0.1") { initParser(); }
 Parser::~Parser(void) {}
 
 int	Parser::launch(std::string file)
@@ -45,6 +22,7 @@ int	Parser::checkFileName(void)
 {
 	int size = _config_file.size();
 	int pos = _config_file.rfind(".conf");
+
 	if (pos == -1)
 		return (0);
 	else if ((size - pos) != 5)
@@ -167,6 +145,7 @@ int	Parser::checkKeys(void)
 int	Parser::setValues(std::string key)
 {
 	int	isspaceNb = 0;
+
 	while (_pos < _size && isspace(_content[_pos]))
 	{
 		_pos++;
@@ -191,7 +170,7 @@ int	Parser::setValues(std::string key)
 int	Parser::checkPort(std::string raw_value, Value & new_value)
 {
 	int port = atoi(raw_value.c_str());
-	std::cout << "Port " << port << std::endl;
+
 	if (port < 0 || port > 65535)
 		return (0);
 	new_value._value = raw_value;
@@ -232,27 +211,36 @@ int	Parser::checkAutoindex(std::string raw_value, Value & new_value)
 
 int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value)
 {
-	int i = 0;
-	int size = raw_value.size();
+	int	i = 0;
+	int	size = raw_value.size();
+	int	body_size = atoi(raw_value.c_str());
 
 	for (; i < size; i++)
 		if (!::isdigit(raw_value[i]))
 			break;
-	if (raw_value[i] != 'M' || i != (size - 1))
-		return (0);
-	int body_size = atoi(raw_value.c_str());
+	if (i != size)
+	{
+		if (raw_value[i] == 'G' && i == size - 1)
+			body_size *= GIGA;
+		else if (raw_value[i] == 'M' && i == size - 1)
+			body_size *= MEGA;
+		else if (raw_value[i] == 'K' && i == size - 1)
+			body_size *= KILO;
+		else
+			return (0);
+	}
 	new_value._value = raw_value;
-	new_value._max_body_size = body_size * 1000000;
+	new_value._max_body_size = body_size;
 	return (SUCCESS);
 }
 int	Parser::checkHost(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkServerName(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkErrorPage(std::string raw_value, Value & new_value) 
 {
-	int pos = 0;
-	int	size = raw_value.size();
+	int			size = raw_value.size();
 	std::string	str_error;
 	int			nbr_error;
+	int			pos = 0;
 
 	new_value._value += raw_value;
 	for (; pos < size && !isspace(raw_value[pos]); pos++) {}
@@ -268,12 +256,12 @@ int	Parser::checkErrorPage(std::string raw_value, Value & new_value)
 	new_value._errors.insert(std::pair<int, std::string>(nbr_error, str_error));
 	return (SUCCESS);  
 }
-int	Parser::checkRoot(std::string raw_value, Value & new_value) { 	new_value._value = raw_value; return (1);  }
-int	Parser::checkIndex(std::string raw_value, Value & new_value) { 	new_value._value = raw_value; return (1);  }
+int	Parser::checkRoot(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
+int	Parser::checkIndex(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
-	int pos = 0;
-	int	size = raw_value.size();
+	int			pos = 0;
+	int			size = raw_value.size();
 	std::string	location;
 	std::string	substitute;
 
@@ -305,6 +293,30 @@ int	Parser::checkValue(std::string key, std::string value, Port & port)
 	}
 	_server.getRefPorts().back().getConfig()[key] = _default_keys[key];
 	return (SUCCESS);
+}
+
+void	Parser::initParser(void)
+{
+	_key_checker["listen"] = &Parser::checkPort;
+	_key_checker["host"] = &Parser::checkHost;
+	_key_checker["server_name"] = &Parser::checkServerName;
+	_key_checker["client_max_body_size"] = &Parser::checkClientMaxSize;
+	_key_checker["error_page"] = &Parser::checkErrorPage;
+	_key_checker["autoindex"] = &Parser::checkAutoindex;
+	_key_checker["method"] = &Parser::checkMethod;
+	_key_checker["root"] = &Parser::checkRoot;
+	_key_checker["index"] = &Parser::checkIndex;
+	_key_checker["location"] = &Parser::checkLocation;
+	_default_keys["listen"] = Value("8080");
+	_default_keys["host"] = Value("Webserv.com");
+	_default_keys["server_name"] = Value("webserv");
+	_default_keys["client_max_body_size"] = Value("100M");
+	_default_keys["error_page"] = Value("");
+	_default_keys["autoindex"] = Value("off");
+	_default_keys["method"] = Value("GET|POST|DELETE");
+	_default_keys["root"] = Value("/www");
+	_default_keys["index"] = Value("index.html");
+	_default_keys["location"] = Value(""); 
 }
 
 Server	Parser::getServer( void ) { return _server; }

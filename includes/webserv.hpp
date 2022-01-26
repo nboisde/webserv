@@ -22,7 +22,7 @@
 # define CONTENT_LENGTH 1
 # define TRANSFER_ENCODING 2
 
-// Connection handling.
+// Connection handling
 # define CLOSE 0
 # define KEEP_ALIVE 1
 
@@ -38,6 +38,11 @@
 # define STDIN 0
 # define STDOUT 1
 # define STDERR 2
+
+// UNITS
+# define GIGA 1000000000
+# define MEGA 1000000
+# define KILO 1000
 
 // Methods MACROS
 # define UNKNOWN 0

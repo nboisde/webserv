@@ -9,18 +9,13 @@ namespace ws
 Client::Client( void ) {}
 Client::Client( int fd ) : _fd(fd), _status(OK) {}
 Client::Client( Client const & src ) { *this = src; }
-
-/*
-** -------------------------------- DESTRUCTOR --------------------------------
-*/
-
 Client::~Client() {}
 
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-Client &				Client::operator=( Client const & rhs )
+Client &	Client::operator=( Client const & rhs )
 {
 	if ( this != &rhs )
 	{
@@ -76,50 +71,34 @@ int Client::receive(void)
 int Client::send( void )
 {
 	int			ret;
-	//int			len;
 	const char* prov;
 	std::string str = _res.response(_status);
 
-	//len = str.size();
 	prov = str.c_str();
 	ret = ::send(_fd, prov, str.size(), 0);
 	if (ret < 0)
 	{
 		perror(" send() failed");
-		return (ERROR);		
+		return (ERROR);
 	}
-
-	// DEUX CAS A GERER SUR CETTE FONCTION supposement. (avec content-length ou transfer encoding.)
-	/*
-	if (len > BUFFER_SIZE)
-		len = BUFFER_SIZE;
-	//std::cout << "SEND FD = " << _fd << std::endl;
-	ret = ::send(_fd, prov, len, 0);
-	//std::cout << "RET IN SENDING " << ret << std::endl;
-	if (ret < 0)
-	{
-		perror(" send() failed");
-		return (ERROR);		
-	}
-	//str.erase(0, ret - 1);
-	if (str.empty())
-		return CLOSING;
-	//return (WRITING);
-	return (SUCCESS);*/
 	return CLOSING;
 }
 
 void	Client::checkPath( std::string & url, Port & port )
 {
-	std::map<std::string, Value> config = port.getConfig();
-	Value location = config["location"];
-	std::string	path = location._locations[url];
+	std::map<std::string, Value>	config = port.getConfig();
+	Value							location = config["location"];
+	std::string	path =				location._locations[url];
+
 	if (path.size())
 		url = path + url;
 }
 void	Client::checkExtension( std::string & url, Port & port )
 {
-	std::string extension = url.substr(url.find("."));
+	int	pos = url.find(".");
+	if (pos < 0)
+		return ;
+	std::string	extension = url.substr(url.find("."));
 	std::map<std::string, Value> config = port.getConfig();
 	Value location = config["location"];
 	std::string	path = location._locations[extension];
@@ -127,20 +106,34 @@ void	Client::checkExtension( std::string & url, Port & port )
 		url = path + url;
 }
 
+int	Client::checkCGI( void )
+{	
+	int		query_pos = _file_path.find("?");
+	int		size = _file_path.size();
+	int		php_pos = _file_path.find(".php");
+
+	if (php_pos >= 0 && size - php_pos == 4)
+		return (R_CGI);
+	else if (query_pos >= 0 && php_pos >= 0 && php_pos < query_pos)
+		return (R_CGI);
+	else
+	{
+		std::cout << query_pos << std::endl;
+		if (query_pos >= 0 )
+			_file_path = _file_path.substr(0, query_pos);
+		std::cout << _file_path << std::endl;
+		return (R_HTML);
+	}
+}
+
 int	Client::checkURI( Port & port )
 {
-	std::string	url;
-	std::string	root;
-	char		*buf = NULL;
-	size_t		pos;
-	size_t		size;
-	std::stringstream file_path;
+	std::string			root;
+	std::string			url;	
+	char				*buf = NULL;
+	std::stringstream	file_path;
 
 	url =_req.getHead()["url"];
-	pos = url.find("?");
-	size = url.size();
-	if (pos >= 0 && pos < size)
-		url = url.substr(0, pos);
 	if (url == "/")
 		url = port.getConfig()["index"]._value;
 	checkPath(url, port);
@@ -151,13 +144,12 @@ int	Client::checkURI( Port & port )
 	_file_path = file_path.str();
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
+	{
+		_status = NOT_FOUND;
 		return ERROR;
+	}
 	close(fd);
-	pos = _file_path.find(".php");
-	size = _file_path.size();
-	if (size - pos == 4)
-		return (R_CGI);
-	return (R_HTML);
+	return (checkCGI());
 }
 
 int	Client::executeCGI( Server const & serv, Port & port )
@@ -171,8 +163,8 @@ int	Client::executeCGI( Server const & serv, Port & port )
 		cgi.execute(*this);
 	else if (res_type == R_HTML)
 		executeHtml( port );
-	else 
-		return ERROR;
+	else
+		_res.response(_status);
 	return SUCCESS;
 }
 
@@ -183,10 +175,11 @@ int	Client::executeHtml(Port & port )
 	std::string		buffer;
 	std::string		content;
 
-	while (getline(ifs, buffer))
+ 	while (getline(ifs, buffer))
 		content += buffer;
 	ifs.close();
 	_res.setBody(content);
+	_res.setContentType(_file_path);
 	_res.response(_status);
 	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
