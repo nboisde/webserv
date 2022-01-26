@@ -106,32 +106,34 @@ void	Client::checkExtension( std::string & url, Port & port )
 		url = path + url;
 }
 
-int	Client::checkCGI(int query_pos, int URI_size)
+int	Client::checkCGI( void )
 {	
-	int php_pos = _file_path.find(".php");
+	int		query_pos = _file_path.find("?");
+	int		size = _file_path.size();
+	int		php_pos = _file_path.find(".php");
 
 	if (php_pos >= 0 && size - php_pos == 4)
-		return (R_CGI)
+		return (R_CGI);
 	else if (query_pos >= 0 && php_pos >= 0 && php_pos < query_pos)
 		return (R_CGI);
 	else
-		return R_HTML;
+	{
+		std::cout << query_pos << std::endl;
+		if (query_pos >= 0 )
+			_file_path = _file_path.substr(0, query_pos);
+		std::cout << _file_path << std::endl;
+		return (R_HTML);
+	}
 }
 
 int	Client::checkURI( Port & port )
 {
-	std::string			url;
 	std::string			root;
+	std::string			url;	
 	char				*buf = NULL;
-	size_t				pos;
-	size_t				size;
 	std::stringstream	file_path;
 
 	url =_req.getHead()["url"];
-	pos = url.find("?");
-	size = url.size();
-	if (pos >= 0 && pos < size)
-		url = url.substr(0, pos);
 	if (url == "/")
 		url = port.getConfig()["index"]._value;
 	checkPath(url, port);
@@ -147,7 +149,7 @@ int	Client::checkURI( Port & port )
 		return ERROR;
 	}
 	close(fd);
-	return (checkCGI(pos, size));
+	return (checkCGI());
 }
 
 int	Client::executeCGI( Server const & serv, Port & port )
