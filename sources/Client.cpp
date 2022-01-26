@@ -106,14 +106,16 @@ void	Client::checkExtension( std::string & url, Port & port )
 		url = path + url;
 }
 
-int	Client::checkCGI(int query_pos)
+int	Client::checkCGI(int query_pos, int URI_size)
 {	
-	if (query_pos >= 0)
-		return (R_CGI);
 	int php_pos = _file_path.find(".php");
-	if (php_pos >= 0)
+
+	if (php_pos >= 0 && size - php_pos == 4)
+		return (R_CGI)
+	else if (query_pos >= 0 && php_pos >= 0 && php_pos < query_pos)
 		return (R_CGI);
-	return R_HTML;
+	else
+		return R_HTML;
 }
 
 int	Client::checkURI( Port & port )
@@ -145,7 +147,7 @@ int	Client::checkURI( Port & port )
 		return ERROR;
 	}
 	close(fd);
-	return (checkCGI(pos));
+	return (checkCGI(pos, size));
 }
 
 int	Client::executeCGI( Server const & serv, Port & port )
