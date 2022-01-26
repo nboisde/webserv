@@ -91,7 +91,7 @@ int Client::send( void )
 {
 	int			ret;
 	const char* prov;
-	std::string str = _res.response(_status);
+	std::string str = _res.getResponse();
 
 	prov = str.c_str();
 	ret = ::send(_fd, prov, str.size(), 0);
@@ -181,8 +181,6 @@ int	Client::executeCGI( Server const & serv, Port & port )
 	{
 		CGI cgi(*this, port, serv);
 		cgi.execute(*this);
-		//DEBUG//	
-		std::cout << "\n----DOR---- \n" << _res.getResponse() << std::endl << "----EOR----" << std::endl;
 	}
 	else if (res_type == R_HTML)
 		executeHtml( port );
@@ -202,14 +200,9 @@ int	Client::executeHtml(Port & port )
 		content += buffer;
 	ifs.close();
 	_res.setBody(content);
-<<<<<<< HEAD
 	_res.setContentType(_file_path);
 	_res.response(_status);
 	std::cout << _res.getResponse() << std::endl;
-=======
-	_res.response();
-	//std::cout << _res.getResponse() << std::endl;
->>>>>>> progress on env var
 	return SUCCESS;
 }
 

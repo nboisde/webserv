@@ -51,6 +51,7 @@
 # define DELETE 3
 
 // RESPONSE HEADER STATUS
+# define CGI_FLAG 42
 # define CONTINUE 100
 # define OK 200
 # define MULTIPLE_CHOICE 300

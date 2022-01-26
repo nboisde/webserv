@@ -26,7 +26,7 @@ Response::Response( void )
 {
 	_status_line = genStatusLine(OK);
 	_status = OK;
-	//_header = genHeader();
+	_header = genDate();
 }
 
 Response::Response( Response const & src){
@@ -117,14 +117,13 @@ void	Response::setContentType( std::string file_path )
 
 std::string	const &	Response::genHeader( void ){
 
-	_header += genDate();
 	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
+	addContentLength();
 	if (_status == BAD_REQUEST) // Maybe we will modify this and add Connection behavior all the time.
 	{
 		_header += CRLF;
 		_header += genConnection();
 	}
-	
 	return _header;
 }
 
@@ -132,26 +131,24 @@ const char *	Response::response( int status )
 {
 	std::stringstream tmp;
 	
-	resetResponse();
-	_status_line = genStatusLine(status);
-	_status = status;
-	genHeader();
+	if (status != CGI_FLAG)
+	{
+		_status_line = genStatusLine(status);
+		_status = status;
+		addContentType();
+	}
 	tmp << _status_line << CRLF;
-	addContentLength();
-	addContentType();
+	genHeader();
 	tmp << _header << CRLF;
 	tmp << CRLF;
 	tmp << _body;
 
 	_response = tmp.str();
-<<<<<<< HEAD
 
 	//std::cout << _response << std::endl;
 
-=======
-	
->>>>>>> progress on env var
 	const char * str = _response.c_str();
+	resetResponse();
 	return str;
 }
 
@@ -165,11 +162,11 @@ void	Response::addContentLength( void ){
 
 void	Response::addContentType( void )
 {
-	std::stringstream length;
+	std::stringstream type;
 	
-	length << "Content-Type: " << _content_type;
+	type << "Content-Type: " << _content_type;
 	_header += CRLF;
-	_header += length.str();
+	_header += type.str();
 }
 
 void		Response::treatCGI( std::string cgi_output )
