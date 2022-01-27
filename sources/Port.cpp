@@ -36,7 +36,8 @@ std::ostream &			operator<<( std::ostream & o, Port const & i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-int		Port::launchPort( void ){
+int		Port::launchPort( void )
+{
 	int on = 1;
 
 	_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -66,12 +67,13 @@ int		Port::launchPort( void ){
 }
 
 
-int	Port::bind( void ){
+int	Port::bind( void )
+{
 	if (::bind(_fd, (struct sockaddr *)&_port_address, sizeof(_port_address)) < 0)
 	{
 		perror("In bind");
 		close(_fd);
-		return ERROR;
+		return (ERROR);
 	}
 	return SUCCESS;
 }
