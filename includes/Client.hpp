@@ -7,6 +7,7 @@
 # include "CGI.hpp"
 # include "Server.hpp"
 # include "Port.hpp"
+# include "Value.hpp"
 
 namespace ws {
 
@@ -14,6 +15,8 @@ class Port;
 
 class Client
 {
+	typedef	std::map<std::string, Value>	config_type;
+
 	protected:
 		int				_fd;
 		int				_status;
@@ -22,10 +25,11 @@ class Client
 		ws::Request		_req;
 		ws::Response	_res;
 		std::string		_file_path;
+		config_type		_config;
 
 	public:
 		Client( void );
-		Client( int fd, struct sockaddr_in *cli_addr);
+		Client( int fd, struct sockaddr_in *cli_addr, config_type conf );
 		Client( Client const & src );
 		virtual ~Client();
 			

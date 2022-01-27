@@ -8,7 +8,7 @@ namespace ws
 */ 
 Client::Client( void ) {}
 
-Client::Client( int fd, struct sockaddr_in *cli_addr ) : _fd(fd), _status(OK) {
+Client::Client( int fd, struct sockaddr_in *cli_addr, config_type conf ) : _fd(fd), _status(OK), _config(conf) {
 	_ip = inet_ntoa(cli_addr->sin_addr);
 	
 	std::stringstream port;
