@@ -190,6 +190,7 @@ int	Parser::checkMethod(std::string raw_value, Value & new_value)
 		{	
 			if (raw_value != "GET" && raw_value != "POST" && raw_value != "DELETE")
 				return (0);
+			new_value._methods.push_back(raw_value);
 			break;
 		}
 		method = raw_value.substr(0, position);
@@ -310,7 +311,7 @@ void	Parser::initParser(void)
 	_default_keys["listen"] = Value("8080");
 	_default_keys["host"] = Value("Webserv.com");
 	_default_keys["server_name"] = Value("webserv");
-	_default_keys["client_max_body_size"] = Value("100M");
+	_default_keys["client_max_body_size"] = Value("100000000");
 	_default_keys["error_page"] = Value("");
 	_default_keys["autoindex"] = Value("off");
 	_default_keys["method"] = Value("GET|POST|DELETE");
@@ -320,39 +321,4 @@ void	Parser::initParser(void)
 }
 
 Server	Parser::getServer( void ) { return _server; }
-
-// int Parser::defaultConfiguration(void)
-// {
-// 	std::ifstream file("./conf/dictConf.default");
-// 	std::string line;
-// 	while (std::getline(file, line))
-// 	{
-// 		int i = 0;
-// 		while (line[i] == ' ' || line[i] == '\t' || line[i] == '\r' || line[i] == '\v')
-// 			i++;
-// 		if (line[i] == '#')
-// 			continue ;
-// 		else if (!line[i] || line[i] == '\n')
-// 			continue ;
-// 		else
-// 		{
-// 			int dbl = line.find(":");
-// 			if (static_cast<int>(dbl) == -1)
-// 				return (1);
-// 			std::string key = line.substr(i, dbl - i);
-// 			std::string value = line.substr(dbl + 1, line.length());
-// 			while (static_cast<int>(key.find(" ")) != -1 || static_cast<int>(key.find("\t")) != -1)
-// 				key = key.substr(0, key.length() - 1);
-// 			int k = 0;
-// 			while (value[k] == ' ' || value[k] == '\t' || value[k] == '\r' || value[k] == '\v')
-// 				k++;
-// 			value = value.substr(k, value.length() - k);
-// 			while (static_cast<int>(value.find(" ")) != -1 || static_cast<int>(value.find("\t")) != -1)
-// 				value = value.substr(0, value.length() - 1);
-// 			_default_key_checker[key] = Value(value);
-// 		}
-// 	}
-// 	return SUCCESS;
-// }
-
 }

@@ -130,6 +130,9 @@ void	Client::checkExtension( std::string & url, Port & port )
 	std::cout << std::endl << "EXTENSION\t" << extension << std::endl;
 	std::map<std::string, Value> config = port.getConfig();
 	Value location = config["location"];
+	Value size = config[" client_max_body_size"];
+	// std::cout << "Client Max Body Size " << size._value << std::endl;
+	// std::cout << "Client Max Body Size " << size._max_body_size << std::endl;
 	std::string	path = location._locations[extension];
 	std::cout << "PATH\t\t" << path << std::endl;
 	if (path.size())

@@ -16,7 +16,7 @@ class Value
 		Value &		operator=( Value const & rhs );
 
 		std::string							_value;
-		size_t								_max_body_size;
+		unsigned long						_max_body_size;
 		std::map<int, std::string>			_errors;
 		std::vector<std::string>			_methods;
 		std::map<std::string, std::string>	_locations;
