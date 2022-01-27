@@ -50,6 +50,8 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	std::string query;
 	if (url.find(".php?") != std::string::npos)
 		query = url.substr(url.find(".php?") + 4);
+	else if (_header["Method"] == "POST")
+		query = cli.getReq().getBody();
 	_conversion.insert(pair("QUERY_STRING", query));
 
 	_conversion.insert(pair("SCRIPT_FILENAME", cli.getFilePath()));
@@ -138,7 +140,7 @@ std::ostream &			operator<<( std::ostream & o, CGI const & i )
 
 int		CGI::generate_env( void )
 {
-	if (_header["Method"] == "GET")
+	if (_header["Method"] == "GET" | _header["Method"] == "POST")
 	{
 		int i = 0;
 		this->_env = new char*[_conversion.size() + 1];
@@ -152,7 +154,6 @@ int		CGI::generate_env( void )
 			i++;
 		}
 		_env[_conversion.size()] = 0;
-		
 		//DEBUG//
 		//for (int j = 0; _env[j]; j++)
 		//	std::cout << _env[j] << std::endl;
@@ -183,6 +184,8 @@ int		CGI::execute( Client & cli ){
 	
 	if (pid == 0)
 	{
+		for(int i = 0; _env[i]; i++)
+			std::cerr << _env[i] << std::endl;
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);
@@ -193,7 +196,7 @@ int		CGI::execute( Client & cli ){
 	
 	//DEBUG//
 	//std::cout << "Child Return Value = " << WEXITSTATUS(child_stat) << std::endl;
-	
+
 	close(fd[1]);
 	std::string response = concatenateResponse(fd[0]);
 	cli.getRes().treatCGI(response);
