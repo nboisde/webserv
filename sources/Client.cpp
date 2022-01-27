@@ -109,6 +109,9 @@ void Client::bridgeParsingRequest( void )
 	}
 	if (not_all == 1)
 		_status = NOT_ALLOWED;
+	else if (static_cast<size_t>(_req.getBody().length()) > _config["max_body_size"]._max_body_size
+	|| static_cast<size_t>(_req.getContentLength()) > _config["max_body_size"]._max_body_size)
+		_status = REQUEST_ENTITY_TOO_LARGE;
 }
 
 int Client::send( void )
