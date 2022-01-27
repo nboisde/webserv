@@ -26,7 +26,6 @@ Response::Response( void )
 {
 	_status_line = genStatusLine(OK);
 	_status = OK;
-	_header = genDate();
 }
 
 Response::Response( Response const & src){
@@ -118,6 +117,7 @@ void	Response::setContentType( std::string file_path )
 std::string	const &	Response::genHeader( void ){
 
 	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
+	_header = genDate();
 	addContentLength();
 	if (_status == BAD_REQUEST) // Maybe we will modify this and add Connection behavior all the time.
 	{
