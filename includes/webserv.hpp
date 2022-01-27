@@ -3,7 +3,7 @@
 
 // General MACROS
 # define DELAI -1
-# define BUFFER_SIZE 80
+# define BUFFER_SIZE 4096
 # define ERROR -1
 # define SUCCESS 1
 

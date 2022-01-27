@@ -42,6 +42,7 @@ Client &	Client::operator=( Client const & rhs )
 		this->_file_path = rhs.getFilePath();
 		this->_ip = rhs.getIp();
 		this->_port = rhs.getPort();
+		this->_config = rhs.getConfig();
 	}
 	return *this;
 }
@@ -50,6 +51,8 @@ int Client::receive(void)
 {
 	char	buffer[BUFFER_SIZE];
 
+	//_config["method"]._methods;
+	std::cout << "MAX BODY SIZE" << _config["max_body_size"]._max_body_size << std::endl;
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
@@ -213,26 +216,16 @@ void Client::closeConnection(){}
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-int			Client::getStatus( void ) const { return _status; }
-int			Client::getFd(void) const { return _fd; }
-Request &	Client::getReq( void ) { return _req; }
-Request		Client::getReq( void ) const { return _req; }
-Response &	Client::getRes( void ) { return _res; }
+int										Client::getStatus( void ) const { return _status; }
+int										Client::getFd(void) const { return _fd; }
+Request &								Client::getReq( void ) { return _req; }
+Request									Client::getReq( void ) const { return _req; }
+Response &								Client::getRes( void ) { return _res; }
 
-std::string	Client::getFilePath( void ) const{
-	return (_file_path);
-}
-
-std::string		Client::getIp( void ) const{
-	return (_ip);
-}
-
-std::string		Client::getPort( void ) const{
-	return (_port);
-}
-
-ws::Response		Client::getRes(void ) const{
-	return (_res);
-}
+std::string								Client::getFilePath( void ) const { return _file_path; }
+std::string								Client::getIp( void ) const { return _ip; }
+std::string								Client::getPort( void ) const { return _port; }
+ws::Response							Client::getRes(void ) const { return _res; }
+std::map<std::string, ws::Value>		Client::getConfig( void ) const { return _config; }
 
 }

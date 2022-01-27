@@ -55,6 +55,7 @@ class Client
 		std::string		getFilePath( void ) const;
 		std::string		getIp( void ) const;
 		std::string		getPort( void ) const;
+		config_type		getConfig( void ) const;
 };
 
 }
