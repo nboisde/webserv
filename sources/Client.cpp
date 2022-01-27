@@ -127,14 +127,14 @@ void	Client::checkExtension( std::string & url, Port & port )
 	if (pos < 0)
 		return ;
 	std::string	extension = url.substr(url.find("."));
-	std::cout << "EXTENSION " << extension << std::endl;
+	std::cout << std::endl << "EXTENSION\t" << extension << std::endl;
 	std::map<std::string, Value> config = port.getConfig();
 	Value location = config["location"];
 	std::string	path = location._locations[extension];
-	std::cout << "PATH " << path << std::endl;
+	std::cout << "PATH\t\t" << path << std::endl;
 	if (path.size())
 		url = path + url;
-	std::cout << "YRL " << url << std::endl;
+	std::cout << "URL\t\t" << url << std::endl;
 }
 
 int	Client::checkCGI( std::string & url )
