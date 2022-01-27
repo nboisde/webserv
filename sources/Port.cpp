@@ -63,7 +63,7 @@ int		Port::launchPort( void )
 	_port_address.sin_port = htons(atoi((_config["listen"]._value).c_str()));
 	if (bind() < 0 || listening() < 0)
 		return ERROR;
-	std::cout << PURPLE << "Listening on port : " << _config["listen"]._value << RESET << std::endl;
+	std::cout << PURPLE << "Listening on port:\t" << _config["listen"]._value << RESET << std::endl;
 	return SUCCESS;
 }
 
@@ -72,7 +72,7 @@ int	Port::bind( void )
 {
 	if (::bind(_fd, (struct sockaddr *)&_port_address, sizeof(_port_address)) < 0)
 	{
-		perror("In bind");
+		std::cout <<  PURPLE << "Address already in use:\t" << _config["listen"]._value << RESET << std::endl;
 		close(_fd);
 		return (ERROR);
 	}
