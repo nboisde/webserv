@@ -26,7 +26,6 @@ Response::Response( void )
 {
 	_status_line = genStatusLine(OK);
 	_status = OK;
-	_header = genDate();
 }
 
 Response::Response( Response const & src){
@@ -131,6 +130,9 @@ const char *	Response::response( int status )
 {
 	std::stringstream tmp;
 	
+	if (!_header.empty())
+		_header += CRLF;
+	_header += genDate();
 	if (status != CGI_FLAG)
 	{
 		_status_line = genStatusLine(status);
@@ -182,7 +184,7 @@ void		Response::treatCGI( std::string cgi_output )
 	else
 	{
 		pos = cgi_output.find(BODY_CRLF);
-		_header += CRLF;
+		//_header += CRLF;
 		_header += cgi_output.substr(0, pos);
 	}
 	if ((pos = cgi_output.find(BODY_CRLF)) != -1 && !cgi_output.substr(pos + 4).empty())
