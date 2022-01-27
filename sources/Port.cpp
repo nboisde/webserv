@@ -102,8 +102,8 @@ int	Port::accepting( void )
 	
 	if (new_socket < 0)
 	{
-		if (errno != EAGAIN)
-		 	perror("In accept");
+		//if (errno != EAGAIN)
+		 	//perror("In accept");
 		return(ERROR);
 	}
 	Client newClient(new_socket, &cli_addr, _config);

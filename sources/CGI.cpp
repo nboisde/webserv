@@ -24,9 +24,15 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	map_iterator ite = _header.end();
 
 	if (_header.find("Content-Length") != ite)
+	{
 		_conversion.insert(pair("CONTENT_LENGTH", _header["Content-Length"]));
+		_conversion.insert(pair("HTTP_CONTENT_LENGTH", _header["Content-Length"]));
+	}
 	if (_header.find("Content-Type") != ite)
+	{
 		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
+		_conversion.insert(pair("HTTP_CONTENT_TYPE", _header["Content-Type"]));
+	}
 	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
 	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
 	_conversion.insert(pair("SERVER_SOFTWARE", "webzerver/0.9"));
@@ -173,12 +179,17 @@ int		CGI::generate_arg( Client const & cli ){
 
 	_arg[0] = strdup(_bin_location.c_str());
 	_arg[1] = strdup(file_path.c_str());
+	std::string tmp = body;
 	for (int i = 2; i != size - 1; i++)
 	{
-		int pos = body.find("&");
-		std::string tmp = body.substr(0, pos);
-		_arg[i] = strdup(tmp.c_str());
-		tmp = body.substr(pos + 1);
+		ssize_t pos = tmp.find("&");
+		if (pos == -1)
+		{
+			_arg[i] = strdup(tmp.c_str());
+			break;
+		}
+		_arg[i] = strdup((tmp.substr(0, pos)).c_str());
+		tmp = tmp.substr(pos + 1);
 	}
 	_arg[size - 1] = NULL;
 	return SUCCESS;
@@ -189,6 +200,10 @@ int		CGI::execute( Client & cli ){
 	int fd[2];
 	pipe(fd);
 	int child_stat;
+	
+	for (int i = 0; _arg[i]; i++)
+		std::cout << "_arg[i] = " << _arg[i] << std::endl;
+
 	pid_t pid = fork();
 	
 	if (pid == 0)
