@@ -118,31 +118,30 @@ void	Client::checkExtension( std::string & url, Port & port )
 	if (pos < 0)
 		return ;
 	std::string	extension = url.substr(url.find("."));
+	std::cout << "EXTENSION " << extension << std::endl;
 	std::map<std::string, Value> config = port.getConfig();
 	Value location = config["location"];
 	std::string	path = location._locations[extension];
+	std::cout << "PATH " << path << std::endl;
 	if (path.size())
 		url = path + url;
+	std::cout << "YRL " << url << std::endl;
 }
 
-int	Client::checkCGI( void )
+int	Client::checkCGI( std::string & url )
 {	
-	int		query_pos = _file_path.find("?");
-	int		size = _file_path.size();
-	int		php_pos = _file_path.find(".php");
+	int		query_pos = url.find("?");
+	int		size = url.size();
+	int		php_pos = url.find(".php");
 
+	if (query_pos >= 0 )
+			url = url.substr(0, query_pos);
 	if (php_pos >= 0 && size - php_pos == 4)
 		return (R_CGI);
 	else if (query_pos >= 0 && php_pos >= 0 && php_pos < query_pos)
 		return (R_CGI);
 	else
-	{
-		std::cout << query_pos << std::endl;
-		if (query_pos >= 0 )
-			_file_path = _file_path.substr(0, query_pos);
-		std::cout << _file_path << std::endl;
 		return (R_HTML);
-	}
 }
 
 int	Client::checkURI( Port & port )
@@ -151,14 +150,16 @@ int	Client::checkURI( Port & port )
 	std::string			url;	
 	char				*buf = NULL;
 	std::stringstream	file_path;
+	int					ret;
 
 	url =_req.getHead()["url"];
 	if (url == "/")
 		url = port.getConfig()["index"]._value;
-	checkPath(url, port);
-	checkExtension(url, port);
 	root = port.getConfig()["root"]._value;
 	buf = getcwd(buf, 0);
+	ret = checkCGI(url);
+	checkPath(url, port);
+	checkExtension(url, port);
 	file_path << buf << root << url;
 	_file_path = file_path.str();
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
@@ -168,7 +169,7 @@ int	Client::checkURI( Port & port )
 		return ERROR;
 	}
 	close(fd);
-	return (checkCGI());
+	return (ret);
 }
 
 int	Client::executeCGI( Server const & serv, Port & port )
