@@ -19,8 +19,9 @@ CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _bin_lo
 void	CGI::init_conversion( Client const & cli, Port const & port, Server const & serv )
 {
 	typedef std::pair<std::string, std::string>	pair;
-
-	std::map<std::string, std::string>::iterator ite = _header.end();
+	typedef std::map<std::string, std::string>::iterator map_iterator;
+	
+	map_iterator ite = _header.end();
 
 	if (_header.find("Content-Length") != ite)
 		_conversion.insert(pair("CONTENT_LENGTH", _header["Content-Length"]));
@@ -54,6 +55,22 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	_conversion.insert(pair("SCRIPT_FILENAME", cli.getFilePath()));
 	if (_header.find("Method") != ite)
 		_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
+
+	_conversion.insert(pair("HTTPS", ""));
+	if (_header.find("Accept") != ite)
+		_conversion.insert(pair("HTTP_ACCEPT", _header["Accept"]));
+	if (_header.find("Accept-Charset") != ite)
+		_conversion.insert(pair("HTTP_ACCEPT_CHARSET", _header["Accept-Charset"]));
+	if (_header.find("Accept-Encoding") != ite)
+		_conversion.insert(pair("HTTP_ACCEPT_ENCODING", _header["Accept-Encoding"]));
+	if (_header.find("Accept-Language") != ite)
+		_conversion.insert(pair("HTTP_ACCEPT_LANGUAGE", _header["Accept-Language"]));
+	if (_header.find("Connection") != ite)
+		_conversion.insert(pair("HTTP_CONNECTION", _header["Connection"]));
+	if (_header.find("Host") != ite)
+		_conversion.insert(pair("HTTP_HOST", _header["Host"]));
+	if (_header.find("User-Agent") != ite)
+		_conversion.insert(pair("HTTP_USER_AGENT", _header["User-Agent"]));
 }
 
 CGI::CGI( void )
