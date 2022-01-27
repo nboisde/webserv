@@ -48,15 +48,18 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 
 void	Server::launchServer( void )
 {
+	int	accessible_ports = 0;
+
 	for (std::vector<Port>::iterator it = _ports.begin(); it != _ports.end(); it++)
 	{
-		if ((*it).launchPort())
-			addToPolling((*it).getFd());
-		else
+		if ((*it).launchPort() > 0)
 		{
-			//GESTION D'ERROR//
+			addToPolling((*it).getFd());
+			accessible_ports++;
 		}
 	}
+	if (!accessible_ports)
+		exit(1); 
 	while (true)
 	{
 		_clean_fds = 0;
