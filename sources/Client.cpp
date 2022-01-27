@@ -199,16 +199,27 @@ int	Client::executeCGI( Server const & serv, Port & port )
 	return SUCCESS;
 }
 
+       #include <sys/types.h>
+       #include <sys/stat.h>
+       #include <fcntl.h>
+
+
 int	Client::executeHtml(Port & port )
 {
 	(void)port;
-	std::ifstream	ifs(_file_path.c_str());
-	std::string		buffer;
 	std::string		content;
+	char *line = NULL;
+	size_t n = 0;
+	FILE * file = fopen(_file_path.c_str(), "r");
+	ssize_t ret = 0;
 
- 	while (getline(ifs, buffer))
-		content += buffer;
-	ifs.close();
+	while ((ret = getline(&line, &n, file)) != -1)
+	{
+		content.append(line, ret);
+		free(line);
+		line = NULL;
+	}
+	fclose(file);
 	_res.setBody(content);
 	_res.setContentType(_file_path);
 	_res.response(_status);
