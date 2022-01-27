@@ -232,6 +232,8 @@ int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value)
 	}
 	new_value._value = raw_value;
 	new_value._max_body_size = body_size;
+	std::cout << "size " << new_value._max_body_size << std::endl;
+
 	return (SUCCESS);
 }
 int	Parser::checkHost(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }

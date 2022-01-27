@@ -19,7 +19,7 @@ Port &				Port::operator=( Port const & rhs )
 		_fd = rhs._fd;
 		_port_address = rhs._port_address;
 		_clients = rhs._clients;
-		_config = rhs._config;
+		_config = rhs.getConfig();
 	}
 	return *this;
 }

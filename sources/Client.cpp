@@ -95,7 +95,8 @@ void Client::bridgeParsingRequest( void )
 	//int max_size = 0;
 
 	std::cout << "=================== DEV ==================" << std::endl;
-	std::cout << "MAX BODY SIZE : " << _config["max_body_size"]._max_body_size << std::endl;
+	std::cout << "MAX BODY SIZE : " << _config["client_max_body_size"]._max_body_size << std::endl;
+	std::cout << (*(_config.find("client_max_body_size"))).second._max_body_size << std::endl;
 	std::cout << "Methods allowed : ";
 	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
 		std::cout << (*it) << ", ";
@@ -109,8 +110,8 @@ void Client::bridgeParsingRequest( void )
 	}
 	if (not_all == 1)
 		_status = NOT_ALLOWED;
-	else if (static_cast<size_t>(_req.getBody().length()) > _config["max_body_size"]._max_body_size
-	|| static_cast<size_t>(_req.getContentLength()) > _config["max_body_size"]._max_body_size)
+	else if (static_cast<size_t>(_req.getBody().length()) > _config["client_max_body_size"]._max_body_size
+	|| static_cast<size_t>(_req.getContentLength()) > _config["client_max_body_size"]._max_body_size)
 		_status = REQUEST_ENTITY_TOO_LARGE;
 }
 
