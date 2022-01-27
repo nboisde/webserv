@@ -52,7 +52,13 @@ int Client::receive(void)
 	char	buffer[BUFFER_SIZE];
 
 	//_config["method"]._methods;
-	std::cout << "MAX BODY SIZE" << _config["max_body_size"]._max_body_size << std::endl;
+	std::cout << "=================== DEV ==================" << std::endl;
+	std::cout << "MAX BODY SIZE : " << _config["max_body_size"]._max_body_size << std::endl;
+	std::cout << "Methods allowed : ";
+	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
+		std::cout << (*it) << ", ";
+	std::cout << std::endl;
+	std::cout << "==========================================" << std::endl;
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
