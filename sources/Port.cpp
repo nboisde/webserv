@@ -58,11 +58,12 @@ int		Port::launchPort( void )
 		return ERROR;
 	}
 	memset((char *)&_port_address, 0, sizeof(_port_address));
-	_port_address.sin_family = AF_INET; 
-	_port_address.sin_addr.s_addr = htonl(INADDR_ANY); 
+	_port_address.sin_family = AF_INET;
+	_port_address.sin_addr.s_addr = htonl(INADDR_ANY);
 	_port_address.sin_port = htons(atoi((_config["listen"]._value).c_str()));
 	if (bind() < 0 || listening() < 0)
 		return ERROR;
+	std::cout << PURPLE << "Listening on port : " << _config["listen"]._value << RESET << std::endl;
 	return SUCCESS;
 }
 
@@ -105,7 +106,7 @@ int	Port::accepting( void )
 		 	perror("In accept");
 		return(ERROR);
 	}
-	Client newClient(new_socket, &cli_addr);
+	Client newClient(new_socket, &cli_addr, _config);
 	_clients.push_back(newClient);
 	return (new_socket);
 }

@@ -68,6 +68,8 @@
 # define RESET "\033[0m"
 # define BLUE "\033[38;5;63m"
 # define GREEN "\033[38;5;42m"
+# define FIRE "\033[38;5;166m"
+# define PURPLE "\033[38;5;105m"
 
 //CPP_LIBRARIES//
 # include <fstream>
