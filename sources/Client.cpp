@@ -65,7 +65,7 @@ int Client::receive(void)
 	if (req == -1)
 	{
 		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
-		_status = BAD_REQUEST;
+		_status = _req.getStatus();
 		return WRITING;
 	}
 	if (req == SUCCESS)
@@ -74,7 +74,8 @@ int Client::receive(void)
 		if (head_err == ERROR)
 		{
 			std::cout << RED << "400 bad request (Header reception 2)" << RESET << std::endl;
-			_status = BAD_REQUEST;
+			//_status = BAD_REQUEST;
+			_status = _req.getStatus();
 			return WRITING;
 		}
 		std::cout << BLUE;
@@ -202,7 +203,7 @@ int	Client::checkURI( Port & port, std::string url)
 
 int	Client::execution( Server const & serv, Port & port )
 {
-	int	res_type;
+	int	res_type = ERROR;
 
 	if (_status != OK)
 		executeError(serv, port);
