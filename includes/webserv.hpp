@@ -81,6 +81,7 @@
 # include <vector>
 # include <map>
 # include <csignal>
+# include <algorithm>
 
 //C_LIBRARIES//#include <string.h>
 # include <string.h>

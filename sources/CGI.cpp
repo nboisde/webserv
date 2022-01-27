@@ -50,8 +50,6 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	std::string query;
 	if (url.find(".php?") != std::string::npos)
 		query = url.substr(url.find(".php?") + 4);
-	else if (_header["Method"] == "POST")
-		query = cli.getReq().getBody();
 	_conversion.insert(pair("QUERY_STRING", query));
 
 	_conversion.insert(pair("SCRIPT_FILENAME", cli.getFilePath()));
@@ -164,14 +162,25 @@ int		CGI::generate_env( void )
 }
 
 int		CGI::generate_arg( Client const & cli ){
+	int size = 3;
+	std::string body = cli.getReq().getBody();
+	size += std::count(body.begin(), body.end(), '=');
+
 	std::string file_path = cli.getFilePath();
 	
 	file_path = file_path.substr(0, file_path.find_last_of(".php") + 4);
-	_arg = (char**)malloc(sizeof(char *) * 3);
+	_arg = (char**)malloc(sizeof(char *) * size);
 
 	_arg[0] = strdup(_bin_location.c_str());
 	_arg[1] = strdup(file_path.c_str());
-	_arg[2] = NULL;
+	for (int i = 2; i != size - 1; i++)
+	{
+		int pos = body.find("&");
+		std::string tmp = body.substr(0, pos);
+		_arg[i] = strdup(tmp.c_str());
+		tmp = body.substr(pos + 1);
+	}
+	_arg[size - 1] = NULL;
 	return SUCCESS;
 }
 
