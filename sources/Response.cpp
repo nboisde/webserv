@@ -110,6 +110,8 @@ void	Response::setContentType( std::string file_path )
 	
 	if (extension == ".gif" || extension == ".ico" || extension == ".png" || extension == ".jpeg")
 		_content_type = "image/" + extension.substr(1);
+	if (extension == ".css")
+		_content_type = "text/" + extension.substr(1);
 	else
 		_content_type = default_type;
 }
