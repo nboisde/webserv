@@ -51,14 +51,6 @@ int Client::receive(void)
 {
 	char	buffer[BUFFER_SIZE];
 
-	//_config["method"]._methods;
-	// std::cout << "=================== DEV ==================" << std::endl;
-	// std::cout << "MAX BODY SIZE : " << _config["max_body_size"]._max_body_size << std::endl;
-	// std::cout << "Methods allowed : ";
-	// for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
-	// 	std::cout << (*it) << ", ";
-	// std::cout << std::endl;
-	// std::cout << "==========================================" << std::endl;
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
@@ -72,7 +64,7 @@ int Client::receive(void)
 	int req = _req.concatenateRequest(tmp);
 	if (req == -1)
 	{
-		std::cout << RED << "400 bad request (Header reception)" << RESET << std::endl;
+		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
 		_status = BAD_REQUEST;
 		return WRITING;
 	}
@@ -81,7 +73,7 @@ int Client::receive(void)
 		int head_err = _req.fillHeaderAndBody();
 		if (head_err == ERROR)
 		{
-			std::cout << RED << "400 bad request (Header reception)" << RESET << std::endl;
+			std::cout << RED << "400 bad request (Header reception 2)" << RESET << std::endl;
 			_status = BAD_REQUEST;
 			return WRITING;
 		}
@@ -90,11 +82,33 @@ int Client::receive(void)
 		std::cout << RESET;
 		write(1, _req.getBody().c_str(), _req.getBody().length());
 		_status = OK;
+		bridgeParsingRequest();
 		return WRITING;
 	}
 	return READING;
 }
 
+void Client::bridgeParsingRequest( void )
+{
+	int not_all = 1;
+	//int max_size = 0;
+
+	std::cout << "=================== DEV ==================" << std::endl;
+	std::cout << "MAX BODY SIZE : " << _config["max_body_size"]._max_body_size << std::endl;
+	std::cout << "Methods allowed : ";
+	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
+		std::cout << (*it) << ", ";
+	std::cout << std::endl;
+	std::cout << "==========================================" << std::endl;
+	std::cout << _req.getHead()["Method"] << std::endl;
+	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
+	{
+		if ((*it) == _req.getHead()["Method"])
+			not_all = 0;
+	}
+	if (not_all == 1)
+		_status = NOT_ALLOWED;
+}
 
 int Client::send( void )
 {

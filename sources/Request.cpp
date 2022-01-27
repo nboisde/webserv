@@ -82,6 +82,7 @@ void Request::findMethod(void)
 	else
 	{
 		_head["Method"] = "UNKNOWN";
+		_head["url"] = "/405.html"; // THIS LINE IS BULLSHIT AND MUST BE DYNAMIC..
 		_method_type = UNKNOWN;
 	}
 }
@@ -244,8 +245,8 @@ int Request::concatenateRequest(std::string tmp)
 			int te = isTransferEncoding();
 			//if (_method_type == UNKNOWN)
 			//	findMethod();
-			if (_method_type == UNKNOWN)// || (ct == 1 && te == 1))
-				return errorReturn();
+			//if (_method_type == UNKNOWN)// || (ct == 1 && te == 1))
+			//	return errorReturn();
 			/* else  */if (ct == 1)
 				_body_reception_encoding = CONTENT_LENGTH;
 			else if (te == 1)
@@ -542,6 +543,5 @@ int										Request::getState(void) const { return _state; }
 std::map<std::string, std::string>		Request::getHead( void ) const { return _head; }
 std::map<std::string, std::string> &	Request::getHead( void ) { return _head; }
 int										Request::getConnection( void ) const { return _connection; }
-
 
 }
