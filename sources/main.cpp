@@ -19,7 +19,10 @@ int	main(int ac, char **av)
 		return (1);
 	}
 	if (f.is_open())
+	{
 		std::cout << FIRE << f.rdbuf() << RESET << std::endl << std::endl;
+		f.close();
+	}
 	parser.getServer().launchServer();
 	return (0);
 }

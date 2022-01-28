@@ -173,6 +173,8 @@ int	Client::checkURI( Port & port )
 	checkPath(url, port);
 	checkExtension(url, port);
 	file_path << buf << root << url;
+	if (buf)
+		free(buf);
 	_file_path = file_path.str();
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)

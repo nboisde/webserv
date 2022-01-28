@@ -8,7 +8,7 @@
 namespace ws{
 
 
-CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _bin_location("/usr/bin/php-cgi")
+CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _bin_location("/usr/bin/php-cgi"), _arg(NULL), _env(NULL)
 {
 	this->_header = cli.getReq().getHead();
 	init_conversion( cli, port, serv );
@@ -96,17 +96,17 @@ CGI::CGI( const CGI & src )
 
 CGI::~CGI( void )
 {
-	if (!_arg)
+	if (_arg)
 	{
 		for (int i = 0; _arg[i] != NULL; i++)
 			free(_arg[i]);
-		free(_arg);
+		delete[](_arg);
 	}
-	if (!_env)
+	if (_env)
 	{
 		for (int i = 0; _env[i] != NULL; i++)
 				free(_env[i]);
-		free(_env);
+		delete[](_env);
 	}
 	return;
 }
@@ -158,9 +158,6 @@ int		CGI::generate_env( void )
 			i++;
 		}
 		_env[_conversion.size()] = 0;
-		//DEBUG//
-		//for (int j = 0; _env[j]; j++)
-		//	std::cout << _env[j] << std::endl;
 	}
 	else
 		std::cout << "Other Method" << std::endl;
@@ -171,8 +168,7 @@ int		CGI::generate_arg( Client const & cli ){
 	std::string file_path = cli.getFilePath();
 	
 	file_path = file_path.substr(0, file_path.find_last_of(".php") + 4);
-	_arg = (char**)malloc(sizeof(char *) * 3);
-
+	_arg = new char*[3];
 	_arg[0] = strdup(_bin_location.c_str());
 	_arg[1] = strdup(file_path.c_str());
 	_arg[2] = NULL;
@@ -239,9 +235,12 @@ std::string	CGI::concatenateResponse(int fd)
 	while (getline(&line, &line_size, pipe_end) != -1)
 	{
 		response += line;
-		free(line);
+		if (line)
+			free(line);
 		line = NULL;
 	}
+	if (line)
+		free(line);
 	fclose(pipe_end);
 	return response;
 }
