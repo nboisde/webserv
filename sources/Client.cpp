@@ -208,7 +208,6 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 
-	_status = 413;
 	if (_status != OK)
 		executeError(serv, port);
 	else
