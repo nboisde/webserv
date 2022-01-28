@@ -168,10 +168,6 @@ int		CGI::generate_env( void )
 }
 
 int		CGI::generate_arg( Client const & cli ){
-	int size = 3;
-	std::string body = cli.getReq().getBody();
-	size += std::count(body.begin(), body.end(), '=');
-
 	std::string file_path = cli.getFilePath();
 	
 	file_path = file_path.substr(0, file_path.find_last_of(".php") + 4);
@@ -180,19 +176,6 @@ int		CGI::generate_arg( Client const & cli ){
 	_arg[0] = strdup(_bin_location.c_str());
 	_arg[1] = strdup(file_path.c_str());
 	_arg[2] = NULL;
-	// std::string tmp = body;
-	// for (int i = 2; i != size - 1; i++)
-	// {
-	// 	ssize_t pos = tmp.find("&");
-	// 	if (pos == -1)
-	// 	{
-	// 		_arg[i] = strdup(tmp.c_str());
-	// 		break;
-	// 	}
-	// 	_arg[i] = strdup((tmp.substr(0, pos)).c_str());
-	// 	tmp = tmp.substr(pos + 1);
-	// }
-	// _arg[size - 1] = NULL;
 	return SUCCESS;
 }
 
@@ -201,9 +184,6 @@ int		CGI::execute( Client & cli ){
 	int fd[2];
 	pipe(fd);
 	int child_stat;
-	
-	for (int i = 0; _arg[i]; i++)
-		std::cout << "_arg[i] = " << _arg[i] << std::endl;
 
 	pid_t pid = fork();
 	
@@ -221,7 +201,6 @@ int		CGI::execute( Client & cli ){
 			while (!body.empty())
 			{
 				size_t added = body.copy(buf, BUFFER_SIZE);
-				std::cout << "BUF= " << buf << std::endl;
 				size_t ret = write(fd2[1], buf, added);
 				body = body.substr(ret);
 				memset(&buf, 0, added);
@@ -243,10 +222,6 @@ int		CGI::execute( Client & cli ){
 		exit(SUCCESS);
 	}
 	waitpid(pid, &child_stat, 0);
-	
-	//DEBUG//
-	//std::cout << "Child Return Value = " << WEXITSTATUS(child_stat) << std::endl;
-
 	close(fd[1]);
 	std::string response = concatenateResponse(fd[0]);
 	cli.getRes().treatCGI(response);
