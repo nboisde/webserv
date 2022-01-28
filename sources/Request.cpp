@@ -473,7 +473,7 @@ int Request::fillHeaderAndBody(void){
 	}
 	else if (_body_reception_encoding == TRANSFER_ENCODING)
 		ChunkedBodyProcessing(body);
-	std::cout << "BODY :" << _body << std::endl;
+	//std::cout << "BODY :" << _body << std::endl;
 	return SUCCESS;
 }
 
