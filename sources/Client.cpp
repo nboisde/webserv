@@ -98,7 +98,6 @@ int Client::receive(void)
 void Client::bridgeParsingRequest( void )
 {
 	int not_all = 1;
-	//int max_size = 0;
 
 	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
 	{
@@ -273,6 +272,7 @@ int	Client::executeError( Server const & serv, Port & port )
 
 	if (error_file_path.size())
 	{
+		std::cout << "REDIRECTION " << _file_path << std::endl;
 		checkURI(port, error_file_path);
 		_status = 301;
 		_res.resetResponse();
