@@ -16,6 +16,7 @@ class Port;
 class Client
 {
 	typedef	std::map<std::string, Value>	config_type;
+	typedef std::map<int, std::string>		error_type;
 
 	private:
 		int				checkURI( Port & port );
@@ -26,6 +27,7 @@ class Client
 		int				executePhp( Server const & serv, Port & port );
 		int				executeHtml( Server const & serv, Port & port );
 		int				executeError( Server const & serv, Port & port );
+		error_type		init_responseMap( void );
 
 	protected:
 		int				_fd;
@@ -36,6 +38,7 @@ class Client
 		ws::Response	_res;
 		std::string		_file_path;
 		config_type		_config;
+		error_type		_errors;
 
 	public:
 		Client( void );
