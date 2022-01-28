@@ -17,7 +17,7 @@ std::map<int, std::string>	init_responseMap( void )
 	m[403] = "Forbidden";
 	m[404] = "Not Found";
 	m[405] = "Not Allowed";
-	m[500] = "Request Entity Too Large";
+	m[413] = "Request Entity Too Large";
 	m[500] = "Internal Server Error";
 	return	m;
 }

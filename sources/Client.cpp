@@ -158,18 +158,13 @@ int	Client::checkCGI( std::string & url )
 		return (R_HTML);
 }
 
-int	Client::checkURI( Port & port )
+int	Client::checkURI( Port & port, std::string url)
 {
-	if (_status != OK)
-		return (R_ERR);
-
 	int					ret;
 	char				*buf = NULL;
 	std::string			root;
-	std::string			url;	
 	std::stringstream	file_path;
 
-	url =_req.getHead()["url"];
 	if (url == "/")
 		url = port.getConfig()["index"]._value;
 	root = port.getConfig()["root"]._value;
@@ -195,15 +190,20 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type;
 
-	res_type = checkURI(port);
-	if (res_type == R_PHP)
-		executePhp(serv, port);
-	else if (res_type == R_PY)
-		executePy(serv, port);
-	else if (res_type == R_HTML)
-		executeHtml(serv, port);
-	else
+	if (_status != OK)
 		executeError(serv, port);
+	else
+	{
+		res_type = checkURI(port, _req.getHead()["url"]);
+		if (res_type == R_PHP)
+			executePhp(serv, port);
+		else if (res_type == R_PY)
+			executePy(serv, port);
+		else if (res_type == R_HTML)
+			executeHtml(serv, port);
+		else if (res_type == R_ERR)
+			executeError(serv, port);
+	}
 	return SUCCESS;
 }
 
@@ -248,12 +248,24 @@ int	Client::executeHtml(Server const & serv, Port & port )
 int	Client::executeError( Server const & serv, Port & port )
 {
 	(void)serv;
-	(void)port;
-	std::string content = _res.genBody(_status);
-	_res.setBody(content);
-	_res.setContentType(_file_path);
-	_res.response(_status);
-	std::cout << _res.getResponse() << std::endl;
+	std::map<std::string, Value>	config = port.getConfig();
+	Value							error = config["error_page"];
+	std::string						error_file_path = error._errors[_status];
+	std::string						body;
+
+	std::cout << "ERROR FILE PATH: [" << error_file_path << std::endl;
+	if (error_file_path.size())
+	{
+		checkURI(port, error_file_path);
+		executeHtml(serv, port);
+	}
+	else
+	{
+		std::string body = _res.genBody(_status);
+		_res.setBody(body);
+		_res.setContentType(_file_path);
+		_res.response(_status);
+	}
 	return SUCCESS;
 }
 
