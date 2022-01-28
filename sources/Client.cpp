@@ -130,9 +130,6 @@ void	Client::checkExtension( std::string & url, Port & port )
 	std::cout << std::endl << "EXTENSION\t" << extension << std::endl;
 	std::map<std::string, Value> config = port.getConfig();
 	Value location = config["location"];
-	Value size = config[" client_max_body_size"];
-	// std::cout << "Client Max Body Size " << size._value << std::endl;
-	// std::cout << "Client Max Body Size " << size._max_body_size << std::endl;
 	std::string	path = location._locations[extension];
 	std::cout << "PATH\t\t" << path << std::endl;
 	if (path.size())
@@ -141,28 +138,36 @@ void	Client::checkExtension( std::string & url, Port & port )
 }
 
 int	Client::checkCGI( std::string & url )
-{	
+{
 	int		query_pos = url.find("?");
-	int		size = url.size();
 	int		php_pos = url.find(".php");
+	int		py_pos = url.find(".py");
+	int		size = url.size();
 
 	if (query_pos >= 0 )
 			url = url.substr(0, query_pos);
 	if (php_pos >= 0 && size - php_pos == 4)
-		return (R_CGI);
+		return (R_PHP);
 	else if (query_pos >= 0 && php_pos >= 0 && php_pos < query_pos)
-		return (R_CGI);
+		return (R_PHP);
+	else if (py_pos >= 0 && size - py_pos == 3)
+		return (R_PY);
+	else if (py_pos >= 0 && py_pos >= 0 && py_pos < query_pos)
+		return (R_PY);
 	else
 		return (R_HTML);
 }
 
 int	Client::checkURI( Port & port )
 {
+	if (_status != OK)
+		return (R_ERR);
+
+	int					ret;
+	char				*buf = NULL;
 	std::string			root;
 	std::string			url;	
-	char				*buf = NULL;
 	std::stringstream	file_path;
-	int					ret;
 
 	url =_req.getHead()["url"];
 	if (url == "/")
@@ -180,38 +185,46 @@ int	Client::checkURI( Port & port )
 	if (fd < 0)
 	{
 		_status = NOT_FOUND;
-		return ERROR;
+		return R_ERR;
 	}
 	close(fd);
 	return (ret);
 }
 
-int	Client::executeCGI( Server const & serv, Port & port )
+int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type;
 
 	res_type = checkURI(port);
-//	std::cout << "Response " << res_type << std::endl;
-	if (res_type == R_CGI)
-	{
-		CGI cgi(*this, port, serv);
-		cgi.execute(*this);
-	}
+	if (res_type == R_PHP)
+		executePhp(serv, port);
 	else if (res_type == R_HTML)
-		executeHtml( port );
+		executeHtml(serv, port);
+	else if (res_type == R_PY)
+		executePy(serv, port);
 	else
-		_res.response(_status);
+		executeError(serv, port);
 	return SUCCESS;
 }
 
-       #include <sys/types.h>
-       #include <sys/stat.h>
-       #include <fcntl.h>
+int	Client::executePy( Server const & serv, Port & port )
+{
+	(void)serv;
+	(void)port;
+	return  SUCCESS;
+}
 
+int Client::executePhp( Server const & serv, Port & port )
+{
+	CGI cgi(*this, port, serv);
+	cgi.execute(*this);
+	return SUCCESS;
+}
 
-int	Client::executeHtml(Port & port )
+int	Client::executeHtml(Server const & serv, Port & port )
 {
 	(void)port;
+	(void)serv;
 	std::string		content;
 	char *line = NULL;
 	size_t n = 0;
@@ -229,6 +242,14 @@ int	Client::executeHtml(Port & port )
 	_res.setContentType(_file_path);
 	_res.response(_status);
 	std::cout << _res.getResponse() << std::endl;
+	return SUCCESS;
+}
+
+int	Client::executeError( Server const & serv, Port & port )
+{
+	(void)serv;
+	(void)port;
+	_res.response(_status);
 	return SUCCESS;
 }
 

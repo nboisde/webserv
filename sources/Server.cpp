@@ -101,7 +101,7 @@ void	Server::launchServer( void )
 					if ( ret == WRITING)
 					{
 						(findFds((*ct).getFd())).events = POLLOUT;
-						(*ct).executeCGI(*this, *pt);
+						(*ct).execution(*this, *pt);
 					}
 					else if (ret == ERROR)
 					{
