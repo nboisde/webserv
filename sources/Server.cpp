@@ -84,12 +84,16 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLERR)))
 				{
-					std::cout << "Client socket fd : " << findFds((*ct).getFd()).fd << " failed." << std::endl;
+					std::cout << RED<< "Client socket fd : " << findFds((*ct).getFd()).fd << " raised an error." << std::endl;
  					closeConnection(ct, pt);
 				}
+#ifdef __linux__
+				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLRDHUP)))
+#else
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLHUP)))
+#endif
 				{
-					std::cout << "Client " << findFds((*ct).getFd()).fd << " interrupted the connection." << std::endl;
+					std::cout << LIGHTBLUE << "Client " << findFds((*ct).getFd()).fd << " closed the connection." << RESET << std::endl;
  					closeConnection(ct, pt);
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
@@ -118,12 +122,19 @@ void	Server::launchServer( void )
 						// THIS SHOULD BE PERFORMED IF in header Connection: close.
 						//if keep-alive, maybe we don't close the file descriptor of the client.
 						if ((*ct).getReq().getConnection() == CLOSE)
+						{
+							std::cout << LIGHTBLUE << "Client " << findFds((*ct).getFd()).fd << " closed the connection." << RESET << std::endl;
  							closeConnection(ct, pt);
+						}
 						else
 						{
 							(*ct).getReq().resetValues();
 							findFds((*ct).getFd()).revents = 0;
-							findFds((*ct).getFd()).events = POLLIN | POLLHUP;
+# ifdef __linux__
+							findFds((*ct).getFd()).events = POLLIN | POLLRDHUP | POLLERR;
+# else
+							findFds((*ct).getFd()).events = POLLIN | POLLHUP | POLLERR;
+#endif
 						}
 					}
 					else
@@ -194,7 +205,11 @@ void		Server::addToPolling( int fd )
 {
 	struct pollfd new_elem;
 	new_elem.fd = fd;
-	new_elem.events = POLLIN | POLLHUP;
+#ifdef __linux__
+	new_elem.events = POLLIN | POLLRDHUP | POLLERR;
+#else
+	new_elem.events = POLLIN | POLLHUP | POLLERR;
+#endif
 	new_elem.revents = 0;
 	_fds.push_back(new_elem);
 }

@@ -15,7 +15,8 @@ _content_length(0),
 _method_type(UNKNOWN),
 _header_size(0),
 _header(""),
-_body("")
+_body(""),
+_status(OK)
 {
 
 }
@@ -82,6 +83,7 @@ void Request::findMethod(void)
 	else
 	{
 		_head["Method"] = "UNKNOWN";
+		_head["url"] = "/404.html"; // THIS LINE IS BULLSHIT AND MUST BE DYNAMIC..
 		_method_type = UNKNOWN;
 	}
 }
@@ -200,8 +202,10 @@ int Request::concatenateRequest(std::string tmp)
 		{
 			findMethod();
 			_line++;
-			if (_method_type == UNKNOWN || !findProtocol(_raw_content))
-				return errorReturn();
+			if (_method_type == UNKNOWN)
+				return errorReturn(1);
+			if (!findProtocol(_raw_content))
+				return errorReturn(0);
 		}
 	}
 
@@ -235,7 +239,7 @@ int Request::concatenateRequest(std::string tmp)
 /* 		for (std::vector<std::string>::iterator it = _vheader.begin(); it != _vheader.end(); it++)
 			std::cout << (*it) << std::endl; */
 		if (errorHandling(_vheader, 2) == ERROR)
-			return errorReturn();
+			return ERROR; // return errorReturn();
 		if (checkHeaderEnd() == 1)
 		{
 			_cursor = 0;
@@ -244,8 +248,8 @@ int Request::concatenateRequest(std::string tmp)
 			int te = isTransferEncoding();
 			//if (_method_type == UNKNOWN)
 			//	findMethod();
-			if (_method_type == UNKNOWN)// || (ct == 1 && te == 1))
-				return errorReturn();
+			//if (_method_type == UNKNOWN)// || (ct == 1 && te == 1))
+			//	return errorReturn();
 			/* else  */if (ct == 1)
 				_body_reception_encoding = CONTENT_LENGTH;
 			else if (te == 1)
@@ -280,9 +284,15 @@ int Request::concatenateRequest(std::string tmp)
 	return 0;
 }
 
-int Request::errorReturn(void)
+int Request::errorReturn( int opt)
 {
 	_state = REQUEST_FORMAT_ERROR;
+	if (opt == 1)
+		_status = NOT_ALLOWED;
+	if (opt == 2)
+		_status = REQUEST_ENTITY_TOO_LARGE;
+	else
+		_status = BAD_REQUEST;
 	return ERROR;
 }
 
@@ -300,8 +310,10 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 	int cl = 0;
 	int te = 0;
 	int host = 0;
-	if (_method_type == UNKNOWN || !findProtocol(_raw_content))
-		return errorReturn();
+	if (_method_type == UNKNOWN)
+		return errorReturn(1);
+	if (!findProtocol(_raw_content))
+		return errorReturn(0);
 	for (std::vector<std::string>::iterator it = v.begin() + 1; it != v.end(); it++)
 	{
 		int len = static_cast<int>((*it).length());
@@ -313,22 +325,22 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 		if (ret == -1)
 		{
 			if (static_cast<int>((*it).find(" ")) != -1)
-				return errorReturn();
+				return errorReturn(0);
 			else
 				continue ;
 		}
 		//	return errorReturn();
 		//EMPTY FIELD.
 		if (ret == 0 || (*it)[ret - 1] == ' ')
-			return errorReturn();
+			return errorReturn(0);
 		//DEAL WITH SPACES.
 		for (int i = 0; i < ret; i++)
 			if ((*it)[i] == ' ')
-				return errorReturn();
+				return errorReturn(0);
 		//NULL CHARACTER IN VALUE.
 		for (int i = ret; i < len; i++)
 			if ((*it)[i] == '\0')
-				return errorReturn();
+				return errorReturn(0);
 		if (static_cast<int>((*it).find("Content-Length")) != -1)
 		{
 			// ONLY NUMBER IN THE RIGHT FORMAT !
@@ -338,7 +350,7 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 				if ((*it)[i] != ' ')
 				{
 					if (!std::isdigit((*it)[i]))
-						return errorReturn();
+						return errorReturn(0);
 					else if (std::isdigit((*it)[i]))
 						break ;
 				}
@@ -349,7 +361,7 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 			while (i < len)
 			{
 				if ((*it)[i] != ' ')
-					return errorReturn();
+					return errorReturn(0);
 				i++;
 			}
 			cl++;
@@ -359,25 +371,25 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 			int chunk = (*it).find("chunked");
 			//Because we only deal with chunked transfer encoding method
 			if (chunk == -1)
-				return errorReturn();
+				return errorReturn(0);
 			for (int i = ret + 1; i < chunk; i++)
 			{
 				if ((*it)[i] && (*it)[i] != ' ')
-					return errorReturn();
+					return errorReturn(0);
 			}
 			for (int i = chunk + 7; i != len; i++)
 			{
 				if ((*it)[i] != ' ')
-					return errorReturn();
+					return errorReturn(0);
 			}
 			te++;
 		}
 	}
 	// NOT A COMBINAISON OF TE.CL or TE.TE or CL.CL
 	if ((te == 1 && cl == 1) || te > 1 || cl > 1)
-		return errorReturn();
+		return errorReturn(0);
 	if (i == 1 && host == 0)
-		return errorReturn();
+		return errorReturn(0);
 	return SUCCESS;
 }
 
@@ -403,7 +415,7 @@ int		Request::parseHeader(void)
 	}
 	int err = errorHandling(v, 1);
 	if (err == ERROR)
-		return errorReturn();
+		return ERROR;
 	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)
 	{
 		if (it == v.begin())
@@ -451,7 +463,7 @@ int Request::fillHeaderAndBody(void){
 	std::string crlf = (r != -1) ? "\r\n\r\n": "\n\n";
 	int i = 0;
 	if (ret == -1)
-		return errorReturn();
+		return errorReturn(0);
 	while (i < ret + static_cast<int>(crlf.length()))
 	{
 		_header += _raw_content[i];
@@ -460,7 +472,7 @@ int Request::fillHeaderAndBody(void){
 	std::string body = _raw_content.substr(ret + crlf.length(), _raw_content.length() - i);
 	int err = parseHeader();
 	if (err == ERROR)
-		return errorReturn();
+		return errorReturn(0);
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 		return SUCCESS;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
@@ -526,6 +538,7 @@ void	Request::resetValues(void){
 	_header = "";
 	_body.clear();
 	_body = "";
+	_status = OK;
 }
 
 
@@ -542,6 +555,6 @@ int										Request::getState(void) const { return _state; }
 std::map<std::string, std::string>		Request::getHead( void ) const { return _head; }
 std::map<std::string, std::string> &	Request::getHead( void ) { return _head; }
 int										Request::getConnection( void ) const { return _connection; }
-
+int										Request::getStatus( void ) const { return _status; }
 
 }

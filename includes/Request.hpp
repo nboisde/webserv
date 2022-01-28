@@ -43,11 +43,13 @@ class Request
 		head_type		getHead( void ) const;
 		head_type &		getHead( void );
 		int				getConnection( void ) const;
+		int				getStatus( void ) const;
+
 
 	private:
 		int			findProtocol(std::string buf);
 		int			errorHandling(std::vector<std::string> v, int i);
-		int 		errorReturn(void);
+		int 		errorReturn( int opt );
 		int			bodyReceived(void);
 
 		int							_line;
@@ -65,6 +67,7 @@ class Request
 		std::string					_body;
 		std::vector<std::string>	_vheader;
 		head_type					_head;
+		int							_status;
 };
 
 }

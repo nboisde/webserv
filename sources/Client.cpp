@@ -51,14 +51,6 @@ int Client::receive(void)
 {
 	char	buffer[BUFFER_SIZE];
 
-	//_config["method"]._methods;
-	// std::cout << "=================== DEV ==================" << std::endl;
-	// std::cout << "MAX BODY SIZE : " << _config["max_body_size"]._max_body_size << std::endl;
-	// std::cout << "Methods allowed : ";
-	// for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
-	// 	std::cout << (*it) << ", ";
-	// std::cout << std::endl;
-	// std::cout << "==========================================" << std::endl;
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
@@ -72,8 +64,8 @@ int Client::receive(void)
 	int req = _req.concatenateRequest(tmp);
 	if (req == -1)
 	{
-		std::cout << RED << "400 bad request (Header reception)" << RESET << std::endl;
-		_status = BAD_REQUEST;
+		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
+		_status = _req.getStatus();
 		return WRITING;
 	}
 	if (req == SUCCESS)
@@ -81,20 +73,46 @@ int Client::receive(void)
 		int head_err = _req.fillHeaderAndBody();
 		if (head_err == ERROR)
 		{
-			std::cout << RED << "400 bad request (Header reception)" << RESET << std::endl;
-			_status = BAD_REQUEST;
+			std::cout << RED << "400 bad request (Header reception 2)" << RESET << std::endl;
+			//_status = BAD_REQUEST;
+			_status = _req.getStatus();
 			return WRITING;
 		}
 		std::cout << BLUE;
-		std::cout << _req.getHeader() << std::endl;
+		std::cout << "========================= HEADER =========================" << std::endl;
+		std::cout << _req.getHeader();// << std::endl;
+		std::cout << "==========================================================" << std::endl;
 		std::cout << RESET;
-		write(1, _req.getBody().c_str(), _req.getBody().length());
-		_status = OK;
+		// POSSIBILITE D'IMPLEMENTER UPLOAD
+		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
+		//write(fd, _req.getBody().c_str(), _req.getBody().length());
+		//write(1, _req.getBody().c_str(), _req.getBody().length());
+		//close(fd);
+		//_status = OK;
+		bridgeParsingRequest();
 		return WRITING;
 	}
 	return READING;
 }
 
+void Client::bridgeParsingRequest( void )
+{
+	int not_all = 1;
+	//int max_size = 0;
+
+	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
+	{
+		if ((*it) == _req.getHead()["Method"])
+			not_all = 0;
+	}
+	if (not_all == 1)
+		_status = NOT_ALLOWED;
+	else if (static_cast<size_t>(_req.getBody().length()) > _config["client_max_body_size"]._max_body_size
+	|| static_cast<size_t>(_req.getContentLength()) > _config["client_max_body_size"]._max_body_size)
+		_status = REQUEST_ENTITY_TOO_LARGE;
+	else
+		_status = OK;
+}
 
 int Client::send( void )
 {
@@ -188,7 +206,7 @@ int	Client::checkURI( Port & port, std::string url)
 
 int	Client::execution( Server const & serv, Port & port )
 {
-	int	res_type;
+	int	res_type = ERROR;
 
 	if (_status != OK)
 		executeError(serv, port);
@@ -253,7 +271,7 @@ int	Client::executeError( Server const & serv, Port & port )
 	std::string						error_file_path = error._errors[_status];
 	std::string						body;
 
-	std::cout << "ERROR FILE PATH: [" << error_file_path << std::endl;
+	//std::cout << "ERROR FILE PATH: [" << error_file_path << "]" << std::endl;
 	if (error_file_path.size())
 	{
 		checkURI(port, error_file_path);

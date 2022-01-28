@@ -53,6 +53,8 @@ class Client
 		int 			receive( void );
 		int				send( void );
 		void			closeConnection( void );
+		void 			bridgeParsingRequest( void );
+
 
 		int				getFd( void ) const;
 		int				getStatus( void ) const;

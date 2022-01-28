@@ -73,6 +73,8 @@
 # define GREEN "\033[38;5;42m"
 # define FIRE "\033[38;5;166m"
 # define PURPLE "\033[38;5;105m"
+# define LIGHTBLUE "\033[38;5;87m"
+
 
 //CPP_LIBRARIES//
 # include <fstream>
@@ -100,6 +102,7 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <sys/wait.h>
+# include <stdio.h>
 
 //# include <sys/event.h>
 # include <sys/time.h>
