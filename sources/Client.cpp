@@ -79,15 +79,17 @@ int Client::receive(void)
 			return WRITING;
 		}
 		std::cout << BLUE;
-		std::cout << _req.getHeader() << std::endl;
+		std::cout << "========================= HEADER =========================" << std::endl;
+		std::cout << _req.getHeader();// << std::endl;
+		std::cout << "==========================================================" << std::endl;
 		std::cout << RESET;
+		// POSSIBILITE D'IMPLEMENTER UPLOAD
 		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
 		//write(fd, _req.getBody().c_str(), _req.getBody().length());
-		write(1, _req.getBody().c_str(), _req.getBody().length());
+		//write(1, _req.getBody().c_str(), _req.getBody().length());
 		//close(fd);
 		//_status = OK;
 		bridgeParsingRequest();
-		std::cout << "read return status : " << _status << std::endl;
 		return WRITING;
 	}
 	return READING;
@@ -98,15 +100,6 @@ void Client::bridgeParsingRequest( void )
 	int not_all = 1;
 	//int max_size = 0;
 
-	std::cout << "=================== DEV ==================" << std::endl;
-	std::cout << "MAX BODY SIZE : " << _config["client_max_body_size"]._max_body_size << std::endl;
-	std::cout << (*(_config.find("client_max_body_size"))).second._max_body_size << std::endl;
-	std::cout << "Methods allowed : ";
-	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
-		std::cout << (*it) << ", ";
-	std::cout << std::endl;
-	std::cout << "==========================================" << std::endl;
-	std::cout << _req.getHead()["Method"] << std::endl;
 	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
 	{
 		if ((*it) == _req.getHead()["Method"])
@@ -119,8 +112,6 @@ void Client::bridgeParsingRequest( void )
 		_status = REQUEST_ENTITY_TOO_LARGE;
 	else
 		_status = OK;
-	std::cout << "status : " <<  _status << std::endl;
-	std::cout << static_cast<size_t>(_req.getBody().length()) << std::endl;
 }
 
 int Client::send( void )
@@ -280,7 +271,7 @@ int	Client::executeError( Server const & serv, Port & port )
 	std::string						error_file_path = error._errors[_status];
 	std::string						body;
 
-	std::cout << "ERROR FILE PATH: [" << error_file_path << std::endl;
+	//std::cout << "ERROR FILE PATH: [" << error_file_path << "]" << std::endl;
 	if (error_file_path.size())
 	{
 		checkURI(port, error_file_path);

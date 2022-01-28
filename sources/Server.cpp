@@ -84,7 +84,7 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLERR)))
 				{
-					std::cout << "Client socket fd : " << findFds((*ct).getFd()).fd << " failed." << std::endl;
+					std::cout << RED<< "Client socket fd : " << findFds((*ct).getFd()).fd << " raised an error." << std::endl;
  					closeConnection(ct, pt);
 				}
 #ifdef __linux__
@@ -93,7 +93,7 @@ void	Server::launchServer( void )
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLHUP)))
 #endif
 				{
-					std::cout << "Client " << findFds((*ct).getFd()).fd << " interrupted the connection." << std::endl;
+					std::cout << LIGHTBLUE << "Client " << findFds((*ct).getFd()).fd << " closed the connection." << RESET << std::endl;
  					closeConnection(ct, pt);
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
@@ -122,7 +122,10 @@ void	Server::launchServer( void )
 						// THIS SHOULD BE PERFORMED IF in header Connection: close.
 						//if keep-alive, maybe we don't close the file descriptor of the client.
 						if ((*ct).getReq().getConnection() == CLOSE)
+						{
+							std::cout << LIGHTBLUE << "Client " << findFds((*ct).getFd()).fd << " closed the connection." << RESET << std::endl;
  							closeConnection(ct, pt);
+						}
 						else
 						{
 							(*ct).getReq().resetValues();
