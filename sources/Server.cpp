@@ -87,7 +87,11 @@ void	Server::launchServer( void )
 					std::cout << "Client socket fd : " << findFds((*ct).getFd()).fd << " failed." << std::endl;
  					closeConnection(ct, pt);
 				}
+#ifdef __linux__
+				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLRDHUP)))
+#else
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLHUP)))
+#endif
 				{
 					std::cout << "Client " << findFds((*ct).getFd()).fd << " interrupted the connection." << std::endl;
  					closeConnection(ct, pt);
@@ -123,7 +127,11 @@ void	Server::launchServer( void )
 						{
 							(*ct).getReq().resetValues();
 							findFds((*ct).getFd()).revents = 0;
+# ifdef __linux__
+							findFds((*ct).getFd()).events = POLLIN | POLLRDHUP | POLLERR;
+# else
 							findFds((*ct).getFd()).events = POLLIN | POLLHUP | POLLERR;
+#endif
 						}
 					}
 					else
@@ -194,7 +202,11 @@ void		Server::addToPolling( int fd )
 {
 	struct pollfd new_elem;
 	new_elem.fd = fd;
+#ifdef __linux__
+	new_elem.events = POLLIN | POLLRDHUP | POLLERR;
+#else
 	new_elem.events = POLLIN | POLLHUP | POLLERR;
+#endif
 	new_elem.revents = 0;
 	_fds.push_back(new_elem);
 }
