@@ -224,6 +224,8 @@ void		Response::resetResponse( void )
 	_status_line = genStatusLine(_status);
 }
 
+void			Response::addToHeader( std::string line ){ _header += line; }
+
 //ACCESSORS - GETTERS//
 
 std::string 	Response::getResponse( void ) const { return _response; }
