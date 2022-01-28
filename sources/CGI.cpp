@@ -175,23 +175,24 @@ int		CGI::generate_arg( Client const & cli ){
 	std::string file_path = cli.getFilePath();
 	
 	file_path = file_path.substr(0, file_path.find_last_of(".php") + 4);
-	_arg = (char**)malloc(sizeof(char *) * size);
+	_arg = (char**)malloc(sizeof(char *) * 3);
 
 	_arg[0] = strdup(_bin_location.c_str());
 	_arg[1] = strdup(file_path.c_str());
-	std::string tmp = body;
-	for (int i = 2; i != size - 1; i++)
-	{
-		ssize_t pos = tmp.find("&");
-		if (pos == -1)
-		{
-			_arg[i] = strdup(tmp.c_str());
-			break;
-		}
-		_arg[i] = strdup((tmp.substr(0, pos)).c_str());
-		tmp = tmp.substr(pos + 1);
-	}
-	_arg[size - 1] = NULL;
+	_arg[2] = NULL;
+	// std::string tmp = body;
+	// for (int i = 2; i != size - 1; i++)
+	// {
+	// 	ssize_t pos = tmp.find("&");
+	// 	if (pos == -1)
+	// 	{
+	// 		_arg[i] = strdup(tmp.c_str());
+	// 		break;
+	// 	}
+	// 	_arg[i] = strdup((tmp.substr(0, pos)).c_str());
+	// 	tmp = tmp.substr(pos + 1);
+	// }
+	// _arg[size - 1] = NULL;
 	return SUCCESS;
 }
 
@@ -210,6 +211,31 @@ int		CGI::execute( Client & cli ){
 	{
 		for(int i = 0; _env[i]; i++)
 			std::cerr << _env[i] << std::endl;
+		if (_header["Method"] == "POST")
+		{
+			std::string body = cli.getReq().getBody();
+			char buf[BUFFER_SIZE];
+			memset(&buf, 0, BUFFER_SIZE);
+			int fd2[2];
+			pipe(fd2);
+			while (!body.empty())
+			{
+				size_t added = body.copy(buf, BUFFER_SIZE);
+				std::cout << "BUF= " << buf << std::endl;
+				size_t ret = write(fd2[1], buf, added);
+				body = body.substr(ret);
+				memset(&buf, 0, added);
+			}
+			memset(&buf, 0, BUFFER_SIZE);
+			close(fd2[1]);
+			// while (read(fd2[0], buf, BUFFER_SIZE) != 0)
+			// {
+			// 	std::cout << "ZE BUFFER = " << buf << std::endl;
+			// 	memset(&buf, 0, BUFFER_SIZE);
+			// }
+			dup2(fd2[0], STDIN);
+			close(fd2[0]);
+		}
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);
