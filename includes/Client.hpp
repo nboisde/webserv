@@ -23,8 +23,7 @@ class Client
 		int				checkCGI( std::string & url );
 		void			checkPath( std::string & url, Port & port );
 		void			checkExtension( std::string & url, Port & port );
-		int				executePy( Server const & serv, Port & port );
-		int				executePhp( Server const & serv, Port & port );
+		int				executePhpPython( Server const & serv, Port & port, int extension_type );
 		int				executeHtml( Server const & serv, Port & port );
 		int				executeError( Server const & serv, Port & port );
 		error_type		init_responseMap( void );
