@@ -226,6 +226,7 @@ int	Client::execution( Server const & serv, Port & port )
 
 int	Client::executePy( Server const & serv, Port & port )
 {
+	std::cout << "PY EXECUTION" << std::endl;
 	(void)serv;
 	(void)port;
 	return  SUCCESS;
@@ -233,6 +234,7 @@ int	Client::executePy( Server const & serv, Port & port )
 
 int Client::executePhp( Server const & serv, Port & port )
 {
+	std::cout << "PHP EXECUTION" << std::endl;
 	CGI cgi(*this, port, serv);
 	cgi.execute(*this);
 	return SUCCESS;
@@ -240,6 +242,7 @@ int Client::executePhp( Server const & serv, Port & port )
 
 int	Client::executeHtml(Server const & serv, Port & port )
 {
+	std::cout << "HTML EXECUTION" << std::endl;
 	(void)port;
 	(void)serv;
 	std::string		content;
@@ -258,12 +261,13 @@ int	Client::executeHtml(Server const & serv, Port & port )
 	_res.setBody(content);
 	_res.setContentType(_file_path);
 	_res.response(_status);
-	std::cout << _res.getResponse() << std::endl;
+	//std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
 }
 
 int	Client::executeError( Server const & serv, Port & port )
 {
+	std::cout << "ERROR EXECUTION" << std::endl;
 	(void)serv;
 	std::map<std::string, Value>	config = port.getConfig();
 	Value							error = config["error_page"];
@@ -272,7 +276,6 @@ int	Client::executeError( Server const & serv, Port & port )
 
 	if (error_file_path.size())
 	{
-		std::cout << "REDIRECTION " << _file_path << std::endl;
 		checkURI(port, error_file_path);
 		_status = 301;
 		_res.resetResponse();
@@ -297,16 +300,16 @@ void Client::closeConnection(){}
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-int										Client::getStatus( void ) const { return _status; }
-int										Client::getFd(void) const { return _fd; }
-Request &								Client::getReq( void ) { return _req; }
-Request									Client::getReq( void ) const { return _req; }
-Response &								Client::getRes( void ) { return _res; }
+int									Client::getStatus( void ) const { return _status; }
+int									Client::getFd(void) const { return _fd; }
+Request &							Client::getReq( void ) { return _req; }
+Request								Client::getReq( void ) const { return _req; }
+Response &							Client::getRes( void ) { return _res; }
 
-std::string								Client::getFilePath( void ) const { return _file_path; }
-std::string								Client::getIp( void ) const { return _ip; }
-std::string								Client::getPort( void ) const { return _port; }
-ws::Response							Client::getRes(void ) const { return _res; }
-std::map<std::string, ws::Value>		Client::getConfig( void ) const { return _config; }
+std::string							Client::getFilePath( void ) const { return _file_path; }
+std::string							Client::getIp( void ) const { return _ip; }
+std::string							Client::getPort( void ) const { return _port; }
+ws::Response						Client::getRes(void ) const { return _res; }
+std::map<std::string, ws::Value>	Client::getConfig( void ) const { return _config; }
 
 }
