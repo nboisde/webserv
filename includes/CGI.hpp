@@ -16,7 +16,7 @@ class Port;
 class CGI {
 	public:
 
-		CGI( Client const & cli, Port const & port, Server const & serv );
+		CGI( Client const & cli, Port const & port, Server const & serv, int extension_type );
 		CGI( CGI const & src );
 		virtual ~CGI( void );
 
@@ -39,6 +39,7 @@ class CGI {
 
 	private:
 
+		std::string							_extension;
 		std::map<std::string, std::string>	_conversion;			
 		std::string							_bin_location;
 		std::map<std::string, std::string>	_header;

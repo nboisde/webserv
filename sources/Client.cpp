@@ -212,10 +212,8 @@ int	Client::execution( Server const & serv, Port & port )
 	else
 	{
 		res_type = checkURI(port, _req.getHead()["url"]);
-		if (res_type == R_PHP)
-			executePhp(serv, port);
-		else if (res_type == R_PY)
-			executePy(serv, port);
+		if (res_type == R_PHP || res_type == R_PY)
+			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)
 			executeHtml(serv, port);
 		else if (res_type == R_ERR)
@@ -224,8 +222,9 @@ int	Client::execution( Server const & serv, Port & port )
 	return SUCCESS;
 }
 
-int	Client::executePy( Server const & serv, Port & port )
+int Client::executePhpPython( Server const & serv, Port & port, int extension_type)
 {
+<<<<<<< HEAD
 	std::cout << "PY EXECUTION" << std::endl;
 	(void)serv;
 	(void)port;
@@ -236,6 +235,9 @@ int Client::executePhp( Server const & serv, Port & port )
 {
 	std::cout << "PHP EXECUTION" << std::endl;
 	CGI cgi(*this, port, serv);
+=======
+	CGI cgi(*this, port, serv, extension_type);
+>>>>>>> MON TIT PYTHON
 	cgi.execute(*this);
 	return SUCCESS;
 }

@@ -8,8 +8,18 @@
 namespace ws{
 
 
-CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _bin_location("/usr/bin/php-cgi"), _arg(NULL), _env(NULL)
+CGI::CGI( Client const & cli , Port const & port, Server const & serv, int extension_type) : _arg(NULL), _env(NULL)
 {
+	if (extension_type == R_PY)
+	{	
+		_extension = ".py";
+		_bin_location = "/usr/bin/python";
+	}
+	else
+	{
+		_extension = ".php";
+		_bin_location = "/usr/bin/php-cgi";
+	}
 	this->_header = cli.getReq().getHead();
 	init_conversion( cli, port, serv );
 	generate_env();
@@ -48,9 +58,9 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	std::string url = _header["url"];
 	std::string root = cli.getFilePath().substr(0, cli.getFilePath().find(url));
 	_conversion.insert(pair("DOCUMENT_ROOT", root));
-	_conversion.insert(pair("DOCUMENT_URI", url.substr(0, url.find(".php") + 4)));
-	_conversion.insert(pair("SCRIPT_NAME", url.substr(0, url.find(".php") + 4)));
-	_conversion.insert(pair("PHP_SELF", url.substr(0, url.find(".php") + 4)));	
+	_conversion.insert(pair("DOCUMENT_URI", url.substr(0, url.find(_extension) + _extension.size())));
+	_conversion.insert(pair("SCRIPT_NAME", url.substr(0, url.find(_extension) + _extension.size())));
+	_conversion.insert(pair("PHP_SELF", url.substr(0, url.find(_extension) + _extension.size())));	
 	_conversion.insert(pair("REQUEST_URI", url));
 	
 	std::string query;
@@ -167,7 +177,7 @@ int		CGI::generate_env( void )
 int		CGI::generate_arg( Client const & cli ){
 	std::string file_path = cli.getFilePath();
 	
-	file_path = file_path.substr(0, file_path.find_last_of(".php") + 4);
+	file_path = file_path.substr(0, file_path.find_last_of(_extension) + _extension.size());
 	_arg = new char*[3];
 	_arg[0] = strdup(_bin_location.c_str());
 	_arg[1] = strdup(file_path.c_str());
