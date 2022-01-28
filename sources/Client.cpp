@@ -52,13 +52,13 @@ int Client::receive(void)
 	char	buffer[BUFFER_SIZE];
 
 	//_config["method"]._methods;
-	std::cout << "=================== DEV ==================" << std::endl;
-	std::cout << "MAX BODY SIZE : " << _config["max_body_size"]._max_body_size << std::endl;
-	std::cout << "Methods allowed : ";
-	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
-		std::cout << (*it) << ", ";
-	std::cout << std::endl;
-	std::cout << "==========================================" << std::endl;
+	// std::cout << "=================== DEV ==================" << std::endl;
+	// std::cout << "MAX BODY SIZE : " << _config["max_body_size"]._max_body_size << std::endl;
+	// std::cout << "Methods allowed : ";
+	// for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
+	// 	std::cout << (*it) << ", ";
+	// std::cout << std::endl;
+	// std::cout << "==========================================" << std::endl;
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
@@ -198,10 +198,10 @@ int	Client::execution( Server const & serv, Port & port )
 	res_type = checkURI(port);
 	if (res_type == R_PHP)
 		executePhp(serv, port);
-	else if (res_type == R_HTML)
-		executeHtml(serv, port);
 	else if (res_type == R_PY)
 		executePy(serv, port);
+	else if (res_type == R_HTML)
+		executeHtml(serv, port);
 	else
 		executeError(serv, port);
 	return SUCCESS;
@@ -249,7 +249,11 @@ int	Client::executeError( Server const & serv, Port & port )
 {
 	(void)serv;
 	(void)port;
+	std::string content = _res.genBody(_status);
+	_res.setBody(content);
+	_res.setContentType(_file_path);
 	_res.response(_status);
+	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
 }
 

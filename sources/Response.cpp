@@ -4,26 +4,29 @@
 namespace ws
 {
 
-std::map<int, std::string>	init_responseMap( void ){
-	std::map<int, std::string>	m;
+std::map<int, std::string>	init_responseMap( void )
+{
+	std::map<int, std::string> m;
 
 	m[100] = "Continue";
-	m[200] =  "OK";
-	m[300] =  "Multiple Choice";
-	m[301] =  "Moved Permanently";
+	m[200] = "OK";
+	m[300] = "Multiple Choice";
+	m[301] = "Moved Permanently";
 	m[400] = "Bad Request";
 	m[401] = "Unauthorized";
 	m[403] = "Forbidden";
 	m[404] = "Not Found";
-	m[405] = "Not Allowed"; //For non implemented methods.
-	m[500] =  "Internal Server Error";
-	return m;
+	m[405] = "Not Allowed";
+	m[500] = "Request Entity Too Large";
+	m[500] = "Internal Server Error";
+	return	m;
 }
 
 std::map<int, std::string>  Response::_status_code = init_responseMap();
 
 Response::Response( void ) 
 {
+
 	_status_line = genStatusLine(OK);
 	_status = OK;
 }
@@ -49,7 +52,8 @@ Response &  Response::operator=( Response const & rhs)
 
 //METHODS - //
 
-std::string 	Response::genStatusLine( int status ){
+std::string 	Response::genStatusLine( int status )
+{
 	int ret_code = OK;
 	std::stringstream ret;
 
@@ -103,17 +107,36 @@ std::string 	Response::genConnection( void )
 	return co;
 }
 
+std::string 	Response::genBody( int error )
+{
+	std::stringstream body;
+
+	body << "<!DOCTYPE html>\n<html>\n<head>\n<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"http:/fire.ico\"/>\n";
+	body << "<title>" << error << " " << _status_code[error] << "</title>\n";
+	body << "</head>\n<body>\n";
+	body << "<h1>" << error << " " << _status_code[error] << "</h1>\n";
+	body << "</body>\n</html>";
+
+	return body.str();
+}
+
 void	Response::setContentType( std::string file_path )
 {
-	std::string extension = file_path.substr(file_path.find("."));
-	std::string default_type = "text/html";
+	std::string	default_type = "text/html";
+	int 		pos = file_path.find(".");
 	
-	if (extension == ".gif" || extension == ".ico" || extension == ".png" || extension == ".jpeg")
-		_content_type = "image/" + extension.substr(1);
-	if (extension == ".css")
-		_content_type = "text/" + extension.substr(1);
-	else
+	if (pos < 0)
 		_content_type = default_type;
+	else
+	{
+		std::string extension = file_path.substr(pos);
+		if (extension == ".gif" || extension == ".ico" || extension == ".png" || extension == ".jpeg")
+			_content_type = "image/" + extension.substr(1);
+		if (extension == ".css")
+			_content_type = "text/" + extension.substr(1);
+		else
+			_content_type = default_type;
+	}
 }
 
 std::string	const &	Response::genHeader( void ){
