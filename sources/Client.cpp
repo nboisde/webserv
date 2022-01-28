@@ -81,9 +81,13 @@ int Client::receive(void)
 		std::cout << BLUE;
 		std::cout << _req.getHeader() << std::endl;
 		std::cout << RESET;
+		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
+		//write(fd, _req.getBody().c_str(), _req.getBody().length());
 		write(1, _req.getBody().c_str(), _req.getBody().length());
-		_status = OK;
+		//close(fd);
+		//_status = OK;
 		bridgeParsingRequest();
+		std::cout << "read return status : " << _status << std::endl;
 		return WRITING;
 	}
 	return READING;
@@ -113,6 +117,10 @@ void Client::bridgeParsingRequest( void )
 	else if (static_cast<size_t>(_req.getBody().length()) > _config["client_max_body_size"]._max_body_size
 	|| static_cast<size_t>(_req.getContentLength()) > _config["client_max_body_size"]._max_body_size)
 		_status = REQUEST_ENTITY_TOO_LARGE;
+	else
+		_status = OK;
+	std::cout << "status : " <<  _status << std::endl;
+	std::cout << static_cast<size_t>(_req.getBody().length()) << std::endl;
 }
 
 int Client::send( void )

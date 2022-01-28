@@ -123,7 +123,7 @@ void	Server::launchServer( void )
 						{
 							(*ct).getReq().resetValues();
 							findFds((*ct).getFd()).revents = 0;
-							findFds((*ct).getFd()).events = POLLIN | POLLHUP;
+							findFds((*ct).getFd()).events = POLLIN | POLLHUP | POLLERR;
 						}
 					}
 					else
@@ -194,7 +194,7 @@ void		Server::addToPolling( int fd )
 {
 	struct pollfd new_elem;
 	new_elem.fd = fd;
-	new_elem.events = POLLIN | POLLHUP;
+	new_elem.events = POLLIN | POLLHUP | POLLERR;
 	new_elem.revents = 0;
 	_fds.push_back(new_elem);
 }
