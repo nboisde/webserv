@@ -35,6 +35,7 @@ namespace ws
 			std::string			getBody( void ) const;
 			int					getStatus( void ) const;
 
+			void				addToHeader( std::string line );
 			void				setContentType( std::string file_path );
 			void				setResponse( std::string resp );
 			void				setStatusLine( std::string status_l );

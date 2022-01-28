@@ -185,8 +185,8 @@ int		CGI::execute( Client & cli ){
 	
 	if (pid == 0)
 	{
-		for(int i = 0; _env[i]; i++)
-			std::cerr << _env[i] << std::endl;
+		//for(int i = 0; _env[i]; i++)
+		//	std::cerr << _env[i] << std::endl;
 		if (_header["Method"] == "POST")
 		{
 			std::string body = cli.getReq().getBody();
@@ -222,6 +222,7 @@ int		CGI::execute( Client & cli ){
 	std::string response = concatenateResponse(fd[0]);
 	cli.getRes().treatCGI(response);
 	cli.getRes().response(CGI_FLAG);
+	std::cout << cli.getRes().getResponse() << std::endl;
 	return SUCCESS;
 }
 

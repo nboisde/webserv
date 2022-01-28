@@ -271,11 +271,15 @@ int	Client::executeError( Server const & serv, Port & port )
 	std::string						error_file_path = error._errors[_status];
 	std::string						body;
 
-	//std::cout << "ERROR FILE PATH: [" << error_file_path << "]" << std::endl;
 	if (error_file_path.size())
 	{
 		checkURI(port, error_file_path);
-		executeHtml(serv, port);
+		_status = 301;
+		_res.resetResponse();
+		std::string loc("Location: ");
+		loc += error_file_path;
+		_res.setHeader(loc);
+		_res.response(_status);
 	}
 	else
 	{
