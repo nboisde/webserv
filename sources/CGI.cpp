@@ -222,7 +222,7 @@ int		CGI::execute( Client & cli ){
 	std::string response = concatenateResponse(fd[0]);
 	cli.getRes().treatCGI(response);
 	cli.getRes().response(CGI_FLAG);
-	std::cout << cli.getRes().getResponse() << std::endl;
+	//std::cout << cli.getRes().getResponse() << std::endl;
 	return SUCCESS;
 }
 
