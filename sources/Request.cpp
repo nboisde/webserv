@@ -95,11 +95,12 @@ void Request::findMethod(void)
 int Request::identifyBodyLengthInHeader(void)
 {
 	std::string l = "content-length"; // Change with all compatible casses. ?
-	std::string l2 = "Content-Length";
 	std::string cl;
-	int r1 = _raw_content.find(l);
-	int r2 = _raw_content.find(l2);
-	int ret = ((r1 == -1 && r2 == -1) || r1 >= 0) ? r1 : r2;
+	// std::string l2 = "Content-Length";
+	// int r1 = _raw_content.find(l);
+	// int r2 = _raw_content.find(l2);
+	// int ret = ((r1 == -1 && r2 == -1) || r1 >= 0) ? r1 : r2;
+	int ret = strToLower(_raw_content).find(l);
 	if (ret == -1)
 		return 0;
 	else
@@ -118,7 +119,7 @@ int Request::identifyBodyLengthInHeader(void)
 int Request::isTransferEncoding(void) const
 {
 	// HERE SEE DIFFERENTS TYPOS OF TRANSFER ENCODING.
-	int r = _raw_content.find("Transfer-Encoding:");
+	int r = strToLower(_raw_content).find("transfer-encoding:");
 	int r2 = _raw_content.find("chunked");
 	if (r == -1 || r2 == -1)
 		return 0;
@@ -136,7 +137,7 @@ int		Request::findProtocol(std::string buf)
 
 void	Request::manageConnection( std::string str )
 {
-	int ret = str.find("Connection:");
+	int ret = strToLower(str).find("connection:");
 	if (ret == -1)
 		return ;
 	else
@@ -341,7 +342,7 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 		for (int i = ret; i < len; i++)
 			if ((*it)[i] == '\0')
 				return errorReturn(0);
-		if (static_cast<int>((*it).find("Content-Length")) != -1)
+		if (static_cast<int>(strToLower((*it)).find("content-length")) != -1)
 		{
 			// ONLY NUMBER IN THE RIGHT FORMAT !
 			int i  = ret + 1;
@@ -366,7 +367,7 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 			}
 			cl++;
 		}
-		if (static_cast<int>((*it).find("Transfer-Encoding")) != -1)
+		if (static_cast<int>(strToLower((*it)).find("transfer-encoding")) != -1)
 		{
 			int chunk = (*it).find("chunked");
 			//Because we only deal with chunked transfer encoding method
