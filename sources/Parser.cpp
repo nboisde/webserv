@@ -156,6 +156,8 @@ int	Parser::setValues(std::string key)
 	while (_pos < _size && _content[_pos] != ';')
 	{
 		int	dot = _content.find_first_of(";", _pos);
+		if (dot == -1)
+			return (0);
 		std::string value = _content.substr(_pos, dot - _pos);
 		if (!(checkValue(key, value, _server.getRefPorts().back())))
 			return (0);
