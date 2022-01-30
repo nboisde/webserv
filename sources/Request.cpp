@@ -320,7 +320,7 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 		int len = static_cast<int>((*it).length());
 		int ret = (*it).find(":");
 		if (host == 0)
-			if (static_cast<int>((*it).find("Host")) != -1 && ret != -1)
+			if (static_cast<int>(strToLower((*it)).find("host")) != -1 && ret != -1)
 				host = 1;
 		//NO double dot.
 		if (ret == -1)
