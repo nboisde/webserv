@@ -2,6 +2,7 @@
 # define __REQUEST_HPP__
 
 # include "webserv.hpp"
+# include "Utils.hpp"
 
 namespace ws 
 {
