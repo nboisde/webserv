@@ -79,7 +79,7 @@ int Client::receive(void)
 		// POSSIBILITE D'IMPLEMENTER UPLOAD
 		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
 		//write(fd, _req.getBody().c_str(), _req.getBody().length());
-		//write(1, _req.getBody().c_str(), _req.getBody().length());
+		write(1, _req.getBody().c_str(), _req.getBody().length());
 		//close(fd);
 		//_status = OK;
 		bridgeParsingRequest();
