@@ -445,6 +445,8 @@ int		Request::parseHeader(void)
 		// Doesn't put in header data empty lines. // Don't know if we must consider...
 		if (ret == -1)
 			continue ;
+		// MUST ABSOLUTELY DEAL WITH LOWER CASE ! NEED TO CHANGES CGI TO ALL LOWERS...
+		//_head[strToLower((*it).substr(0, ret))] = (*it).substr(ret + 2, (*it).length());
 		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
 	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
