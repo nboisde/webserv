@@ -94,7 +94,7 @@ void Client::bridgeParsingRequest( void )
 
 	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
 	{
-		if ((*it) == _req.getHead()["Method"])
+		if ((*it) == _req.getHead()["method"])
 			not_all = 0;
 	}
 	if (not_all == 1)

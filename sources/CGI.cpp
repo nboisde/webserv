@@ -33,15 +33,15 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	
 	map_iterator ite = _header.end();
 
-	if (_header.find("Content-Length") != ite)
+	if (_header.find("content-length") != ite)
 	{
-		_conversion.insert(pair("CONTENT_LENGTH", _header["Content-Length"]));
-		_conversion.insert(pair("HTTP_CONTENT_LENGTH", _header["Content-Length"]));
+		_conversion.insert(pair("CONTENT_LENGTH", _header["content-length"]));
+		_conversion.insert(pair("HTTP_CONTENT_LENGTH", _header["content-length"]));
 	}
-	if (_header.find("Content-Type") != ite)
+	if (_header.find("content-type") != ite)
 	{
-		_conversion.insert(pair("CONTENT_TYPE", _header["Content-Type"]));
-		_conversion.insert(pair("HTTP_CONTENT_TYPE", _header["Content-Type"]));
+		_conversion.insert(pair("CONTENT_TYPE", _header["content-type"]));
+		_conversion.insert(pair("HTTP_CONTENT_TYPE", _header["content-type"]));
 	}
 	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
 	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
@@ -69,24 +69,24 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	_conversion.insert(pair("QUERY_STRING", query));
 
 	_conversion.insert(pair("SCRIPT_FILENAME", cli.getFilePath()));
-	if (_header.find("Method") != ite)
-		_conversion.insert(pair("REQUEST_METHOD", _header["Method"]));
+	if (_header.find("method") != ite)
+		_conversion.insert(pair("REQUEST_METHOD", _header["method"]));
 
 	_conversion.insert(pair("HTTPS", ""));
-	if (_header.find("Accept") != ite)
-		_conversion.insert(pair("HTTP_ACCEPT", _header["Accept"]));
-	if (_header.find("Accept-Charset") != ite)
-		_conversion.insert(pair("HTTP_ACCEPT_CHARSET", _header["Accept-Charset"]));
-	if (_header.find("Accept-Encoding") != ite)
-		_conversion.insert(pair("HTTP_ACCEPT_ENCODING", _header["Accept-Encoding"]));
-	if (_header.find("Accept-Language") != ite)
-		_conversion.insert(pair("HTTP_ACCEPT_LANGUAGE", _header["Accept-Language"]));
-	if (_header.find("Connection") != ite)
-		_conversion.insert(pair("HTTP_CONNECTION", _header["Connection"]));
-	if (_header.find("Host") != ite)
-		_conversion.insert(pair("HTTP_HOST", _header["Host"]));
-	if (_header.find("User-Agent") != ite)
-		_conversion.insert(pair("HTTP_USER_AGENT", _header["User-Agent"]));
+	if (_header.find("accept") != ite)
+		_conversion.insert(pair("HTTP_ACCEPT", _header["accept"]));
+	if (_header.find("accept-charset") != ite)
+		_conversion.insert(pair("HTTP_ACCEPT_CHARSET", _header["accept-charset"]));
+	if (_header.find("accept-encoding") != ite)
+		_conversion.insert(pair("HTTP_ACCEPT_ENCODING", _header["accept-encoding"]));
+	if (_header.find("accept-language") != ite)
+		_conversion.insert(pair("HTTP_ACCEPT_LANGUAGE", _header["accept-language"]));
+	if (_header.find("connection") != ite)
+		_conversion.insert(pair("HTTP_CONNECTION", _header["connection"]));
+	if (_header.find("host") != ite)
+		_conversion.insert(pair("HTTP_HOST", _header["host"]));
+	if (_header.find("user-agent") != ite)
+		_conversion.insert(pair("HTTP_USER_AGENT", _header["user-agent"]));
 }
 
 CGI::CGI( void )
@@ -154,7 +154,7 @@ std::ostream &			operator<<( std::ostream & o, CGI const & i )
 
 int		CGI::generate_env( void )
 {
-	if (_header["Method"] == "GET" | _header["Method"] == "POST")
+	if (_header["method"] == "GET" | _header["method"] == "POST")
 	{
 		int i = 0;
 		this->_env = new char*[_conversion.size() + 1];
@@ -195,7 +195,13 @@ int		CGI::execute( Client & cli ){
 	
 	if (pid == 0)
 	{
+<<<<<<< HEAD
 		if (_header["Method"] == "POST")
+=======
+		//for(int i = 0; _env[i]; i++)
+		//	std::cerr << _env[i] << std::endl;
+		if (_header["method"] == "POST")
+>>>>>>> CGI environement in full lower case
 		{
 			std::string body = cli.getReq().getBody();
 			char buf[BUFFER_SIZE];

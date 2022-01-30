@@ -67,23 +67,23 @@ void Request::findMethod(void)
 	d = _raw_content.find("DELETE");
 	if (g != -1)
 	{
-		_head["Method"] = "GET";
+		_head["method"] = "GET";
 		_method_type = GET;
 	}
 	else if (p != -1)
 	{
-		_head["Method"] = "POST";
+		_head["method"] = "POST";
 		_method_type = POST;
 	}
 	else if (d != -1)
 	{
-		_head["Method"] = "UPDATE";
+		_head["method"] = "UPDATE";
 		_method_type = DELETE;
 	}
 	else
 	{
-		_head["Method"] = "UNKNOWN";
-		_head["url"] = "/404.html"; // THIS LINE IS BULLSHIT AND MUST BE DYNAMIC..
+		_head["method"] = "UNKNOWN";
+		//_head["url"] = "/404.html"; // THIS LINE IS BULLSHIT AND MUST BE DYNAMIC..
 		_method_type = UNKNOWN;
 	}
 }
@@ -446,8 +446,8 @@ int		Request::parseHeader(void)
 		if (ret == -1)
 			continue ;
 		// MUST ABSOLUTELY DEAL WITH LOWER CASE ! NEED TO CHANGES CGI TO ALL LOWERS...
-		//_head[strToLower((*it).substr(0, ret))] = (*it).substr(ret + 2, (*it).length());
-		_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
+		_head[strToLower((*it).substr(0, ret))] = (*it).substr(ret + 2, (*it).length());
+		//_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
 	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
 	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
