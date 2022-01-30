@@ -240,7 +240,10 @@ int Request::concatenateRequest(std::string tmp)
 /* 		for (std::vector<std::string>::iterator it = _vheader.begin(); it != _vheader.end(); it++)
 			std::cout << (*it) << std::endl; */
 		if (errorHandling(_vheader, 2) == ERROR)
+		{
+			std::cout << "ici" << std::endl;
 			return ERROR; // return errorReturn();
+		}
 		if (checkHeaderEnd() == 1)
 		{
 			_cursor = 0;
