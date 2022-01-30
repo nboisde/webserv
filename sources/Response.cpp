@@ -123,7 +123,7 @@ std::string 	Response::genBody( int error )
 void	Response::setContentType( std::string file_path )
 {
 	std::string	default_type = "text/html";
-	int 		pos = file_path.find(".");
+	int 		pos = file_path.find_last_of(".");
 	
 	if (pos < 0)
 		_content_type = default_type;
