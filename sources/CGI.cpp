@@ -13,7 +13,7 @@ CGI::CGI( Client const & cli , Port const & port, Server const & serv, int exten
 	if (extension_type == R_PY)
 	{	
 		_extension = ".py";
-		_bin_location = "/usr/bin/python";
+		_bin_location = "/usr/bin/python3";
 	}
 	else
 	{
