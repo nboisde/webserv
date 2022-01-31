@@ -224,20 +224,7 @@ int	Client::execution( Server const & serv, Port & port )
 
 int Client::executePhpPython( Server const & serv, Port & port, int extension_type)
 {
-<<<<<<< HEAD
-	std::cout << "PY EXECUTION" << std::endl;
-	(void)serv;
-	(void)port;
-	return  SUCCESS;
-}
-
-int Client::executePhp( Server const & serv, Port & port )
-{
-	std::cout << "PHP EXECUTION" << std::endl;
-	CGI cgi(*this, port, serv);
-=======
 	CGI cgi(*this, port, serv, extension_type);
->>>>>>> MON TIT PYTHON
 	cgi.execute(*this);
 	return SUCCESS;
 }
