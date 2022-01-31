@@ -10,3 +10,13 @@ std::string strToLower(std::string s1)
 	}
 	return s2;
 }
+
+int strIsPrintable(std::string str)
+{
+	for (std::string::iterator it = str.begin(); it != str.end(); it++)
+	{
+		if (!std::isprint(*it))
+			return 0;
+	}
+	return 1;
+}

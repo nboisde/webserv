@@ -54,7 +54,7 @@ class Client
 		int				send( void );
 		void			closeConnection( void );
 		void 			bridgeParsingRequest( void );
-
+		int				uploadFiles( void );
 
 		int				getFd( void ) const;
 		int				getStatus( void ) const;
