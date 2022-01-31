@@ -21,6 +21,7 @@
 # define BODY_RECEPTION_NOT_SPECIFIED 0
 # define CONTENT_LENGTH 1
 # define TRANSFER_ENCODING 2
+# define MULTIPART 3
 
 // Connection handling
 # define CLOSE 0

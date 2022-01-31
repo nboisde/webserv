@@ -203,6 +203,7 @@ int Request::concatenateRequest(std::string tmp)
 		{
 			findMethod();
 			_line++;
+			std::cout << "ici" << std::endl;
 			if (_method_type == UNKNOWN)
 				return errorReturn(1);
 			if (!findProtocol(_raw_content))
@@ -239,22 +240,16 @@ int Request::concatenateRequest(std::string tmp)
 		}
 /* 		for (std::vector<std::string>::iterator it = _vheader.begin(); it != _vheader.end(); it++)
 			std::cout << (*it) << std::endl; */
+		std::cout << "line 265: " << _raw_content << std::endl;
 		if (errorHandling(_vheader, 2) == ERROR)
-		{
-			std::cout << "ici" << std::endl;
 			return ERROR; // return errorReturn();
-		}
 		if (checkHeaderEnd() == 1)
 		{
 			_cursor = 0;
 			_vheader.clear();
 			int ct = identifyBodyLengthInHeader();
 			int te = isTransferEncoding();
-			//if (_method_type == UNKNOWN)
-			//	findMethod();
-			//if (_method_type == UNKNOWN)// || (ct == 1 && te == 1))
-			//	return errorReturn();
-			/* else  */if (ct == 1)
+			if (ct == 1)
 				_body_reception_encoding = CONTENT_LENGTH;
 			else if (te == 1)
 				_body_reception_encoding = TRANSFER_ENCODING;
@@ -268,10 +263,16 @@ int Request::concatenateRequest(std::string tmp)
 		int r = _raw_content.find("\r\n\r\n");
 		int r2 = _raw_content.find("\n\n");
 		int i = (r == -1) ? r2 : r;
+		std::cout << GREEN;
+		std::cout << "index header end " << i << std::endl;
+		std::cout << _body_len_received + _header_len_received << std::endl;
+		std::cout << "rc len: "<< _raw_content.length() << std::endl;
+		std::cout << "stop index: " << _content_length + i + 4 << std::endl;
+		std::cout << RESET;
 		// Attention ici a gerer si la content length ne match jamais la reception...
 		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 			return bodyReceived();
-		else if (_body_reception_encoding == CONTENT_LENGTH && _body_len_received + _header_len_received < _content_length + i + 4)
+		else if ((_body_reception_encoding == CONTENT_LENGTH) && static_cast<int>(_raw_content.length()) < _content_length + i + 4)//_body_len_received + _header_len_received < _content_length + i + 4)
 				return 0;
 		else if (_body_reception_encoding == TRANSFER_ENCODING)
 		{
@@ -468,6 +469,7 @@ int Request::fillHeaderAndBody(void){
 	int ret = (r != -1) ? r : r2;
 	std::string crlf = (r != -1) ? "\r\n\r\n": "\n\n";
 	int i = 0;
+	//std::string body;
 	if (ret == -1)
 		return errorReturn(0);
 	while (i < ret + static_cast<int>(crlf.length()))
@@ -476,19 +478,27 @@ int Request::fillHeaderAndBody(void){
 		i++;
 	}
 	std::string body = _raw_content.substr(ret + crlf.length(), _raw_content.length() - i);
+	std::cout << "ici" << std::endl;
 	int err = parseHeader();
+	std::cout << "la" << std::endl;
 	if (err == ERROR)
 		return errorReturn(0);
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 		return SUCCESS;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
 	{
-		while (_raw_content[i])
-		{
-			_body += _raw_content[i];
-			i++;
-		}
+		_body += _raw_content.substr(i, _content_length);
+		// while (_raw_content[i])
+		// {
+		// 	_body += _raw_content[i];
+		// 	i++;
+		// }
 	}
+	//else if (_body_reception_encoding == MULTIPART)
+	//{
+	//	std::cout << "ici" << std::endl;
+	//	std::cout << _body << std::endl;
+	//}
 	else if (_body_reception_encoding == TRANSFER_ENCODING)
 		ChunkedBodyProcessing(body);
 	//std::cout << "BODY :" << _body << std::endl;
