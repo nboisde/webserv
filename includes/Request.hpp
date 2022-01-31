@@ -29,6 +29,9 @@ class Request
 		int				parseHeader(void);
 		void			manageConnection( std::string str );
 		void			resetValues(void);
+		int				multipartForm( void );
+		int				setupMultipartForm( void );
+
 
 		
 		// GETTERS
@@ -53,6 +56,7 @@ class Request
 		int 		errorReturn( int opt );
 		int			bodyReceived(void);
 
+
 		int							_line;
 		int							_cursor;
 		int							_state;
@@ -69,6 +73,8 @@ class Request
 		std::vector<std::string>	_vheader;
 		head_type					_head;
 		int							_status;
+		int							_multipart;
+		int							_occurence;
 };
 
 }
