@@ -169,11 +169,8 @@ const char *	Response::response( int status )
 	tmp << _header << CRLF;
 	tmp << CRLF;
 	tmp << _body;
-
 	_response = tmp.str();
-
-	//std::cout << _response << std::endl;
-
+	
 	const char * str = _response.c_str();
 	resetResponse();
 	return str;
