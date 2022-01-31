@@ -4,3 +4,4 @@
 objects/*.o
 webserver
 log.out
+logs/access.log

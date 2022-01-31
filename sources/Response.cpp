@@ -143,7 +143,7 @@ void	Response::setContentType( std::string file_path )
 
 void	Response::setContentDisposition( std::string file_path )
 {
-	int			attachement = file_path.find("/files/");
+	int			attachement = file_path.find("/download/");
 	
 	std::cout << "FILE PATH " << file_path << std::endl;
 	std::cout << "ATTACHEMENT " << attachement << std::endl;
