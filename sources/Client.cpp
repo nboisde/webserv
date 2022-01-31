@@ -39,6 +39,68 @@ Client &	Client::operator=( Client const & rhs )
 	return *this;
 }
 
+int Client::uploadFiles( void )
+{
+	//int bound_len = _req.getBoundary().length();
+	std::string data = _req.getBody();
+	std::string file;
+	//int save = 1;
+	//int crlf = data.find("\r\n\r\n");
+	while (!data.empty())
+	{
+		int save = 1;
+		int crlf = data.find("\r\n\r\n");
+		int f_index = data.find("filename") + 10;
+		std::string f_name = "";
+		std::string extension = "";
+		while (data[f_index] != '\"')
+		{
+			f_name += data[f_index];
+			f_index++;
+		}
+		if (f_name.length() == 0)
+			save = 0;
+		std::string tmp;
+		if (crlf != -1)
+			tmp = data.substr(crlf + 4, data.length() - (crlf + 4));
+		else
+			tmp = data;
+		int bd = tmp.find(_req.getBoundary());
+		if (bd == -1)
+			break ;
+		else
+		{
+			while (tmp[bd] && tmp[bd] == '-')
+				bd--;
+		}
+		std::string f_content = tmp.substr(0, bd);
+		if (save == 1)
+		{
+			if (!strIsPrintable(f_name))
+			{
+				int ex = f_name.find(".");
+				extension = f_name.substr(ex, f_name.length() - ex);
+				f_name.clear();
+				f_name = "file";
+				f_name += extension;
+			}
+			int fd = open(f_name.c_str(), O_CREAT | O_WRONLY, 0644);
+			if (fd < 0)
+				continue ;
+			int ret;
+			ret = write(fd, f_content.c_str(), f_content.length());
+			if (ret == -1)
+				std::cout << "Writing problem" << std::endl;
+			close(fd);
+		}
+		int forward = tmp.find(_req.getBoundary()) + _req.getBoundary().length();
+		while (tmp[forward] && (tmp[forward] == '-' || tmp[forward] == '\r' || tmp[forward] == '\n'))
+			forward++;
+		data = tmp.substr(forward, tmp.length() - forward);
+	}
+	return SUCCESS;
+}
+
 int Client::receive(void)
 {
 	char	buffer[BUFFER_SIZE];
@@ -59,7 +121,7 @@ int Client::receive(void)
 		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
 		_status = _req.getStatus();
 		std::cout << "------------------- client _raw_content ---------------------" << std::endl;
-		std::cout << _req.getRawContent() << std::endl;
+		//std::cout << _req.getRawContent() << std::endl;
 		std::cout << "-------------------------------------------------------------" << std::endl;
 		return WRITING;
 	}
@@ -82,12 +144,18 @@ int Client::receive(void)
 		// POSSIBILITE D'IMPLEMENTER UPLOAD
 		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
 		//write(fd, _req.getBody().c_str(), _req.getBody().length());
-		std::cout << "------------------------- BODY ---------------------------" << std::endl;
-		write(1, _req.getBody().c_str(), _req.getBody().length());
-		std::cout << "----------------------------------------------------------" << std::endl;
+		//std::cout << "------------------------- BODY ---------------------------" << std::endl;
+		//write(1, _req.getBody().c_str(), _req.getBody().length());
+		//std::cout << "----------------------------------------------------------" << std::endl;
 		//close(fd);
 		//_status = OK;
 		bridgeParsingRequest();
+		// RENVOYER LE BODY DEPUIS LA REPONSE, LE STATUS DU HEADER ET LE SEPARATEUR ET ENREGISTRER LES FICHIERS SSI le status != NOT_ALLOWED
+		if (_status == OK && _req.getMultipart() == 1)
+		{
+			std::cout << "NE PAS OUBLIER DE RECUPERER LA ROUTE DE DL DEPUIS LA CONFIG" << std::endl;
+			uploadFiles();
+		}
 		return WRITING;
 	}
 	return READING;

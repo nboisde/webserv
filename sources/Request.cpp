@@ -16,7 +16,9 @@ _method_type(UNKNOWN),
 _header_size(0),
 _header(""),
 _body(""),
-_status(OK)
+_status(OK),
+_multipart(0),
+_boundary("")
 {
 
 }
@@ -45,6 +47,9 @@ Request &	Request::operator=( Request const & rhs )
 		_header = rhs._header;
 		_body = rhs._body;
 		_head = rhs._head;
+		_status = rhs._status;
+		_multipart = rhs._multipart;
+		_boundary = rhs._boundary;
 	}
 	return *this;
 }
@@ -157,6 +162,26 @@ int Request::bodyReceived(void)
 	return SUCCESS;
 }
 
+int	Request::multipartForm( void )
+{
+	int r = strToLower(_raw_content).find("content-type");
+	int r2 = strToLower(_raw_content).find("multipart");
+	if (r == -1 || r2 == -1)
+		return 0;
+	else
+	{
+		_multipart = 1;
+		std::string tmp = _raw_content.substr(r);
+		//std::cout << tmp << std::endl;
+		int bd = strToLower(tmp).find("boundary=");
+		std::string tmp2 = tmp.substr(bd + 9, tmp.find("\r\n") - (bd + 9));
+		_boundary = tmp2;
+		//std::cout << GREEN << tmp2 << RESET << std::endl;
+		return 1;
+	}
+}
+
+
 /*
 ** this function will concatenate buffer into raw Request and tell to the engine if the request is full: ie,
 ** if the header and the body is full.
@@ -203,7 +228,6 @@ int Request::concatenateRequest(std::string tmp)
 		{
 			findMethod();
 			_line++;
-			std::cout << "ici" << std::endl;
 			if (_method_type == UNKNOWN)
 				return errorReturn(1);
 			if (!findProtocol(_raw_content))
@@ -240,7 +264,6 @@ int Request::concatenateRequest(std::string tmp)
 		}
 /* 		for (std::vector<std::string>::iterator it = _vheader.begin(); it != _vheader.end(); it++)
 			std::cout << (*it) << std::endl; */
-		std::cout << "line 265: " << _raw_content << std::endl;
 		if (errorHandling(_vheader, 2) == ERROR)
 			return ERROR; // return errorReturn();
 		if (checkHeaderEnd() == 1)
@@ -254,6 +277,7 @@ int Request::concatenateRequest(std::string tmp)
 			else if (te == 1)
 				_body_reception_encoding = TRANSFER_ENCODING;
 			_state = HEADER_RECEIVED;
+			//multipartForm();
 		}
 	}
 	//BODY CATCH
@@ -263,12 +287,6 @@ int Request::concatenateRequest(std::string tmp)
 		int r = _raw_content.find("\r\n\r\n");
 		int r2 = _raw_content.find("\n\n");
 		int i = (r == -1) ? r2 : r;
-		std::cout << GREEN;
-		std::cout << "index header end " << i << std::endl;
-		std::cout << _body_len_received + _header_len_received << std::endl;
-		std::cout << "rc len: "<< _raw_content.length() << std::endl;
-		std::cout << "stop index: " << _content_length + i + 4 << std::endl;
-		std::cout << RESET;
 		// Attention ici a gerer si la content length ne match jamais la reception...
 		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 			return bodyReceived();
@@ -276,7 +294,6 @@ int Request::concatenateRequest(std::string tmp)
 				return 0;
 		else if (_body_reception_encoding == TRANSFER_ENCODING)
 		{
-			// ICI OBSERVER SI LE BODY FINIT BIEN PAR \r\n\r\n ou \n\n -> a mon avis ne doit pas etre traite.
 			int ret = _raw_content.find("0\r\n\r\n");
 			if (ret == -1)
 				return 0;
@@ -311,7 +328,6 @@ int Request::errorReturn( int opt)
 int Request::errorHandling(std::vector<std::string> v, int i)
 {
 	//gestion de la presence de l'url requise.
-	//gestion d'une taille de header trop grosse.
 	int cl = 0;
 	int te = 0;
 	int host = 0;
@@ -446,15 +462,10 @@ int		Request::parseHeader(void)
 			continue ;
 		}
 		ret = (*it).find(":");
-		// Doesn't put in header data empty lines. // Don't know if we must consider...
 		if (ret == -1)
 			continue ;
-		// MUST ABSOLUTELY DEAL WITH LOWER CASE ! NEED TO CHANGES CGI TO ALL LOWERS...
 		_head[strToLower((*it).substr(0, ret))] = (*it).substr(ret + 2, (*it).length());
-		//_head[(*it).substr(0, ret)] = (*it).substr(ret + 2, (*it).length());
 	}
-	//for (std::map<std::string, std::string>::iterator it = _head.begin(); it != _head.end(); it++)
-	//	std::cout << (*it).first << "->" << (*it).second << std::endl;
 	return SUCCESS;
 }
 
@@ -469,7 +480,6 @@ int Request::fillHeaderAndBody(void){
 	int ret = (r != -1) ? r : r2;
 	std::string crlf = (r != -1) ? "\r\n\r\n": "\n\n";
 	int i = 0;
-	//std::string body;
 	if (ret == -1)
 		return errorReturn(0);
 	while (i < ret + static_cast<int>(crlf.length()))
@@ -478,30 +488,16 @@ int Request::fillHeaderAndBody(void){
 		i++;
 	}
 	std::string body = _raw_content.substr(ret + crlf.length(), _raw_content.length() - i);
-	std::cout << "ici" << std::endl;
 	int err = parseHeader();
-	std::cout << "la" << std::endl;
 	if (err == ERROR)
 		return errorReturn(0);
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 		return SUCCESS;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
-	{
 		_body += _raw_content.substr(i, _content_length);
-		// while (_raw_content[i])
-		// {
-		// 	_body += _raw_content[i];
-		// 	i++;
-		// }
-	}
-	//else if (_body_reception_encoding == MULTIPART)
-	//{
-	//	std::cout << "ici" << std::endl;
-	//	std::cout << _body << std::endl;
-	//}
 	else if (_body_reception_encoding == TRANSFER_ENCODING)
 		ChunkedBodyProcessing(body);
-	//std::cout << "BODY :" << _body << std::endl;
+	multipartForm();
 	return SUCCESS;
 }
 
@@ -556,6 +552,9 @@ void	Request::resetValues(void){
 	_body = "";
 	_status = OK;
 	_head.clear();
+	_multipart = 0;
+	_boundary.clear();
+	_boundary = "";
 }
 
 
@@ -573,5 +572,7 @@ std::map<std::string, std::string>		Request::getHead( void ) const { return _hea
 std::map<std::string, std::string> &	Request::getHead( void ) { return _head; }
 int										Request::getConnection( void ) const { return _connection; }
 int										Request::getStatus( void ) const { return _status; }
+int										Request::getMultipart( void ) const { return _multipart; }
+std::string								Request::getBoundary( void ) const { return _boundary; }
 
 }

@@ -30,9 +30,6 @@ class Request
 		void			manageConnection( std::string str );
 		void			resetValues(void);
 		int				multipartForm( void );
-		int				setupMultipartForm( void );
-
-
 		
 		// GETTERS
 		std::string		getRawContent(void) const;
@@ -48,7 +45,8 @@ class Request
 		head_type &		getHead( void );
 		int				getConnection( void ) const;
 		int				getStatus( void ) const;
-
+		int				getMultipart( void ) const;
+		std::string		getBoundary( void ) const;
 
 	private:
 		int			findProtocol(std::string buf);
@@ -74,7 +72,7 @@ class Request
 		head_type					_head;
 		int							_status;
 		int							_multipart;
-		int							_occurence;
+		std::string					_boundary;
 };
 
 }
