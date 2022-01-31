@@ -119,15 +119,21 @@ int Client::send( void )
 	int			ret;
 	const char* prov;
 	std::string str = _res.getResponse();
+	int			len = str.size();
 
+	if (len > BUFFER_SIZE)
+		len = BUFFER_SIZE;
 	prov = str.c_str();
-	ret = ::send(_fd, prov, str.size(), 0);
+	ret = ::send(_fd, prov, len, 0);
 	if (ret < 0)
 	{
 		perror(" send() failed");
 		return (ERROR);
 	}
-	return CLOSING;
+	else if (ret < BUFFER_SIZE)
+		return CLOSING;
+	_res.getResponse() = _res.getResponse().substr(ret);
+	return WRITING;
 }
 
 void	Client::checkPath( std::string & url, Port & port )
