@@ -249,8 +249,9 @@ int	Client::executeHtml(Server const & serv, Port & port )
 	fclose(file);
 	_res.setBody(content);
 	_res.setContentType(_file_path);
+	_res.setContentDisposition(_file_path);
 	_res.response(_status);
-	//std::cout << _res.getResponse() << std::endl;
+	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
 }
 

@@ -132,10 +132,29 @@ void	Response::setContentType( std::string file_path )
 		std::string extension = file_path.substr(pos);
 		if (extension == ".gif" || extension == ".ico" || extension == ".png" || extension == ".jpeg")
 			_content_type = "image/" + extension.substr(1);
-		if (extension == ".css")
+		else if (extension == ".css")
 			_content_type = "text/" + extension.substr(1);
+		else if (extension == ".pdf")
+			_content_type = "application/" + extension.substr(1);
 		else
 			_content_type = default_type;
+	}
+}
+
+void	Response::setContentDisposition( std::string file_path )
+{
+	std::string	default_disposition = "inline";
+	int 		pos = file_path.find_last_of(".");
+	
+	if (pos < 0)
+		_content_disposition = default_disposition;
+	else
+	{
+		std::string extension = file_path.substr(pos);
+		if (extension == ".pdf")
+			_content_disposition = "attachement";
+		else
+			_content_disposition = default_disposition;
 	}
 }
 
@@ -163,6 +182,7 @@ const char *	Response::response( int status )
 		_status_line = genStatusLine(status);
 		_status = status;
 		addContentType();
+		addContentDisposition();
 	}
 	tmp << _status_line << CRLF;
 	genHeader();
@@ -189,6 +209,15 @@ void	Response::addContentType( void )
 	std::stringstream type;
 	
 	type << "Content-Type: " << _content_type;
+	_header += CRLF;
+	_header += type.str();
+}
+
+void	Response::addContentDisposition( void )
+{
+	std::stringstream type;
+	
+	type << "Content-Disposition: " << _content_disposition;
 	_header += CRLF;
 	_header += type.str();
 }
