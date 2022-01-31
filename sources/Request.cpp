@@ -539,6 +539,7 @@ void	Request::resetValues(void){
 	_body.clear();
 	_body = "";
 	_status = OK;
+	_head.clear();
 }
 
 
