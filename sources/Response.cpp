@@ -143,19 +143,12 @@ void	Response::setContentType( std::string file_path )
 
 void	Response::setContentDisposition( std::string file_path )
 {
-	std::string	default_disposition = "inline";
-	int 		pos = file_path.find_last_of(".");
+	int			attachement = file_path.find_last_of("/files/");
 	
-	if (pos < 0)
-		_content_disposition = default_disposition;
+	if (attachement < 0)
+		_content_disposition = "inline";
 	else
-	{
-		std::string extension = file_path.substr(pos);
-		if (extension == ".pdf")
-			_content_disposition = "attachement";
-		else
-			_content_disposition = default_disposition;
-	}
+		_content_disposition = "attachement";
 }
 
 std::string	const &	Response::genHeader( void ){

@@ -142,8 +142,13 @@ void	Client::checkPath( std::string & url, Port & port )
 void	Client::checkExtension( std::string & url, Port & port )
 {
 	int	pos = url.find(".");
-	if (pos < 0)
+	int	attachement = url.find("/files/");
+
+	if (pos < 0 || attachement >= 0)
+	{
+		std::cout << "URL\t\t" << url << std::endl;
 		return ;
+	}
 	std::string	extension = url.substr(url.find("."));
 	std::cout << std::endl << "EXTENSION\t" << extension << std::endl;
 	std::map<std::string, Value> config = port.getConfig();
@@ -194,6 +199,7 @@ int	Client::checkURI( Port & port, std::string url)
 	if (buf)
 		free(buf);
 	_file_path = file_path.str();
+	std::cout << "PATH " << _file_path << std::endl;
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
 	{
@@ -208,6 +214,7 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 
+	std::cout << "STATUS " << _status << std::endl;
 	saveLogs();
 	if (_status != OK)
 		executeError(serv, port);
@@ -253,7 +260,6 @@ int	Client::executeHtml(Server const & serv, Port & port )
 	_res.setContentType(_file_path);
 	_res.setContentDisposition(_file_path);
 	_res.response(_status);
-	std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
 }
 
