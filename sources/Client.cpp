@@ -78,11 +78,12 @@ int Client::receive(void)
 			_status = _req.getStatus();
 			return WRITING;
 		}
-		std::cout << BLUE;
-		std::cout << "========================= HEADER =========================" << std::endl;
-		std::cout << _req.getHeader();// << std::endl;
-		std::cout << "==========================================================" << std::endl;
-		std::cout << RESET;
+		// DISPLAY IN ACCESS LOG
+		//std::cout << BLUE;
+		//std::cout << "========================= HEADER =========================" << std::endl;
+		//std::cout << _req.getHeader();// << std::endl;
+		//std::cout << "==========================================================" << std::endl;
+		//std::cout << RESET;
 		// POSSIBILITE D'IMPLEMENTER UPLOAD
 		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
 		//write(fd, _req.getBody().c_str(), _req.getBody().length());
@@ -207,6 +208,7 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 
+	saveLogs();
 	if (_status != OK)
 		executeError(serv, port);
 	else
@@ -282,6 +284,16 @@ int	Client::executeError( Server const & serv, Port & port )
 		_res.response(_status);
 	}
 	return SUCCESS;
+}
+
+void	Client::saveLogs( void )
+{
+	std::ofstream		ofs("./logs/access.log", std::ios_base::app);
+	std::string			content;
+
+	ofs << "CLIENT " << _fd << std::endl;
+	ofs << _req.getHeader() << std::endl;
+	ofs.close();
 }
 
 void Client::closeConnection(){}

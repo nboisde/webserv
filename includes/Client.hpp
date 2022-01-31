@@ -19,6 +19,7 @@ class Client
 	typedef std::map<int, std::string>		error_type;
 
 	private:
+		void			saveLogs(void);
 		int				checkURI( Port & port, std::string url );
 		int				checkCGI( std::string & url );
 		void			checkPath( std::string & url, Port & port );
