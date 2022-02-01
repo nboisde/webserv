@@ -5,3 +5,5 @@ objects/*.o
 webserver
 log.out
 logs/access.log
+logs/error.log
+output

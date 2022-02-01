@@ -145,8 +145,6 @@ void	Response::setContentDisposition( std::string file_path )
 {
 	int			attachement = file_path.find("/download/");
 	
-	std::cout << "FILE PATH " << file_path << std::endl;
-	std::cout << "ATTACHEMENT " << attachement << std::endl;
 	if (attachement < 0)
 		_content_disposition = "inline";
 	else
