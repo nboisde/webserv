@@ -220,22 +220,25 @@ void	Response::addContentDisposition( void )
 
 void		Response::treatCGI( std::string cgi_output )
 {
-	int pos;
+	int pos1 = 0;
+	int pos2 = 0;
 
-	if ((pos = cgi_output.find("Status: ")) != -1)
+	if ((pos1 = cgi_output.find("Status: ")) != -1)
 	{
-		pos += 8;
+		pos1 += 8;
 		_status_line = "HTTP/1.1 ";	
-		_status_line +=  cgi_output.substr(pos, cgi_output.find(CRLF, pos) - pos);
+		_status_line +=  cgi_output.substr(pos1, cgi_output.find(CRLF, pos1) - pos1);
+		for(;cgi_output[pos1] != '\n';pos1++);
+		pos1++;
 	}
-	else
-	{
-		pos = cgi_output.find(BODY_CRLF);
-		//_header += CRLF;
-		_header += cgi_output.substr(0, pos);
-	}
-	if ((pos = cgi_output.find(BODY_CRLF)) != -1 && !cgi_output.substr(pos + 4).empty())
-		_body = cgi_output.substr(pos + 4);
+	if (pos1 == -1)
+		pos1 = 0;
+	pos2 = cgi_output.find(BODY_CRLF);
+	//_header += CRLF;
+	std::cout << "POS1 = " << pos1 << " | POS2 =" << pos2 << std::endl;
+	_header += cgi_output.substr(pos1, pos2);
+	if ((pos1 = cgi_output.find(BODY_CRLF)) != -1 && !cgi_output.substr(pos1 + 4).empty())
+		_body = cgi_output.substr(pos1 + 4);
 }
 
 void		Response::resetResponse( void )
