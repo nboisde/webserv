@@ -195,13 +195,7 @@ int		CGI::execute( Client & cli ){
 	
 	if (pid == 0)
 	{
-<<<<<<< HEAD
-		if (_header["Method"] == "POST")
-=======
-		//for(int i = 0; _env[i]; i++)
-		//	std::cerr << _env[i] << std::endl;
 		if (_header["method"] == "POST")
->>>>>>> CGI environement in full lower case
 		{
 			std::string body = cli.getReq().getBody();
 			char buf[BUFFER_SIZE];
