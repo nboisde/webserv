@@ -55,6 +55,7 @@ class Client
 		void			closeConnection( void );
 		void 			bridgeParsingRequest( void );
 		int				uploadFiles( void );
+		std::string		uploadPath( void );
 
 		int				getFd( void ) const;
 		int				getStatus( void ) const;
