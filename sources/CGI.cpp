@@ -65,7 +65,7 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	
 	std::string query;
 	if (url.find(".php?") != std::string::npos)
-		query = url.substr(url.find(".php?") + 4);
+		query = url.substr(url.find(".php?") + 5);
 	_conversion.insert(pair("QUERY_STRING", query));
 
 	_conversion.insert(pair("SCRIPT_FILENAME", cli.getFilePath()));
@@ -225,7 +225,6 @@ int		CGI::execute( Client & cli ){
 	std::string response = concatenateResponse(fd[0]);
 	cli.getRes().treatCGI(response);
 	cli.getRes().response(CGI_FLAG);
-	std::cout << cli.getRes().getResponse() << std::endl;
 	return SUCCESS;
 }
 
