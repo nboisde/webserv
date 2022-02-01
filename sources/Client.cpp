@@ -116,7 +116,6 @@ int Client::uploadFiles( void )
 		if (save == 1)
 		{
 			std::string path = uploadPath();
-			std::cout << FIRE << "[" << path << "]" << RESET << std::endl;
 			if (!strIsPrintable(f_name))
 			{
 				int ex = f_name.find(".");
@@ -329,7 +328,6 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 
-	std::cout << "STATUS " << _status << std::endl;
 	saveLogs();
 	if (_status != OK)
 		executeError(serv, port);
