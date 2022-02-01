@@ -164,14 +164,14 @@ int Request::bodyReceived(void)
 
 int	Request::multipartForm( void )
 {
-	int r = strToLower(_raw_content).find("content-type");
-	int r2 = strToLower(_raw_content).find("multipart");
+	int r = strToLower(_header).find("content-type");
+	int r2 = strToLower(_header).find("multipart");
 	if (r == -1 || r2 == -1)
 		return 0;
 	else
 	{
 		_multipart = 1;
-		std::string tmp = _raw_content.substr(r);
+		std::string tmp = _header.substr(r);
 		//std::cout << tmp << std::endl;
 		int bd = strToLower(tmp).find("boundary=");
 		std::string tmp2 = tmp.substr(bd + 9, tmp.find("\r\n") - (bd + 9));
@@ -488,7 +488,6 @@ int Request::fillHeaderAndBody(void){
 		i++;
 	}
 	std::string body = _raw_content.substr(ret + crlf.length(), _raw_content.length() - ret);
-	//std::cout << body << std::endl;
 	int err = parseHeader();
 	if (err == ERROR)
 		return errorReturn(0);
@@ -510,7 +509,6 @@ void		Request::ChunkedBodyProcessing(std::string body)
 {
 	int i = 0;
 	int ret = body.find("0\r\n\r\n");
-	std::cout << ret << std::endl;
 	// std::cout << ret << std::endl;
 	// std::cout << RED << "Attention au SIGSEGV sur --data-binary @webserver" << RESET << std::endl;
 	// const char* str = body.data();
@@ -553,7 +551,6 @@ void		Request::ChunkedBodyProcessing(std::string body)
 		i+=2;
 		int j = 0;
 		int dec = std::strtol(hex.c_str(), 0, 16);
-		std::cout << "dec: " << dec << std::endl;
 		if (body[i] == '0')
 			break ;
 		if (dec == 0)
@@ -565,10 +562,7 @@ void		Request::ChunkedBodyProcessing(std::string body)
 			j++;
 		}
 		i+=2;
-		std::cout << i << std::endl;
-		std::cout << "length: " << proceed_body.length() << std::endl;
 		_body += proceed_body;
-		std::cout << "loop iteration : " << k << std::endl;
 		k++;
 	}
 }

@@ -55,17 +55,26 @@ Client &	Client::operator=( Client const & rhs )
 std::string Client::uploadPath( void )
 {
 	std::map<std::string, std::string> ml = _config["location"]._locations;
-	std::cout << FIRE << ml["upload"] << RESET << std::endl;
 	std::string s = "";
 	if (ml.find("upload") == ml.end())
 		return s;
 	struct stat info;
 	if (stat( ml["upload"].c_str(), &info) != 0)
-		std::cout << RED << "directory dosn't exists" << RESET << std::endl;
+	{
+		std::cout << RED << "upload directory dosn't exists" << RESET << std::endl;
+		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+	}
 	else if (info.st_mode & S_IFDIR)
-		std::cout << GREEN << "directory exists" << RESET << std::endl;
+	{
+		s += ml["upload"];
+		s += '/';
+	}
 	else
-		std::cout << FIRE << "is not a directory" << RESET << std::endl;
+	{
+		std::cout << RED << "upload location in configuration is not a directory" << RESET << std::endl;
+		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+	}
+	std::cout << s << std::endl;
 	return s;
 }
 
@@ -79,6 +88,8 @@ int Client::uploadFiles( void )
 		int save = 1;
 		int crlf = data.find("\r\n\r\n");
 		int f_index = data.find("filename") + 10;
+		if (f_index == -1)
+			return ERROR;
 		std::string f_name = "";
 		std::string extension = "";
 		while (data[f_index] != '\"')
@@ -104,7 +115,8 @@ int Client::uploadFiles( void )
 		std::string f_content = tmp.substr(0, bd);
 		if (save == 1)
 		{
-			uploadPath();
+			std::string path = uploadPath();
+			std::cout << FIRE << "[" << path << "]" << RESET << std::endl;
 			if (!strIsPrintable(f_name))
 			{
 				int ex = f_name.find(".");
@@ -115,8 +127,15 @@ int Client::uploadFiles( void )
 				f_name.clear();
 				f_name = "file";
 				f_name += extension;
+			}	
+			int fd = -1;
+			if (path.length() == 0)
+				fd = open(f_name.c_str(), O_CREAT | O_WRONLY, 0644);
+			else
+			{
+				path += f_name;
+				fd = open(path.c_str(), O_CREAT | O_WRONLY, 0644);
 			}
-			int fd = open(f_name.c_str(), O_CREAT | O_WRONLY, 0644);
 			if (fd < 0)
 				continue ;
 			int ret;
@@ -152,9 +171,6 @@ int Client::receive(void)
 	{
 		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
 		_status = _req.getStatus();
-		std::cout << "------------------- client _raw_content ---------------------" << std::endl;
-		std::cout << _req.getRawContent() << std::endl;
-		std::cout << "-------------------------------------------------------------" << std::endl;
 		return WRITING;
 	}
 	if (req == SUCCESS)
@@ -168,26 +184,22 @@ int Client::receive(void)
 			return WRITING;
 		}
 		// DISPLAY IN ACCESS LOG
-		//std::cout << BLUE;
-		//std::cout << "========================= HEADER =========================" << std::endl;
-		//std::cout << _req.getHeader();// << std::endl;
-		//std::cout << "==========================================================" << std::endl;
-		//std::cout << RESET;
+		// std::cout << BLUE;
+		// std::cout << "========================= HEADER =========================" << std::endl;
+		// std::cout << _req.getHeader();// << std::endl;
+		// std::cout << "==========================================================" << std::endl;
+		// std::cout << RESET;
 		// POSSIBILITE D'IMPLEMENTER UPLOAD
 		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
 		//write(fd, _req.getBody().c_str(), _req.getBody().length());
-		std::cout << "------------------------- BODY ---------------------------" << std::endl;
-		write(1, _req.getBody().c_str(), _req.getBody().length());
-		std::cout << "----------------------------------------------------------" << std::endl;
+		//std::cout << "------------------------- BODY ---------------------------" << std::endl;
+		//write(1, _req.getBody().c_str(), _req.getBody().length());
+		//std::cout << "----------------------------------------------------------" << std::endl;
 		//close(fd);
 		//_status = OK;
 		bridgeParsingRequest();
-		// RENVOYER LE BODY DEPUIS LA REPONSE, LE STATUS DU HEADER ET LE SEPARATEUR ET ENREGISTRER LES FICHIERS SSI le status != NOT_ALLOWED
 		if (_status == OK && _req.getMultipart() == 1)
-		{
-			std::cout << "NE PAS OUBLIER DE RECUPERER LA ROUTE DE DL DEPUIS LA CONFIG" << std::endl;
 			uploadFiles();
-		}
 		return WRITING;
 	}
 	return READING;

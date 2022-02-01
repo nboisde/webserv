@@ -183,7 +183,7 @@ const char *	Response::response( int status )
 	tmp << CRLF;
 	tmp << _body;
 	_response = tmp.str();
-	
+
 	const char * str = _response.c_str();
 	resetResponse();
 	return str;
