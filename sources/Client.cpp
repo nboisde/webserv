@@ -4,7 +4,7 @@ namespace ws
 {
 
 /*
-** ------------------------------- CONSTRUCTOR --------------------------------
+** ------------------------------- CONSTRUCTOR / DESTRUCTOR--------------------
 */ 
 Client::Client( void ) {}
 
@@ -16,15 +16,7 @@ Client::Client( int fd, struct sockaddr_in *cli_addr, config_type conf ) : _fd(f
 	_port += port.str();
 }
 
-Client::Client( Client const & src ) 
-{
-	*this = src;
-}
-
-/*
-** -------------------------------- DESTRUCTOR --------------------------------
-*/
-
+Client::Client( Client const & src ) { *this = src; }
 Client::~Client() {}
 
 /*
@@ -125,6 +117,7 @@ int Client::send( void )
 		len = BUFFER_SIZE;
 	prov = str.c_str();
 	ret = ::send(_fd, prov, len, 0);
+	std::cout << std::endl << std::endl << "[" << str.substr(0, len) << "]" << std::endl;
 	if (ret < 0)
 	{
 		perror(" send() failed");
@@ -132,7 +125,7 @@ int Client::send( void )
 	}
 	else if (ret < BUFFER_SIZE)
 		return CLOSING;
-	_res.getResponse() = _res.getResponse().substr(ret);
+	_res.setResponse(_res.getResponse().substr(ret));
 	return WRITING;
 }
 
@@ -148,7 +141,7 @@ void	Client::checkPath( std::string & url, Port & port )
 void	Client::checkExtension( std::string & url, Port & port )
 {
 	int	pos = url.find(".");
-	int	attachement = url.find("/files/");
+	int	attachement = url.find("/download/");
 
 	if (pos < 0 || attachement >= 0)
 	{
