@@ -117,7 +117,6 @@ int Client::send( void )
 		len = BUFFER_SIZE;
 	prov = str.c_str();
 	ret = ::send(_fd, prov, len, 0);
-	std::cout << std::endl << std::endl << "[" << str.substr(0, len) << "]" << std::endl;
 	if (ret < 0)
 	{
 		perror(" send() failed");
