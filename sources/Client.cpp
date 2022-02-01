@@ -39,13 +39,38 @@ Client &	Client::operator=( Client const & rhs )
 	return *this;
 }
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+// struct stat info;
+
+// if( stat( pathname, &info ) != 0 )
+//     printf( "cannot access %s\n", pathname );
+// else if( info.st_mode & S_IFDIR )  // S_ISDIR() doesn't exist on my windows 
+//     printf( "%s is a directory\n", pathname );
+// else
+//     printf( "%s is no directory\n", pathname );
+
+
+std::string Client::uploadPath( void )
+{
+	std::map<std::string, std::string> ml = _config["location"]._locations;
+	std::cout << FIRE << ml["upload"] << RESET << std::endl;
+	std::string s = "";
+	struct stat info;
+	if (stat( ml["upload"].c_str(), &info) != 0)
+		std::cout << RED << "directory dosn't exists" << RESET << std::endl;
+	else if (info.st_mode & S_IFDIR)
+		std::cout << GREEN << "directory exists" << RESET << std::endl;
+	else
+		std::cout << FIRE << "is not a directory" << RESET << std::endl;
+	return s;
+}
+
 int Client::uploadFiles( void )
 {
-	//int bound_len = _req.getBoundary().length();
 	std::string data = _req.getBody();
 	std::string file;
-	//int save = 1;
-	//int crlf = data.find("\r\n\r\n");
 	while (!data.empty())
 	{
 		int save = 1;
@@ -76,10 +101,14 @@ int Client::uploadFiles( void )
 		std::string f_content = tmp.substr(0, bd);
 		if (save == 1)
 		{
+			uploadPath();
 			if (!strIsPrintable(f_name))
 			{
 				int ex = f_name.find(".");
-				extension = f_name.substr(ex, f_name.length() - ex);
+				if (ex == -1)
+					extension = f_name.substr(ex, f_name.length() - ex);
+				else
+					extension = f_name;
 				f_name.clear();
 				f_name = "file";
 				f_name += extension;
