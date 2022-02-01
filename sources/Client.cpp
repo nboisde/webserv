@@ -57,6 +57,8 @@ std::string Client::uploadPath( void )
 	std::map<std::string, std::string> ml = _config["location"]._locations;
 	std::cout << FIRE << ml["upload"] << RESET << std::endl;
 	std::string s = "";
+	if (ml.find("upload") == ml.end())
+		return s;
 	struct stat info;
 	if (stat( ml["upload"].c_str(), &info) != 0)
 		std::cout << RED << "directory dosn't exists" << RESET << std::endl;
@@ -67,6 +69,7 @@ std::string Client::uploadPath( void )
 	return s;
 }
 
+// SI FORMULAIRE GERE PAR CGI, EDITER _HEAD...
 int Client::uploadFiles( void )
 {
 	std::string data = _req.getBody();
@@ -150,7 +153,7 @@ int Client::receive(void)
 		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
 		_status = _req.getStatus();
 		std::cout << "------------------- client _raw_content ---------------------" << std::endl;
-		//std::cout << _req.getRawContent() << std::endl;
+		std::cout << _req.getRawContent() << std::endl;
 		std::cout << "-------------------------------------------------------------" << std::endl;
 		return WRITING;
 	}
@@ -173,9 +176,9 @@ int Client::receive(void)
 		// POSSIBILITE D'IMPLEMENTER UPLOAD
 		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
 		//write(fd, _req.getBody().c_str(), _req.getBody().length());
-		//std::cout << "------------------------- BODY ---------------------------" << std::endl;
-		//write(1, _req.getBody().c_str(), _req.getBody().length());
-		//std::cout << "----------------------------------------------------------" << std::endl;
+		std::cout << "------------------------- BODY ---------------------------" << std::endl;
+		write(1, _req.getBody().c_str(), _req.getBody().length());
+		std::cout << "----------------------------------------------------------" << std::endl;
 		//close(fd);
 		//_status = OK;
 		bridgeParsingRequest();

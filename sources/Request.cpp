@@ -487,7 +487,8 @@ int Request::fillHeaderAndBody(void){
 		_header += _raw_content[i];
 		i++;
 	}
-	std::string body = _raw_content.substr(ret + crlf.length(), _raw_content.length() - i);
+	std::string body = _raw_content.substr(ret + crlf.length(), _raw_content.length() - ret);
+	//std::cout << body << std::endl;
 	int err = parseHeader();
 	if (err == ERROR)
 		return errorReturn(0);
@@ -509,27 +510,66 @@ void		Request::ChunkedBodyProcessing(std::string body)
 {
 	int i = 0;
 	int ret = body.find("0\r\n\r\n");
-	const char* str = body.c_str();
-	while (i < ret)
+	std::cout << ret << std::endl;
+	// std::cout << ret << std::endl;
+	// std::cout << RED << "Attention au SIGSEGV sur --data-binary @webserver" << RESET << std::endl;
+	// const char* str = body.data();
+	// while (i < ret)
+	// {
+	// 	std::string proceed_body = "";
+	// 	std::string hex = "";
+	// 	while (str[i] != '\r' && str[i + 1] != '\n')
+	// 	{
+	// 		hex += str[i];
+	// 		i++;
+	// 	}
+	// 	i+=2;
+	// 	int j = 0;
+	// 	int dec = std::strtol(hex.c_str(), 0, 16);
+	// 	while (j < dec)
+	// 	{
+	// 		proceed_body += str[i];
+	// 		i++;
+	// 		j++;
+	// 	}
+	// 	i+=2;
+	// 	_body += proceed_body;
+	// }
+	int k = 0;
+	if (ret == -1)
+	{
+		_body = "";
+		return ;
+	}
+	while (body[i] != '0' && i < ret)//i < ret)
 	{
 		std::string proceed_body = "";
 		std::string hex = "";
-		while (str[i] != '\r' && str[i + 1] != '\n')
+		while (body[i] != '\r' && body[i + 1] && body[i + 1] != '\n')
 		{
-			hex += str[i];
+			hex += body[i];
 			i++;
 		}
 		i+=2;
 		int j = 0;
 		int dec = std::strtol(hex.c_str(), 0, 16);
-		while (j < dec)
+		std::cout << "dec: " << dec << std::endl;
+		if (body[i] == '0')
+			break ;
+		if (dec == 0)
+			break ;
+		while (j < dec && i < ret)
 		{
-			proceed_body += str[i];
+			proceed_body += body[i];
 			i++;
 			j++;
 		}
 		i+=2;
+		std::cout << i << std::endl;
+		std::cout << "length: " << proceed_body.length() << std::endl;
 		_body += proceed_body;
+		std::cout << "loop iteration : " << k << std::endl;
+		k++;
 	}
 }
 
