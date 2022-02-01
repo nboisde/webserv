@@ -35,4 +35,24 @@ li a:hover {
 img {
 	max-width: 300px;
 	border-radius: 50%;
+  }
+
+.styled {
+    border: 0;
+    line-height: 2.5;
+    padding: 0 20px;
+    font-size: 1rem;
+    text-align: center;
+    color: #fff;
+    border-radius: 10px;
+    background-color: rgb(10, 137, 255);
+}
+
+.styled:hover {
+    background-color: darkcyan;
+}
+
+.styled:active {
+    box-shadow: inset -2px -2px 3px rgba(255, 255, 255, .6),
+                inset 2px 2px 3px rgba(0, 0, 0, .6);
 }

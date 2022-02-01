@@ -6,6 +6,7 @@ IFLAGS				= -I${INC_DIR}
 SRCS_DIR			= sources
 INC_DIR				= includes
 OBJS_DIR			= objects
+LOGS_DIR			= logs
 
 INC					= $(shell find ${INC_DIR} -type f -name "*.hpp")
 SRCS 				= $(notdir $(shell find ${SRCS_DIR} -type f -name "*.cpp"))
@@ -28,6 +29,7 @@ ${OBJS_DIR}/%.o:	%.cpp
 
 clean:
 					${RM} ${OBJS_DIR}
+					${RM} ${LOGS_DIR}/access.log
 
 fclean:				clean
 					${RM} ${NAME}

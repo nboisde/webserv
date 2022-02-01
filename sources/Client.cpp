@@ -4,7 +4,7 @@ namespace ws
 {
 
 /*
-** ------------------------------- CONSTRUCTOR --------------------------------
+** ------------------------------- CONSTRUCTOR / DESTRUCTOR--------------------
 */ 
 Client::Client( void ) {}
 
@@ -16,15 +16,7 @@ Client::Client( int fd, struct sockaddr_in *cli_addr, config_type conf ) : _fd(f
 	_port += port.str();
 }
 
-Client::Client( Client const & src ) 
-{
-	*this = src;
-}
-
-/*
-** -------------------------------- DESTRUCTOR --------------------------------
-*/
-
+Client::Client( Client const & src ) { *this = src; }
 Client::~Client() {}
 
 /*
@@ -78,11 +70,12 @@ int Client::receive(void)
 			_status = _req.getStatus();
 			return WRITING;
 		}
-		std::cout << BLUE;
-		std::cout << "========================= HEADER =========================" << std::endl;
-		std::cout << _req.getHeader();// << std::endl;
-		std::cout << "==========================================================" << std::endl;
-		std::cout << RESET;
+		// DISPLAY IN ACCESS LOG
+		//std::cout << BLUE;
+		//std::cout << "========================= HEADER =========================" << std::endl;
+		//std::cout << _req.getHeader();// << std::endl;
+		//std::cout << "==========================================================" << std::endl;
+		//std::cout << RESET;
 		// POSSIBILITE D'IMPLEMENTER UPLOAD
 		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
 		//write(fd, _req.getBody().c_str(), _req.getBody().length());
@@ -118,15 +111,21 @@ int Client::send( void )
 	int			ret;
 	const char* prov;
 	std::string str = _res.getResponse();
+	int			len = str.size();
 
+	if (len > BUFFER_SIZE)
+		len = BUFFER_SIZE;
 	prov = str.c_str();
-	ret = ::send(_fd, prov, str.size(), 0);
+	ret = ::send(_fd, prov, len, 0);
 	if (ret < 0)
 	{
 		perror(" send() failed");
 		return (ERROR);
 	}
-	return CLOSING;
+	else if (ret < BUFFER_SIZE)
+		return CLOSING;
+	_res.setResponse(_res.getResponse().substr(ret));
+	return WRITING;
 }
 
 void	Client::checkPath( std::string & url, Port & port )
@@ -141,8 +140,13 @@ void	Client::checkPath( std::string & url, Port & port )
 void	Client::checkExtension( std::string & url, Port & port )
 {
 	int	pos = url.find(".");
-	if (pos < 0)
+	int	attachement = url.find("/download/");
+
+	if (pos < 0 || attachement >= 0)
+	{
+		std::cout << "URL\t\t" << url << std::endl;
 		return ;
+	}
 	std::string	extension = url.substr(url.find("."));
 	std::cout << std::endl << "EXTENSION\t" << extension << std::endl;
 	std::map<std::string, Value> config = port.getConfig();
@@ -193,6 +197,7 @@ int	Client::checkURI( Port & port, std::string url)
 	if (buf)
 		free(buf);
 	_file_path = file_path.str();
+	std::cout << "PATH " << _file_path << std::endl;
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
 	{
@@ -207,6 +212,8 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 
+	std::cout << "STATUS " << _status << std::endl;
+	saveLogs();
 	if (_status != OK)
 		executeError(serv, port);
 	else
@@ -249,8 +256,8 @@ int	Client::executeHtml(Server const & serv, Port & port )
 	fclose(file);
 	_res.setBody(content);
 	_res.setContentType(_file_path);
+	_res.setContentDisposition(_file_path);
 	_res.response(_status);
-	//std::cout << _res.getResponse() << std::endl;
 	return SUCCESS;
 }
 
@@ -281,6 +288,16 @@ int	Client::executeError( Server const & serv, Port & port )
 		_res.response(_status);
 	}
 	return SUCCESS;
+}
+
+void	Client::saveLogs( void )
+{
+	std::ofstream		ofs("./logs/access.log", std::ios_base::app);
+	std::string			content;
+
+	ofs << "CLIENT " << _fd << std::endl;
+	ofs << _req.getHeader() << std::endl;
+	ofs.close();
 }
 
 void Client::closeConnection(){}

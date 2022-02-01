@@ -2,22 +2,13 @@
 
 namespace ws{
 /*
-** ------------------------------- CONSTRUCTOR --------------------------------
+** ------------------------------- CONSTRUCTOR / DESTRUCTOR ------------------------
 */
 
 Server::Server( void ) {}
 Server::Server( std::string ip) : _server_ip(ip) {}
 Server::Server( const Server & src ) { *this = src; }
-
-/*
-** -------------------------------- DESTRUCTOR --------------------------------
-*/
-
-Server::~Server( void )
-{
-	_ports.clear();
-}
-
+Server::~Server( void ) { _ports.clear(); }
 
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
@@ -98,9 +89,6 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
-					//std::cout << "FD = " << (*ct).getFd() << std::endl;
-					//std::cout << findFds((*ct).getFd()).revents << std::endl;
-					//std::cout << (findFds((*ct).getFd()).revents & POLLIN) << std::endl;
 					int ret = (*ct).receive();
 					if ( ret == WRITING)
 					{
@@ -116,11 +104,8 @@ void	Server::launchServer( void )
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
 				{
 					int ret = (*ct).send();
-					//(findFds((*ct).getFd())).events = POLLOUT;
 					if (ret == CLOSING)
 					{
-						// THIS SHOULD BE PERFORMED IF in header Connection: close.
-						//if keep-alive, maybe we don't close the file descriptor of the client.
 						if ((*ct).getReq().getConnection() == CLOSE)
 						{
 							std::cout << LIGHTBLUE << "Client " << findFds((*ct).getFd()).fd << " closed the connection." << RESET << std::endl;
@@ -140,11 +125,8 @@ void	Server::launchServer( void )
 					else
 						ct++;
 				}
-				else //GERER FLAG D'ERREURS DE POLL POUR EVITER BOUCLE INFINIE
-				{
+				else
 					ct++;
-				}
-				// findFds((*ct).getFd()).revents = 0;
 			}
 		}
 		if (_clean_fds)

@@ -23,10 +23,14 @@ namespace ws
 			std::string 		genBody( int error );
 
 			const char *		response( int status ); //CREER LA REPONSE A PARTIR DE ENTETE ET DONNES DE RETOUR
+			void				resetResponse( void );
+			
+			void				addToHeader( std::string line );
 			void				addContentLength( void );
 			void				addContentType( void );
+			void				addContentDisposition( void );
+
 			void				treatCGI( std::string cgi_output ); //DISSEQUE LA REPONSE DU CGI
-			void				resetResponse( void );
 
 			std::string			getResponse( void ) const;
 			std::string			getContentType( void ) const;
@@ -35,8 +39,8 @@ namespace ws
 			std::string			getBody( void ) const;
 			int					getStatus( void ) const;
 
-			void				addToHeader( std::string line );
 			void				setContentType( std::string file_path );
+			void				setContentDisposition( std::string file_path );
 			void				setResponse( std::string resp );
 			void				setStatusLine( std::string status_l );
 			void				setHeader( std::string header );
@@ -50,6 +54,7 @@ namespace ws
 			std::string		_header;
 			std::string		_body;
 			std::string		_content_type;
+			std::string		_content_disposition;
 			int				_status;
 	};
 }
