@@ -18,6 +18,7 @@ all:				init ${NAME}
 
 init:		
 					$(shell mkdir -p ${OBJS_DIR})
+					$(shell mkdir -p ${LOGS_DIR})
 
 ${NAME}:			${OBJS}
 					${CC} ${CFLAGS} ${IFLAGS} -o $@ $^
