@@ -197,6 +197,7 @@ void	Response::addContentLength( void ){
 	_header += length.str();
 }
 
+
 void	Response::addContentType( void )
 {
 	std::stringstream type;
