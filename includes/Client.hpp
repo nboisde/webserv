@@ -43,7 +43,7 @@ class Client
 		void			executeRedir( void );
 		void			executeHtml( void );
 		int				executeError( void );
-	
+		int				delete_ressource( void );
 		error_type		init_responseMap( void );
 		int				uploadAuthorized( void );
 		int				uploadFiles( void );
