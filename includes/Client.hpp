@@ -20,10 +20,11 @@ class Client
 
 	private:
 		void			saveLogs(void);
+		int				openFile( std::string path );
 		int				checkURI( Port & port, std::string url );
 		int				checkCGI( std::string & url );
-		void			checkPath( std::string & url, Port & port );
-		void			checkExtension( std::string & url, Port & port );
+		int				checkPath( char * cwd, std::string & root, std::string & url, Port & port );
+		int				checkExtension( char * cwd, std::string & root, std::string & url, Port & port );
 		int				executePhpPython( Server const & serv, Port & port, int extension_type );
 		int				executeHtml( Server const & serv, Port & port );
 		int				executeError( Server const & serv, Port & port );

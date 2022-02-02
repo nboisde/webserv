@@ -244,34 +244,64 @@ int Client::send( void )
 	return WRITING;
 }
 
-void	Client::checkPath( std::string & url, Port & port )
+int	Client::checkPath( char * cwd, std::string & root, std::string & url, Port & port )
 {
 	std::map<std::string, Value>	config = port.getConfig();
 	Value							location = config["location"];
-	std::string	path =				location._locations[url];
-
-	if (path.size())
-		url = path + url;
-}
-void	Client::checkExtension( std::string & url, Port & port )
-{
-	int	pos = url.find(".");
-	int	attachement = url.find("/download/");
-
-	if (pos < 0 || attachement >= 0)
+	std::string						path = location._locations[url];
+	std::stringstream				file_path;
+	
+	std::cout << "URL 4\t" << url << std::endl;
+	file_path << cwd << root << url;
+	if (openFile(file_path.str()) > 0)
 	{
-		std::cout << "URL\t\t" << url << std::endl;
-		return ;
+		_file_path = file_path.str();
+		if (cwd)
+			free(cwd);
+		return (SUCCESS);
 	}
-	std::string	extension = url.substr(url.find("."));
-	std::cout << std::endl << "EXTENSION\t" << extension << std::endl;
-	std::map<std::string, Value> config = port.getConfig();
-	Value location = config["location"];
-	std::string	path = location._locations[extension];
-	std::cout << "PATH\t\t" << path << std::endl;
 	if (path.size())
+	{
+		file_path.str("");
 		url = path + url;
-	std::cout << "URL\t\t" << url << std::endl;
+		file_path << cwd << root << url;
+		if (openFile(file_path.str()) > 0)
+		{
+			_file_path = file_path.str();
+			if (cwd)
+				free(cwd);
+			return (SUCCESS);
+		}
+	}
+	return (ERROR);
+}
+
+int	Client::checkExtension( char * cwd, std::string & root, std::string & url, Port & port )
+{
+	int								pos = url.find(".");
+	int								attachement = url.find("/download/");
+	std::map<std::string, Value>	config = port.getConfig();
+	std::stringstream				file_path;
+
+	if (pos > 0 && attachement < 0)
+	{
+		Value		location = config["location"];
+		std::string	extension = url.substr(pos);
+		std::string	path = location._locations[extension];
+		if (path.size())
+			url = path + url;
+	}
+	file_path << cwd << root << url;
+	if (openFile(file_path.str()) > 0)
+	{
+		_file_path = file_path.str();
+		if (cwd)
+			free(cwd);
+		return (SUCCESS);
+	}
+	if (cwd)
+		free(cwd);
+	return (ERROR);
 }
 
 int	Client::checkCGI( std::string & url )
@@ -295,33 +325,32 @@ int	Client::checkCGI( std::string & url )
 		return (R_HTML);
 }
 
+int	Client::openFile( std::string path )
+{
+	int fd = ::open(path.c_str(), O_RDONLY);
+	if (fd < 0)
+		return ERROR;
+	close(fd);
+	return SUCCESS;
+}
+
 int	Client::checkURI( Port & port, std::string url)
 {
 	int					ret;
-	char				*buf = NULL;
+	char				*cwd = NULL;
 	std::string			root;
-	std::stringstream	file_path;
 
 	if (url == "/")
 		url = port.getConfig()["index"]._value;
 	root = port.getConfig()["root"]._value;
-	buf = getcwd(buf, 0);
+	cwd = getcwd(cwd, 0);
 	ret = checkCGI(url);
-	checkPath(url, port);
-	checkExtension(url, port);
-	file_path << buf << root << url;
-	if (buf)
-		free(buf);
-	_file_path = file_path.str();
-	std::cout << "PATH " << _file_path << std::endl;
-	int fd = ::open(_file_path.c_str(), O_RDONLY);
-	if (fd < 0)
-	{
-		_status = NOT_FOUND;
-		return R_ERR;
-	}
-	close(fd);
-	return (ret);
+	if (checkPath(cwd, root, url, port) > 0)
+		return (ret);
+	if (checkExtension(cwd, root, url, port) > 0)
+		return (ret);
+	_status = NOT_FOUND;
+	return (R_ERR);
 }
 
 int	Client::execution( Server const & serv, Port & port )

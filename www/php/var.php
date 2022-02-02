@@ -1,6 +1,8 @@
 <head>
-	<link rel="shortcut icon" type="image/x-icon" href="https://favicon-generator.org/favicon-generator/htdocs/favicons/2014-12-18/32e6e83989d480f4bed129837dec3f6c.ico" />
-</head>
+        <link rel="shortcut icon" type="image/x-icon" href="/imgs/fire.ico" />
+        <title>Var</title>
+	    <link rel="stylesheet" href="/css/style.css">
+    </head>
 
 <?php
     while (list($var,$value) = each ($_SERVER)) {
