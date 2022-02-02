@@ -134,7 +134,7 @@ void Request::findMethod(void)
 	}
 	else if (d != -1)
 	{
-		_head["method"] = "UPDATE";
+		_head["method"] = "DELETE";
 		_method_type = DELETE;
 	}
 	else
