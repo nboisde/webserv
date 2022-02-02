@@ -56,6 +56,7 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	_conversion.insert(pair("SERVER_PORT", server_port.str()));
 	
 	std::string url = _header["url"];
+	std::cout << RED << "LE HEADER ICI :" <<_header["url"] << RESET << std::endl;
 	std::string root = cli.getFilePath().substr(0, cli.getFilePath().find(url));
 	_conversion.insert(pair("DOCUMENT_ROOT", root));
 	_conversion.insert(pair("DOCUMENT_URI", url.substr(0, url.find(_extension) + _extension.size())));
@@ -195,7 +196,9 @@ int		CGI::execute( Client & cli ){
 	
 	if (pid == 0)
 	{
-		if (_header["method"] == "POST")
+		for (int i = 0; _env[i]; i++)
+			std::cout << FIRE << _env[i] << RESET << std::endl;
+		if (_header["Method"] == "POST")
 		{
 			std::string body = cli.getReq().getBody();
 			char buf[BUFFER_SIZE];
@@ -214,6 +217,7 @@ int		CGI::execute( Client & cli ){
 			dup2(fd2[0], STDIN);
 			close(fd2[0]);
 		}
+		std::cout << "\n\nAVANT\n" << std::endl;
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);
@@ -221,6 +225,7 @@ int		CGI::execute( Client & cli ){
 		exit(SUCCESS);
 	}
 	waitpid(pid, &child_stat, 0);
+	std::cout << "\n\nAPRES\n" << std::endl;
 	close(fd[1]);
 	std::string response = concatenateResponse(fd[0]);
 	cli.getRes().treatCGI(response);
