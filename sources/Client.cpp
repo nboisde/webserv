@@ -252,6 +252,7 @@ int	Client::checkPath( char * cwd, std::string & root, std::string & url, Port &
 	std::stringstream				file_path;
 	
 	file_path << cwd << root << url;
+	std::cout << "PATH IN PATH BEGIN " << file_path.str() << std::endl;
 	if (openFile(file_path.str()) > 0)
 	{
 		_file_path = file_path.str();
@@ -272,6 +273,7 @@ int	Client::checkPath( char * cwd, std::string & root, std::string & url, Port &
 			return (SUCCESS);
 		}
 	}
+	std::cout << "PATH IN PATH END " << file_path.str() << std::endl;
 	return (ERROR);
 }
 
@@ -291,6 +293,7 @@ int	Client::checkExtension( char * cwd, std::string & root, std::string & url, P
 			url = path + url;
 	}
 	file_path << cwd << root << url;
+	std::cout << "PATH IN EXTENSION " << file_path.str() << std::endl;
 	if (openFile(file_path.str()) > 0)
 	{
 		_file_path = file_path.str();
@@ -344,9 +347,11 @@ int	Client::checkURI( Port & port, std::string url)
 	root = port.getConfig()["root"]._value;
 	cwd = getcwd(cwd, 0);
 	ret = checkCGI(url);
-	if (checkPath(cwd, root, url, port))
+	std::cout << "PATH IN URI" << _file_path << std::endl;
+	if (checkPath(cwd, root, url, port) > 0)
 		return (ret);
-	if (checkExtension(cwd, root, url, port))
+	std::cout << "PATH IN URI" << _file_path << std::endl;
+	if (checkExtension(cwd, root, url, port) > 0)
 		return (ret);
 	_status = NOT_FOUND;
 	return (R_ERR);
