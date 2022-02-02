@@ -295,6 +295,15 @@ int	Client::checkCGI( std::string & url )
 		return (R_HTML);
 }
 
+int	Client::openFile( std::string path )
+{
+	int fd = ::open(path.c_str(), O_RDONLY);
+	if (fd < 0)
+		return ERROR;
+	close(fd);
+	return SUCCESS;
+}
+
 int	Client::checkURI( Port & port, std::string url)
 {
 	int					ret;
@@ -314,13 +323,11 @@ int	Client::checkURI( Port & port, std::string url)
 		free(buf);
 	_file_path = file_path.str();
 	std::cout << "PATH " << _file_path << std::endl;
-	int fd = ::open(_file_path.c_str(), O_RDONLY);
-	if (fd < 0)
+	if (openFile(_file_path) < 0)
 	{
 		_status = NOT_FOUND;
 		return R_ERR;
 	}
-	close(fd);
 	return (ret);
 }
 

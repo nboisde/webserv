@@ -20,6 +20,7 @@ class Client
 
 	private:
 		void			saveLogs(void);
+		int				openFile( std::string path );
 		int				checkURI( Port & port, std::string url );
 		int				checkCGI( std::string & url );
 		void			checkPath( std::string & url, Port & port );
