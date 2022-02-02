@@ -283,9 +283,6 @@ int	Client::checkExtension( char * cwd, std::string & root, std::string & url, P
 	std::map<std::string, Value>	config = port.getConfig();
 	std::stringstream				file_path;
 
-	std::cout << "URL 6\t" << url << std::endl;
-	std::cout << "POS \t" << pos << std::endl;
-	std::cout << "ATTACHEMENT \t" << attachement << std::endl;
 	if (pos > 0 && attachement < 0)
 	{
 		Value		location = config["location"];
@@ -294,7 +291,6 @@ int	Client::checkExtension( char * cwd, std::string & root, std::string & url, P
 		if (path.size())
 			url = path + url;
 	}
-	std::cout << "URL 7\t" << url << std::endl;
 	file_path << cwd << root << url;
 	if (openFile(file_path.str()) > 0)
 	{
@@ -344,17 +340,13 @@ int	Client::checkURI( Port & port, std::string url)
 	char				*cwd = NULL;
 	std::string			root;
 
-	std::cout << "URL 1\t" << url << std::endl;
 	if (url == "/")
 		url = port.getConfig()["index"]._value;
-	std::cout << "URL 2\t" << url << std::endl;
 	root = port.getConfig()["root"]._value;
 	cwd = getcwd(cwd, 0);
 	ret = checkCGI(url);
-	std::cout << "URL 3\t" << url << std::endl;
 	if (checkPath(cwd, root, url, port) > 0)
 		return (ret);
-	std::cout << "URL 5\t" << url << std::endl;
 	if (checkExtension(cwd, root, url, port) > 0)
 		return (ret);
 	_status = NOT_FOUND;
@@ -366,14 +358,11 @@ int	Client::execution( Server const & serv, Port & port )
 	int	res_type = ERROR;
 
 	saveLogs();
-	std::cout << "URL\t" << _req.getHead()["url"] << std::endl;
-	std::cout << "STATUS\t" << _status << std::endl;
 	if (_status != OK)
 		executeError(serv, port);
 	else
 	{
 		res_type = checkURI(port, _req.getHead()["url"]);
-		std::cout << "PATH\t" << _file_path << std::endl;
 		if (res_type == R_PHP || res_type == R_PY)
 			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)
@@ -427,7 +416,6 @@ int	Client::executeError( Server const & serv, Port & port )
 
 	if (error_file_path.size())
 	{
-		std::cout << "REDIRECTON" << std::endl;
 		checkURI(port, error_file_path);
 		_status = 301;
 		_res.resetResponse();
