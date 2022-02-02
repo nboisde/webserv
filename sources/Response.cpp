@@ -185,6 +185,8 @@ const char *	Response::response( int status )
 	_response = tmp.str();
 
 	const char * str = _response.c_str();
+
+	std::cout << "RESPONSE " << str << std::endl;
 	resetResponse();
 	return str;
 }
