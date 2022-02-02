@@ -202,6 +202,8 @@ void	Response::addContentLength( void ){
 
 void	Response::addContentType( void )
 {
+	if (_content_type.empty())
+		return ;
 	std::stringstream type;
 	
 	type << "Content-Type: " << _content_type;
@@ -211,6 +213,8 @@ void	Response::addContentType( void )
 
 void	Response::addContentDisposition( void )
 {
+	if (_content_disposition.empty())
+		return;
 	std::stringstream type;
 	
 	type << "Content-Disposition: " << _content_disposition;
