@@ -317,7 +317,8 @@ void	Parser::initParser(void)
 	_default_keys["client_max_body_size"] = Value("100000000");
 	_default_keys["error_page"] = Value("");
 	_default_keys["autoindex"] = Value("off");
-	_default_keys["method"] = Value("GET|POST|DELETE");
+	_default_keys["method"] = Value("GET");
+	_default_keys["method"]._methods.push_back("GET");
 	_default_keys["root"] = Value("/www");
 	_default_keys["index"] = Value("index.html");
 	_default_keys["location"] = Value(""); 
