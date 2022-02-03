@@ -55,18 +55,26 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	server_port << ntohs(port.getPortAddr().sin_port);
 	_conversion.insert(pair("SERVER_PORT", server_port.str()));
 	
-	std::string url = _header["url"];
-	std::cout << RED << "LE HEADER ICI :" <<_header["url"] << RESET << std::endl;
-	std::string root = cli.getFilePath().substr(0, cli.getFilePath().find(url));
+
+	char *buf = NULL;
+	buf = getcwd(buf, 0);
+	std::string root(buf);
+	root += port.getConfig()["root"]._value;
+	free(buf);
+
+	std::string uri_query = _header["url"];
+	std::string url = cli.getFilePath();
+	size_t		pos = url.find(root) + root.size();
+
 	_conversion.insert(pair("DOCUMENT_ROOT", root));
-	_conversion.insert(pair("DOCUMENT_URI", url.substr(0, url.find(_extension) + _extension.size())));
-	_conversion.insert(pair("SCRIPT_NAME", url.substr(0, url.find(_extension) + _extension.size())));
-	_conversion.insert(pair("PHP_SELF", url.substr(0, url.find(_extension) + _extension.size())));	
-	_conversion.insert(pair("REQUEST_URI", url));
+	_conversion.insert(pair("DOCUMENT_URI", url.substr(pos, url.find(_extension) + _extension.size() - pos)));
+	_conversion.insert(pair("SCRIPT_NAME", url.substr(pos, url.find(_extension) + _extension.size() - pos)));
+	_conversion.insert(pair("PHP_SELF", url.substr(pos, url.find(_extension) + _extension.size() - pos)));	
+	_conversion.insert(pair("REQUEST_URI", uri_query));
 	
 	std::string query;
-	if (url.find(".php?") != std::string::npos)
-		query = url.substr(url.find(".php?") + 5);
+	if (uri_query.find(".php?") != std::string::npos)
+		query = uri_query.substr(uri_query.find(".php?") + 5);
 	_conversion.insert(pair("QUERY_STRING", query));
 
 	_conversion.insert(pair("SCRIPT_FILENAME", cli.getFilePath()));
@@ -182,6 +190,7 @@ int		CGI::generate_arg( Client const & cli ){
 	_arg = new char*[3];
 	_arg[0] = strdup(_bin_location.c_str());
 	_arg[1] = strdup(file_path.c_str());
+	std::cout << GREEN << _arg[1] << RESET << std::endl;
 	_arg[2] = NULL;
 	return SUCCESS;
 }
@@ -198,7 +207,7 @@ int		CGI::execute( Client & cli ){
 	{
 		for (int i = 0; _env[i]; i++)
 			std::cout << FIRE << _env[i] << RESET << std::endl;
-		if (_header["Method"] == "POST")
+		if (_header["method"] == "POST")
 		{
 			std::string body = cli.getReq().getBody();
 			char buf[BUFFER_SIZE];
