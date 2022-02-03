@@ -376,9 +376,12 @@ int	Client::executeHtml(Server const & serv, Port & port )
 	while ((ret = getline(&line, &n, file)) != -1)
 	{
 		content.append(line, ret);
-		free(line);
+		if (line)
+			free(line);
 		line = NULL;
 	}
+	if (line)
+		free(line);
 	fclose(file);
 	_res.setBody(content);
 	_res.setContentType(_file_path);
