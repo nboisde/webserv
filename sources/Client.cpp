@@ -426,9 +426,11 @@ int	Client::executeError( Server const & serv, Port & port )
 	}
 	else
 	{
+		std::cout << "STATUS " << _status << std::endl;
 		std::string body = _res.genBody(_status);
 		_res.setBody(body);
-		_res.setContentType(_file_path);
+		std::cout << "PATH " << _file_path << std::endl;
+		_res.setContentType("");
 		_res.response(_status);
 	}
 	return SUCCESS;

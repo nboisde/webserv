@@ -111,7 +111,7 @@ std::string 	Response::genBody( int error )
 {
 	std::stringstream body;
 
-	body << "<!DOCTYPE html>\n<html>\n<head>\n<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"http:/fire.ico\"/>\n";
+	body << "<!DOCTYPE html>\n<html>\n<head>\n<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"http:/imgs/fire.ico\"/>\n";
 	body << "<title>" << error << " " << _status_code[error] << "</title>\n";
 	body << "</head>\n<body>\n";
 	body << "<h1>" << error << " " << _status_code[error] << "</h1>\n";
