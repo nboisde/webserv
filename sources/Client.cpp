@@ -251,15 +251,15 @@ int	Client::checkPath( char * cwd, std::string & root, std::string & url, Port &
 	std::string						path = location._locations[url];
 	std::stringstream				file_path;
 	
-	std::cout << "URL 4\t" << url << std::endl;
-	file_path << cwd << root << url;
 	if (openFile(file_path.str()) > 0)
 	{
+		std::cout << "URL 5\t" << file_path.str() << std::endl;
 		_file_path = file_path.str();
 		if (cwd)
 			free(cwd);
 		return (SUCCESS);
 	}
+	std::cout << "URL 4\t" << file_path.str() << std::endl;
 	if (path.size())
 	{
 		file_path.str("");
@@ -331,6 +331,13 @@ int	Client::openFile( std::string path )
 	if (fd < 0)
 		return ERROR;
 	close(fd);
+	fd = ::open(path.c_str(), O_DIRECTORY);
+	if 
+	(fd > 0)
+	{
+		close(fd);
+		return (ERROR);
+	}
 	return SUCCESS;
 }
 
