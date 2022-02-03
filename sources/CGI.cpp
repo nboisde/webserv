@@ -190,7 +190,6 @@ int		CGI::generate_arg( Client const & cli ){
 	_arg = new char*[3];
 	_arg[0] = strdup(_bin_location.c_str());
 	_arg[1] = strdup(file_path.c_str());
-	std::cout << GREEN << _arg[1] << RESET << std::endl;
 	_arg[2] = NULL;
 	return SUCCESS;
 }
@@ -205,8 +204,8 @@ int		CGI::execute( Client & cli ){
 	
 	if (pid == 0)
 	{
-		for (int i = 0; _env[i]; i++)
-			std::cout << FIRE << _env[i] << RESET << std::endl;
+		//for (int i = 0; _env[i]; i++)
+		//	std::cout << FIRE << _env[i] << RESET << std::endl;
 		if (_header["method"] == "POST")
 		{
 			std::string body = cli.getReq().getBody();
@@ -226,7 +225,7 @@ int		CGI::execute( Client & cli ){
 			dup2(fd2[0], STDIN);
 			close(fd2[0]);
 		}
-		std::cout << "\n\nAVANT\n" << std::endl;
+		//std::cout << "\n\nAVANT\n" << std::endl;
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);
@@ -234,7 +233,7 @@ int		CGI::execute( Client & cli ){
 		exit(SUCCESS);
 	}
 	waitpid(pid, &child_stat, 0);
-	std::cout << "\n\nAPRES\n" << std::endl;
+	//std::cout << "\n\nAPRES\n" << std::endl;
 	close(fd[1]);
 	std::string response = concatenateResponse(fd[0]);
 	cli.getRes().treatCGI(response);
