@@ -253,13 +253,11 @@ int	Client::checkPath( char * cwd, std::string & root, std::string & url, Port &
 	
 	if (openFile(file_path.str()) > 0)
 	{
-		std::cout << "URL 5\t" << file_path.str() << std::endl;
 		_file_path = file_path.str();
 		if (cwd)
 			free(cwd);
 		return (SUCCESS);
 	}
-	std::cout << "URL 4\t" << file_path.str() << std::endl;
 	if (path.size())
 	{
 		file_path.str("");
@@ -433,10 +431,8 @@ int	Client::executeError( Server const & serv, Port & port )
 	}
 	else
 	{
-		std::cout << "STATUS " << _status << std::endl;
 		std::string body = _res.genBody(_status);
 		_res.setBody(body);
-		std::cout << "PATH " << _file_path << std::endl;
 		_res.setContentType("");
 		_res.response(_status);
 	}
