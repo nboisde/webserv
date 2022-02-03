@@ -42,16 +42,6 @@ Client &	Client::operator=( Client const & rhs )
 #include <sys/types.h>
 #include <sys/stat.h>
 
-// struct stat info;
-
-// if( stat( pathname, &info ) != 0 )
-//     printf( "cannot access %s\n", pathname );
-// else if( info.st_mode & S_IFDIR )  // S_ISDIR() doesn't exist on my windows 
-//     printf( "%s is a directory\n", pathname );
-// else
-//     printf( "%s is no directory\n", pathname );
-
-
 std::string Client::uploadPath( void )
 {
 	std::map<std::string, std::string> ml = _config["location"]._locations;
@@ -182,20 +172,6 @@ int Client::receive(void)
 			_status = _req.getStatus();
 			return WRITING;
 		}
-		// DISPLAY IN ACCESS LOG
-		// std::cout << BLUE;
-		// std::cout << "========================= HEADER =========================" << std::endl;
-		// std::cout << _req.getHeader();// << std::endl;
-		// std::cout << "==========================================================" << std::endl;
-		// std::cout << RESET;
-		// POSSIBILITE D'IMPLEMENTER UPLOAD
-		//int fd = open("w.pdf", O_WRONLY | O_CREAT);
-		//write(fd, _req.getBody().c_str(), _req.getBody().length());
-		//std::cout << "------------------------- BODY ---------------------------" << std::endl;
-		//write(1, _req.getBody().c_str(), _req.getBody().length());
-		//std::cout << "----------------------------------------------------------" << std::endl;
-		//close(fd);
-		//_status = OK;
 		bridgeParsingRequest();
 		if (_status == OK && _req.getMultipart() == 1)
 			uploadFiles();
@@ -251,6 +227,7 @@ int	Client::checkPath( char * cwd, std::string & root, std::string & url, Port &
 	std::string						path = location._locations[url];
 	std::stringstream				file_path;
 	
+	file_path << cwd << root << url;
 	if (openFile(file_path.str()) > 0)
 	{
 		_file_path = file_path.str();
@@ -413,6 +390,7 @@ int	Client::executeHtml(Server const & serv, Port & port )
 int	Client::executeError( Server const & serv, Port & port )
 {
 	std::cout << "ERROR EXECUTION" << std::endl;
+	std::cout << "STATUS " << _status << std::endl;
 	(void)serv;
 	std::map<std::string, Value>	config = port.getConfig();
 	Value							error = config["error_page"];
