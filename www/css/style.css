@@ -1,6 +1,18 @@
+/*-- HEADER --*/
+
+header {
+	width: 100%;
+	background-color: chartreuse;
+}
+
+/*-- BODY --*/
+
+
+/*-- FOOTER --*/
+
 body {
 	background-color: black;
-	color: rgb(10, 137, 255);
+	color: rgb(112, 231, 206);
 	text-align: center;
 }
 
