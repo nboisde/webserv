@@ -262,6 +262,7 @@ int	Parser::checkErrorPage(std::string raw_value, Value & new_value)
 }
 int	Parser::checkRoot(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkIndex(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
+int	Parser::checkUpload(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
 	int			pos = 0;
@@ -311,6 +312,7 @@ void	Parser::initParser(void)
 	_key_checker["root"] = &Parser::checkRoot;
 	_key_checker["index"] = &Parser::checkIndex;
 	_key_checker["location"] = &Parser::checkLocation;
+	_key_checker["upload"] = &Parser::checkUpload;
 	_default_keys["listen"] = Value("8080");
 	_default_keys["host"] = Value("Webserv.com");
 	_default_keys["server_name"] = Value("webserv");
@@ -320,9 +322,15 @@ void	Parser::initParser(void)
 	_default_keys["method"] = Value("GET");
 	_default_keys["method"]._methods.push_back("GET");
 	_default_keys["root"] = Value("/www");
+<<<<<<< HEAD
 	_default_keys["index"] = Value("/php/index.php");
 	_default_keys["location"] = Value("upload www/uploads/");
 	_default_keys["location"]._locations["upload"] = "www/uploads/";
+=======
+	_default_keys["index"] = Value("/html/index.html");
+	_default_keys["location"] = Value("");
+	_default_keys["upload"] = Value("/uploads");
+>>>>>>> a2fd8ca (Change Default upload location path)
 }
 
 Server	Parser::getServer( void ) { return _server; }
