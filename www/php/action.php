@@ -11,7 +11,7 @@
 <body>
 	<img src="/imgs/cute.png">
 	<form action="action.php" method="post">
-		Hello and welcome <?php echo htmlspecialchars($_POST['firstname']); ?> <?php echo htmlspecialchars($_POST['lastname']); ?>
+		Hello and welcome <?php echo htmlspecialchars($_POST['nom']); ?> <?php echo htmlspecialchars($_POST['lastname']); ?>
 		AKA <?php echo htmlspecialchars($_POST['login']); ?>
 		<p><input type="submit" value="OK"></p>
 	</form>
