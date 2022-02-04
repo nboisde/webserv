@@ -44,6 +44,7 @@ class Parser
 		int					checkRoot(std::string, Value &);
 		int					checkIndex(std::string, Value &);
 		int					checkLocation(std::string, Value &);
+		int					checkUpload(std::string, Value &);
 
 	public:
 		
