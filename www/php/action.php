@@ -8,5 +8,11 @@
 		<li><a href="/html/index.html">Home</a></li>
 	</ul>
 </head>
-Bonjour et bienvenue, <?php echo htmlspecialchars($_POST['nom']); ?>.
-Tu as <?php echo (int)$_POST['age']; ?> ans.
+<body>
+	<img src="/imgs/cute.png">
+	<form action="action.php" method="post">
+		Hello and welcome <?php echo htmlspecialchars($_POST['firstname']); ?> <?php echo htmlspecialchars($_POST['lastname']); ?>
+		AKA <?php echo htmlspecialchars($_POST['login']); ?>
+		<p><input type="submit" value="OK"></p>
+	</form>
+</body>
