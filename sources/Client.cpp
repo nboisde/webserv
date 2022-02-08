@@ -46,6 +46,8 @@ std::string Client::uploadPath( void )
 {
 	std::map<std::string, std::string> ml = _config["location"]._locations;
 	std::string s = "";
+	
+	return (ml["upload"]);
 	if (ml.find("upload") == ml.end())
 		return s;
 	struct stat info;

@@ -312,7 +312,6 @@ void	Parser::initParser(void)
 	_key_checker["root"] = &Parser::checkRoot;
 	_key_checker["index"] = &Parser::checkIndex;
 	_key_checker["location"] = &Parser::checkLocation;
-	_key_checker["upload"] = &Parser::checkUpload;
 	_default_keys["listen"] = Value("8080");
 	_default_keys["host"] = Value("Webserv.com");
 	_default_keys["server_name"] = Value("webserv");
