@@ -134,6 +134,15 @@ int Client::uploadFiles( void )
 			if (ret == -1)
 				std::cout << "Writing problem" << std::endl;
 			close(fd);
+			std::cout << GREEN << "file saved ..." << RESET << std::endl;
+			// if (path.length() != 0)
+			// 	path += f_name;
+			// std::fstream fs;
+			// fs.open(f_name.c_str(), std::fstream::out);
+			// fs << f_content;
+			// std::cout << GREEN << "file saved ..." << RESET << std::endl;
+			// fs.close();
+			// chmod(f_name.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		}
 		int forward = tmp.find(_req.getBoundary()) + _req.getBoundary().length();
 		while (tmp[forward] && (tmp[forward] == '-' || tmp[forward] == '\r' || tmp[forward] == '\n'))
@@ -158,13 +167,14 @@ int Client::receive(void)
 	}
 	std::string tmp(buffer, ret);
 	int req = _req.concatenateRequest(tmp);
-	if (req == -1)
+	//std::cout << _req.getRawContent() << std::endl;
+	if (req == -1 && _req.findContinue() == 0)
 	{
 		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
 		_status = _req.getStatus();
 		return WRITING;
 	}
-	if (req == SUCCESS)
+	if (req == SUCCESS && _req.getContinue() == 0)
 	{
 		int head_err = _req.fillHeaderAndBody();
 		if (head_err == ERROR)

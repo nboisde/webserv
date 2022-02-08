@@ -30,7 +30,10 @@ class Request
 		void			manageConnection( std::string str );
 		void			resetValues(void);
 		int				multipartForm( void );
-		
+		int				findContinue( void );
+		int				multipartFormRaw( void );
+
+
 		// GETTERS
 		std::string		getRawContent(void) const;
 		int				getMethodType(void) const;
@@ -47,13 +50,17 @@ class Request
 		int				getStatus( void ) const;
 		int				getMultipart( void ) const;
 		std::string		getBoundary( void ) const;
+		int				getContinue( void ) const;
+
+		void			setContinue( int cont );
 
 	private:
 		int			findProtocol(std::string buf);
 		int			errorHandling(std::vector<std::string> v, int i);
 		int 		errorReturn( int opt );
 		int			bodyReceived(void);
-
+		int			findMultiEnd( void );
+		int			findBodyEnd( void );
 
 		int							_line;
 		int							_cursor;
@@ -73,6 +80,7 @@ class Request
 		int							_status;
 		int							_multipart;
 		std::string					_boundary;
+		int							_continue;
 };
 
 }
