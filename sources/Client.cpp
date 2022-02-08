@@ -222,38 +222,34 @@ int Client::send( void )
 	return WRITING;
 }
 
-int	Client::checkPath( char * cwd, std::string & root, std::string & url, Port & port )
+int	Client::checkPath( std::string & root, std::string & url, Port & port )
 {
 	std::map<std::string, Value>	config = port.getConfig();
 	Value							location = config["location"];
 	std::string						path = location._locations[url];
 	std::stringstream				file_path;
 	
-	file_path << cwd << root << url;
+	file_path << root << url;
 	if (openFile(file_path.str()) > 0)
 	{
 		_file_path = file_path.str();
-		if (cwd)
-			free(cwd);
 		return (SUCCESS);
 	}
 	if (path.size())
 	{
 		file_path.str("");
 		url = path + url;
-		file_path << cwd << root << url;
+		file_path << root << url;
 		if (openFile(file_path.str()) > 0)
 		{
 			_file_path = file_path.str();
-			if (cwd)
-				free(cwd);
 			return (SUCCESS);
 		}
 	}
 	return (ERROR);
 }
 
-int	Client::checkExtension( char * cwd, std::string & root, std::string & url, Port & port )
+int	Client::checkExtension( std::string & root, std::string & url, Port & port )
 {
 	int								pos = url.find(".");
 	int								attachement = url.find("/download/");
@@ -268,16 +264,12 @@ int	Client::checkExtension( char * cwd, std::string & root, std::string & url, P
 		if (path.size())
 			url = path + url;
 	}
-	file_path << cwd << root << url;
+	file_path << root << url;
 	if (openFile(file_path.str()) > 0)
 	{
 		_file_path = file_path.str();
-		if (cwd)
-			free(cwd);
 		return (SUCCESS);
 	}
-	if (cwd)
-		free(cwd);
 	return (ERROR);
 }
 
@@ -321,17 +313,15 @@ int	Client::openFile( std::string path )
 int	Client::checkURI( Port & port, std::string url)
 {
 	int					ret;
-	char				*cwd = NULL;
 	std::string			root;
 
 	if (url == "/")
 		url = port.getConfig()["index"]._value;
 	root = port.getConfig()["root"]._value;
-	cwd = getcwd(cwd, 0);
 	ret = checkCGI(url);
-	if (checkPath(cwd, root, url, port) > 0)
+	if (checkPath(root, url, port) > 0)
 		return (ret);
-	if (checkExtension(cwd, root, url, port) > 0)
+	if (checkExtension(root, url, port) > 0)
 		return (ret);
 	_status = NOT_FOUND;
 	return (R_ERR);
@@ -392,11 +382,8 @@ int	Client::executeHtml(Server const & serv, Port & port )
 	return SUCCESS;
 }
 
-int	Client::executeError( Server const & serv, Port & port )
+int	Client::executeError( Port & port )
 {
-	std::cout << "ERROR EXECUTION" << std::endl;
-	std::cout << "STATUS " << _status << std::endl;
-	(void)serv;
 	std::map<std::string, Value>	config = port.getConfig();
 	Value							error = config["error_page"];
 	std::string						error_file_path = error._errors[_status];
