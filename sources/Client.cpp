@@ -174,9 +174,12 @@ int Client::receive(void)
 		_status = _req.getStatus();
 		return WRITING;
 	}
-	if (req == SUCCESS && _req.getContinue() == 0)
+	if (req == SUCCESS)// && _req.getContinue() == 0)
 	{
 		int head_err = _req.fillHeaderAndBody();
+		//std::cout << BLUE << _req.getHeader() << RESET << std::endl;
+		//std::cout << _req.getBody() << std::endl;
+		_req.setContinue(0);
 		if (head_err == ERROR)
 		{
 			std::cout << RED << "400 bad request (Header reception 2)" << RESET << std::endl;

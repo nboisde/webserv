@@ -237,8 +237,8 @@ int Request::findBodyEnd( void )
 	else if (_continue == 1)
 	{
 		size_t i = _raw_content.find("0\r\n\r\n");
-		size_t j = _raw_content.find("\r\n\r\n");
-		if (i == static_cast<size_t>(-1) || j == static_cast<size_t>(-1) || static_cast<size_t>(_content_length) > _raw_content.substr(j + 4).length())
+		//size_t j = _raw_content.find("\r\n\r\n");
+		if (i == static_cast<size_t>(-1))// || j == static_cast<size_t>(-1)) || static_cast<size_t>(_content_length) > _raw_content.substr(j + 4).length())
 			return 0;
 	}
 	return bodyReceived();
@@ -352,8 +352,8 @@ int Request::concatenateRequest(std::string tmp)
 		size_t r2 = _raw_content.find("\n\n");
 		size_t i = (r == static_cast<size_t>(-1)) ? r2 : r;
 		// Attention ici a gerer si la content length ne match jamais la reception...
-		//if (_multipart == 1 || _continue == 1)
-		//	return findBodyEnd();
+		if (_multipart == 1 || _continue == 1)
+			return findBodyEnd();
 		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 			return bodyReceived();
 		else if ((_body_reception_encoding == CONTENT_LENGTH) && (_raw_content.length()) < static_cast<size_t>(_content_length + i + 4))//_body_len_received + _header_len_received < _content_length + i + 4)
@@ -633,6 +633,7 @@ void	Request::resetValues(void){
 	_multipart = 0;
 	_boundary.clear();
 	_boundary = "";
+	_continue = 0;
 	//}
 }
 
