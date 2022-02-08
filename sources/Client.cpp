@@ -235,17 +235,41 @@ int	Client::checkPath( char * cwd, std::string & root, std::string & url, Port &
 			free(cwd);
 		return (SUCCESS);
 	}
+	file_path.str("");
 	if (path.size())
 	{
-		file_path.str("");
-		url = path + url;
-		file_path << cwd << root << url;
+		file_path << cwd << root << path << url;
 		if (openFile(file_path.str()) > 0)
 		{
+			url = path + url;
 			_file_path = file_path.str();
 			if (cwd)
 				free(cwd);
 			return (SUCCESS);
+		}
+		
+	}
+	file_path.str("");
+	std::map<std::string, std::string>::iterator	it = location._locations.begin();
+	std::map<std::string, std::string>::iterator	ite = location._locations.end();
+	for (; it != ite; it++)
+	{
+		int 		pos = -1;
+		std::string	sub = (*it).first;
+
+		pos = url.find(sub);
+		if (pos == 0)
+		{
+			std::string new_url = (*it).second + url.substr(sub.size());
+			file_path << cwd << root << new_url;
+			if (openFile(file_path.str()) > 0)
+			{
+				url = new_url;
+				_file_path = file_path.str();
+				if (cwd)
+					free(cwd);
+				return (SUCCESS);
+			}
 		}
 	}
 	return (ERROR);
@@ -339,6 +363,7 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 
+	std::cout << "Status before execution " << _status << std::endl;
 	saveLogs();
 	if (_status != OK)
 		executeError(serv, port);
