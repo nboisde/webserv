@@ -230,13 +230,15 @@ int Request::findBodyEnd( void )
 	if (_multipart == 1)
 	{
 		int ml = findMultiEnd();
-		if (!ml)
+		int j = _raw_content.find("\r\n\r\n");
+		if (!ml || j == -1 || static_cast<size_t>(_content_length) > _raw_content.substr(j + 4).length())
 			return 0;
 	}
 	else if (_continue == 1)
 	{
 		int i = _raw_content.find("0\r\n\r\n");
-		if (i == -1)
+		int j = _raw_content.find("\r\n\r\n");
+		if (i == -1 || j == -1 || static_cast<size_t>(_content_length) > _raw_content.substr(j + 4).length())
 			return 0;
 	}
 	return bodyReceived();
@@ -263,11 +265,11 @@ int Request::concatenateRequest(std::string tmp)
 	{
 		while (tmp[nl] == '\n')
 			nl++;
-		if (nl == static_cast<int>(tmp.length()))
+		if (static_cast<size_t>(nl) == (tmp.length()))
 			return 0;
 		else
 		{
-			while (nl < static_cast<int>(tmp.length()))
+			while (static_cast<size_t>(nl) < (tmp.length()))
 			{
 				buf += tmp[nl];
 				nl++;
@@ -350,11 +352,11 @@ int Request::concatenateRequest(std::string tmp)
 		int r2 = _raw_content.find("\n\n");
 		int i = (r == -1) ? r2 : r;
 		// Attention ici a gerer si la content length ne match jamais la reception...
-		if (_multipart == 1 || _continue == 1)
-			return findBodyEnd();
+		//if (_multipart == 1 || _continue == 1)
+		//	return findBodyEnd();
 		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 			return bodyReceived();
-		else if ((_body_reception_encoding == CONTENT_LENGTH) && static_cast<int>(_raw_content.length()) < _content_length + i + 4)//_body_len_received + _header_len_received < _content_length + i + 4)
+		else if ((_body_reception_encoding == CONTENT_LENGTH) && (_raw_content.length()) < static_cast<size_t>(_content_length + i + 4))//_body_len_received + _header_len_received < _content_length + i + 4)
 				return 0;
 		else if (_body_reception_encoding == TRANSFER_ENCODING)
 		{
@@ -401,35 +403,35 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 		return errorReturn(0);
 	for (std::vector<std::string>::iterator it = v.begin() + 1; it != v.end(); it++)
 	{
-		int len = static_cast<int>((*it).length());
-		int ret = (*it).find(":");
+		size_t len = ((*it).length());
+		size_t ret = (*it).find(":");
 		if (host == 0)
-			if (static_cast<int>(strToLower((*it)).find("host")) != -1 && ret != -1)
+			if ((strToLower((*it)).find("host")) != static_cast<size_t>(-1) && ret != static_cast<size_t>(-1))
 				host = 1;
 		//NO double dot.
-		if (ret == -1)
+		if (ret == static_cast<size_t>(-1))
 		{
-			if (static_cast<int>((*it).find(" ")) != -1)
+			if (((*it).find(" ")) != static_cast<size_t>(-1))
 				return errorReturn(0);
 			else
 				continue ;
 		}
 		//	return errorReturn();
 		//EMPTY FIELD.
-		if (ret == 0 || (*it)[ret - 1] == ' ')
+		if (ret == static_cast<size_t>(0) || (*it)[ret - 1] == ' ')
 			return errorReturn(0);
 		//DEAL WITH SPACES.
-		for (int i = 0; i < ret; i++)
+		for (size_t i = 0; i < ret; i++)
 			if ((*it)[i] == ' ')
 				return errorReturn(0);
 		//NULL CHARACTER IN VALUE.
-		for (int i = ret; i < len; i++)
+		for (size_t i = ret; i < len; i++)
 			if ((*it)[i] == '\0')
 				return errorReturn(0);
-		if (static_cast<int>(strToLower((*it)).find("content-length")) != -1)
+		if ((strToLower((*it)).find("content-length")) != static_cast<size_t>(-1))
 		{
 			// ONLY NUMBER IN THE RIGHT FORMAT !
-			int i  = ret + 1;
+			size_t i  = ret + 1;
 			while (i < len)
 			{
 				if ((*it)[i] != ' ')
@@ -451,18 +453,18 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 			}
 			cl++;
 		}
-		if (static_cast<int>(strToLower((*it)).find("transfer-encoding")) != -1)
+		if ((strToLower((*it)).find("transfer-encoding")) != static_cast<size_t>(-1))
 		{
-			int chunk = (*it).find("chunked");
+			size_t chunk = (*it).find("chunked");
 			//Because we only deal with chunked transfer encoding method
-			if (chunk == -1)
+			if (chunk == static_cast<size_t>(-1))
 				return errorReturn(0);
-			for (int i = ret + 1; i < chunk; i++)
+			for (size_t i = ret + 1; i < chunk; i++)
 			{
 				if ((*it)[i] && (*it)[i] != ' ')
 					return errorReturn(0);
 			}
-			for (int i = chunk + 7; i != len; i++)
+			for (size_t i = chunk + 7; i != len; i++)
 			{
 				if ((*it)[i] != ' ')
 					return errorReturn(0);
@@ -546,7 +548,7 @@ int Request::fillHeaderAndBody(void){
 	int i = 0;
 	if (ret == -1)
 		return errorReturn(0);
-	while (i < ret + static_cast<int>(crlf.length()))
+	while (static_cast<size_t>(i) < static_cast<size_t>(ret) + (crlf.length()))
 	{
 		_header += _raw_content[i];
 		i++;
