@@ -17,7 +17,7 @@ CGI::CGI( Client const & cli , Port const & port, Server const & serv, int exten
 	}
 	else
 	{
-		_extension = ".php";
+		_extension = ".php";		
 		_bin_location = "/usr/bin/php-cgi";
 	}
 	this->_header = cli.getReq().getHead();
