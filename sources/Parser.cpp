@@ -262,7 +262,6 @@ int	Parser::checkErrorPage(std::string raw_value, Value & new_value)
 }
 int	Parser::checkRoot(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkIndex(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
-int	Parser::checkUpload(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
 	int			pos = 0;
