@@ -320,7 +320,7 @@ void	Parser::initParser(void)
 	_default_keys["method"] = Value("GET");
 	_default_keys["method"]._methods.push_back("GET");
 	_default_keys["root"] = Value("/www");
-	_default_keys["index"] = Value("/html/index.html");
+	_default_keys["index"] = Value("/html/index.php");
 	_default_keys["location"] = Value(""); 
 }
 
