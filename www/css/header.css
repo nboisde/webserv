@@ -40,6 +40,10 @@ div.right li {
 	float: right;
 }
 
+div.title a {
+	text-decoration: none;
+    color: #82AC9F;
+}
 div.right li a {
     font-size: 20;
 	display: block;

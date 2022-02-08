@@ -4,10 +4,10 @@
 <header>
     <div class="left">
         <div class="logo">
-            <img src="/imgs/logo.png">
+            <a href="/php/index.php"> <img src="/imgs/logo.png"> </a>
         </div>
         <div class="title">
-            <h2>Webserver</h2>
+            <a href="/contact.php"> <h2>Webserver</h2> </a>
         </div>
     </div>
     <div class="center">
