@@ -333,16 +333,16 @@ int	Client::execution( Server const & serv, Port & port )
 
 	saveLogs();
 	if (_status != OK)
-		executeError(serv, port);
+		executeError(port);
 	else
 	{
 		res_type = checkURI(port, _req.getHead()["url"]);
 		if (res_type == R_PHP || res_type == R_PY)
 			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)
-			executeHtml(serv, port);
+			executeHtml();
 		else if (res_type == R_ERR)
-			executeError(serv, port);
+			executeError(port);
 	}
 	return SUCCESS;
 }
@@ -354,16 +354,13 @@ int Client::executePhpPython( Server const & serv, Port & port, int extension_ty
 	return SUCCESS;
 }
 
-int	Client::executeHtml(Server const & serv, Port & port )
+int	Client::executeHtml( void )
 {
-	std::cout << "HTML EXECUTION" << std::endl;
-	(void)port;
-	(void)serv;
-	std::string		content;
-	char *line = NULL;
-	size_t n = 0;
-	FILE * file = fopen(_file_path.c_str(), "r");
-	ssize_t ret = 0;
+	std::string	content;
+	char		*line = NULL;
+	size_t		n = 0;
+	FILE *		file = fopen(_file_path.c_str(), "r");
+	ssize_t		ret = 0;
 
 	while ((ret = getline(&line, &n, file)) != -1)
 	{
