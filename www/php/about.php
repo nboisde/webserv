@@ -1,10 +1,11 @@
 <head>
 	<link rel="stylesheet" href="/css/style.css">
 </head>
+
+	<body>
 	<header>
 		<?php include('header.php'); ?>
 	</header>
-	<body>
 		<h1>Who are we?</h1>
 		<table class="center">
 			<tr>

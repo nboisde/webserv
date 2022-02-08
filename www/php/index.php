@@ -4,7 +4,6 @@
 	<title>Homepage</title>
 	<link rel="stylesheet" href="/css/style.css">
 </head>
-
 <body>
 	<header>
 		<?php include('header.php'); ?>
@@ -15,13 +14,13 @@
 	</div>
 	<div class="methods">
 		<div class="get">
-			<h2></p><a href="get.html">Try the GET method</a></h2>
+			<h2></p><a href="/php/get.php">Try the GET method</a></h2>
 		</div>
 		<div class="post">
-			<h2><a href="post.html">Try the POST method</a></h2>
+			<h2><a href="/php/post.php">Try the POST method</a></h2>
 		</div>
 		<div class="delete">
-			<h2><a href="delete.html">Try the DELETE method</a></h2>
+			<h2><a href="/php/delete.php">Try the DELETE method</a></h2>
 		</div>
 	</div>
 </body>
