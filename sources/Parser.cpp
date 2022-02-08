@@ -320,8 +320,13 @@ void	Parser::initParser(void)
 	_default_keys["autoindex"] = Value("off");
 	_default_keys["method"] = Value("GET");
 	_default_keys["method"]._methods.push_back("GET");
-	_default_keys["root"] = Value("/www");
-	_default_keys["index"] = Value("/php/index.php");
+	char *buf = NULL;
+	buf = getcwd(buf, 0);
+	std::stringstream stream;
+	stream << buf << "/www";
+	_default_keys["root"] = Value(stream.str());
+	free(buf);
+	_default_keys["index"] = Value("/html/index.html");
 	_default_keys["location"] = Value("upload www/uploads/");
 	_default_keys["location"]._locations["upload"] = "www/uploads/";
 }
