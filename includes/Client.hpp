@@ -26,8 +26,8 @@ class Client
 		int				checkPath( std::string & root, std::string & url, Port & port );
 		int				checkExtension( std::string & root, std::string & url, Port & port );
 		int				executePhpPython( Server const & serv, Port & port, int extension_type );
-		int				executeHtml( Server const & serv, Port & port );
-		int				executeError( Server const & serv, Port & port );
+		int				executeHtml( void );
+		int				executeError( Port & port );
 		error_type		init_responseMap( void );
 
 	protected:
