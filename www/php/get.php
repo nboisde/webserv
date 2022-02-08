@@ -9,13 +9,14 @@
 <header>
 	<?php require('header.php'); ?>
 </header>
-<h2>Try the GET method</h2>
+<h1>Try the GET method</h1>
 	<h3>Download the precious webserv subject</h3>
-	<button class="styled"
-		type="button"
+	<div class="download">
+	<span class="button"
 		onclick="window.location.href = '/download/webserv.pdf';">
 		Download
-	</button>
+	</span>
+	</div>
 </body>
 <footer>
 	<?php include('footer.php');
