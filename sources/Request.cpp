@@ -18,7 +18,8 @@ _header(""),
 _body(""),
 _status(OK),
 _multipart(0),
-_boundary("")
+_boundary(""),
+_continue(0)
 {
 
 }
@@ -159,6 +160,8 @@ int Request::bodyReceived(void)
 {
 	_line = 0;
 	_state = BODY_RECEIVED;
+	if (_continue == 1)
+		_continue = 0;
 	return SUCCESS;
 }
 
@@ -181,6 +184,63 @@ int	Request::multipartForm( void )
 	}
 }
 
+int	Request::multipartFormRaw( void )
+{
+	int r = strToLower(_raw_content).find("content-type");
+	int r2 = strToLower(_raw_content).find("multipart");
+	if (r == -1 || r2 == -1)
+		return 0;
+	else
+	{
+		_multipart = 1;
+		std::string tmp = _raw_content.substr(r);
+		//std::cout << tmp << std::endl;
+		int bd = strToLower(tmp).find("boundary=");
+		std::string tmp2 = tmp.substr(bd + 9, tmp.find("\r\n") - (bd + 9));
+		_boundary = tmp2;
+		//std::cout << GREEN << tmp2 << RESET << std::endl;
+		return 1;
+	}
+}
+
+int Request::findContinue( void )
+{
+	int r = strToLower(_raw_content).find("except");
+	int r2 = strToLower(_raw_content).find("100-continue");
+	if (r == -1 || r2 == -1)
+		return 0;
+	else
+	{
+		_continue = 1;
+		return 1;
+	}
+}
+
+int Request::findMultiEnd( void )
+{
+	std::string limit = "--" + _boundary + "--\r\n";
+	std::string end = _raw_content.substr(_raw_content.length() - limit.length());
+	if (limit == end)
+		return 1;
+	return 0;
+}
+
+int Request::findBodyEnd( void )
+{
+	if (_multipart == 1)
+	{
+		int ml = findMultiEnd();
+		if (!ml)
+			return 0;
+	}
+	else if (_continue == 1)
+	{
+		int i = _raw_content.find("0\r\n\r\n");
+		if (i == -1)
+			return 0;
+	}
+	return bodyReceived();
+}
 
 /*
 ** this function will concatenate buffer into raw Request and tell to the engine if the request is full: ie,
@@ -277,6 +337,8 @@ int Request::concatenateRequest(std::string tmp)
 			else if (te == 1)
 				_body_reception_encoding = TRANSFER_ENCODING;
 			_state = HEADER_RECEIVED;
+			multipartFormRaw();
+			findContinue();
 			//multipartForm();
 		}
 	}
@@ -288,6 +350,8 @@ int Request::concatenateRequest(std::string tmp)
 		int r2 = _raw_content.find("\n\n");
 		int i = (r == -1) ? r2 : r;
 		// Attention ici a gerer si la content length ne match jamais la reception...
+		if (_multipart == 1 || _continue == 1)
+			return findBodyEnd();
 		if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 			return bodyReceived();
 		else if ((_body_reception_encoding == CONTENT_LENGTH) && static_cast<int>(_raw_content.length()) < _content_length + i + 4)//_body_len_received + _header_len_received < _content_length + i + 4)
@@ -568,6 +632,8 @@ void		Request::ChunkedBodyProcessing(std::string body)
 }
 
 void	Request::resetValues(void){
+	if (_continue == 0)
+	{
 	_line = 0;
 	_cursor = 0;
 	_state = RECEIVING_HEADER;
@@ -589,6 +655,7 @@ void	Request::resetValues(void){
 	_multipart = 0;
 	_boundary.clear();
 	_boundary = "";
+	}
 }
 
 
@@ -608,5 +675,8 @@ int										Request::getConnection( void ) const { return _connection; }
 int										Request::getStatus( void ) const { return _status; }
 int										Request::getMultipart( void ) const { return _multipart; }
 std::string								Request::getBoundary( void ) const { return _boundary; }
+int										Request::getContinue( void ) const { return _continue; }
+
+void									Request::setContinue( int cont ){ _continue = cont; }
 
 }
