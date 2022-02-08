@@ -230,15 +230,15 @@ int Request::findBodyEnd( void )
 	if (_multipart == 1)
 	{
 		int ml = findMultiEnd();
-		int j = _raw_content.find("\r\n\r\n");
-		if (!ml || j == -1 || static_cast<size_t>(_content_length) > _raw_content.substr(j + 4).length())
+		size_t j = _raw_content.find("\r\n\r\n");
+		if (!ml || j == static_cast<size_t>(-1) || static_cast<size_t>(_content_length) > _raw_content.substr(j + 4).length())
 			return 0;
 	}
 	else if (_continue == 1)
 	{
-		int i = _raw_content.find("0\r\n\r\n");
-		int j = _raw_content.find("\r\n\r\n");
-		if (i == -1 || j == -1 || static_cast<size_t>(_content_length) > _raw_content.substr(j + 4).length())
+		size_t i = _raw_content.find("0\r\n\r\n");
+		size_t j = _raw_content.find("\r\n\r\n");
+		if (i == static_cast<size_t>(-1) || j == static_cast<size_t>(-1) || static_cast<size_t>(_content_length) > _raw_content.substr(j + 4).length())
 			return 0;
 	}
 	return bodyReceived();
@@ -348,9 +348,9 @@ int Request::concatenateRequest(std::string tmp)
 	if (requestReceptionState() == HEADER_RECEIVED)
 	{
 		_body_len_received += buf.length();
-		int r = _raw_content.find("\r\n\r\n");
-		int r2 = _raw_content.find("\n\n");
-		int i = (r == -1) ? r2 : r;
+		size_t r = _raw_content.find("\r\n\r\n");
+		size_t r2 = _raw_content.find("\n\n");
+		size_t i = (r == static_cast<size_t>(-1)) ? r2 : r;
 		// Attention ici a gerer si la content length ne match jamais la reception...
 		//if (_multipart == 1 || _continue == 1)
 		//	return findBodyEnd();
@@ -360,8 +360,8 @@ int Request::concatenateRequest(std::string tmp)
 				return 0;
 		else if (_body_reception_encoding == TRANSFER_ENCODING)
 		{
-			int ret = _raw_content.find("0\r\n\r\n");
-			if (ret == -1)
+			size_t ret = _raw_content.find("0\r\n\r\n");
+			if (ret == static_cast<size_t>(-1))
 				return 0;
 			else
 				return bodyReceived();
@@ -487,12 +487,12 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 int		Request::parseHeader(void)
 {
 	std::vector<std::string> v;
-    int i = _header.find("\r\n");
-	int i2 = _header.find("\n");
-	std::string crlf = ((i == -1 && i2 == -1) || i != -1) ? "\r\n" : "\n";
-	int ret = ((i == -1 && i2 == -1) || i != -1) ? i : i2;
+    size_t i = _header.find("\r\n");
+	size_t i2 = _header.find("\n");
+	std::string crlf = ((i == static_cast<size_t>(-1) && i2 == static_cast<size_t>(-1)) || i != static_cast<size_t>(-1)) ? "\r\n" : "\n";
+	size_t ret = ((i == static_cast<size_t>(-1) && i2 == static_cast<size_t>(-1)) || i != static_cast<size_t>(-1)) ? i : i2;
 	std::string tmp = _header;
-	while (ret != -1)
+	while (ret != static_cast<size_t>(-1))
 	{
 		v.push_back(tmp.substr(0, ret));
 		tmp = tmp.substr(ret + crlf.length(), tmp.length() - ret);
@@ -528,7 +528,7 @@ int		Request::parseHeader(void)
 			continue ;
 		}
 		ret = (*it).find(":");
-		if (ret == -1)
+		if (ret == static_cast<size_t>(-1))
 			continue ;
 		_head[strToLower((*it).substr(0, ret))] = (*it).substr(ret + 2, (*it).length());
 	}
@@ -541,14 +541,14 @@ int		Request::parseHeader(void)
 */
 
 int Request::fillHeaderAndBody(void){
-	int r = _raw_content.find("\r\n\r\n");
-	int r2 = _raw_content.find("\n\n");
-	int ret = (r != -1) ? r : r2;
-	std::string crlf = (r != -1) ? "\r\n\r\n": "\n\n";
-	int i = 0;
-	if (ret == -1)
+	size_t r = _raw_content.find("\r\n\r\n");
+	size_t r2 = _raw_content.find("\n\n");
+	size_t ret = (r != static_cast<size_t>(-1)) ? r : r2;
+	std::string crlf = (r != static_cast<size_t>(-1)) ? "\r\n\r\n": "\n\n";
+	size_t i = 0;
+	if (ret == static_cast<size_t>(-1))
 		return errorReturn(0);
-	while (static_cast<size_t>(i) < static_cast<size_t>(ret) + (crlf.length()))
+	while (i < ret + (crlf.length()))
 	{
 		_header += _raw_content[i];
 		i++;
@@ -573,34 +573,10 @@ int Request::fillHeaderAndBody(void){
 
 void		Request::ChunkedBodyProcessing(std::string body)
 {
-	int i = 0;
-	int ret = body.find("0\r\n\r\n");
-	// std::cout << ret << std::endl;
-	// std::cout << RED << "Attention au SIGSEGV sur --data-binary @webserver" << RESET << std::endl;
-	// const char* str = body.data();
-	// while (i < ret)
-	// {
-	// 	std::string proceed_body = "";
-	// 	std::string hex = "";
-	// 	while (str[i] != '\r' && str[i + 1] != '\n')
-	// 	{
-	// 		hex += str[i];
-	// 		i++;
-	// 	}
-	// 	i+=2;
-	// 	int j = 0;
-	// 	int dec = std::strtol(hex.c_str(), 0, 16);
-	// 	while (j < dec)
-	// 	{
-	// 		proceed_body += str[i];
-	// 		i++;
-	// 		j++;
-	// 	}
-	// 	i+=2;
-	// 	_body += proceed_body;
-	// }
+	size_t i = 0;
+	size_t ret = body.find("0\r\n\r\n");
 	int k = 0;
-	if (ret == -1)
+	if (ret == static_cast<size_t>(-1))
 	{
 		_body = "";
 		return ;
@@ -634,8 +610,8 @@ void		Request::ChunkedBodyProcessing(std::string body)
 }
 
 void	Request::resetValues(void){
-	if (_continue == 0)
-	{
+	//if (_continue == 0)
+	//{
 	_line = 0;
 	_cursor = 0;
 	_state = RECEIVING_HEADER;
@@ -657,7 +633,7 @@ void	Request::resetValues(void){
 	_multipart = 0;
 	_boundary.clear();
 	_boundary = "";
-	}
+	//}
 }
 
 
