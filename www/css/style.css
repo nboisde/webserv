@@ -21,6 +21,27 @@ div.methods {
 	justify-content: space-between;
 }
 
+label {
+	text-decoration: none;
+	display: inline-block;
+	background-color: rgb(134, 138, 175);
+	padding: 1.2em;
+	width: 7em;
+	border-radius: 10rem;
+	text-transform: uppercase;
+  	font-size: 1rem;
+ 	letter-spacing: .15rem;
+	color: white;
+}
+
+label:hover {
+	transition: all 0.3s;
+	background-color:rgb(91, 94, 119);
+	transform: scale(1.1);
+	cursor: pointer;
+}
+
+
 div .button {
 	text-decoration: none;
 	display: inline-block;
@@ -41,7 +62,20 @@ div .button:hover {
 	cursor: pointer;
 }
 
-
+div.avatar {
+	margin-top: 5%;
+	display: inline-block;
+	position: relative;
+	width: 300px;
+	height: 300px;
+	overflow: hidden;
+	border-radius: 50%;
+}
+div.avatar img {
+	width: auto;
+	height: 100%;
+	margin-left: -85px;
+}
 /*-- FOOTER --*/
 footer {
 	left: 0;
