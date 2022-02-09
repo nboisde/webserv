@@ -8,20 +8,20 @@
 	<header>
 		<?php require('header.php'); ?>
 	</header>
+	<h1>Edit your profile</h1>
 	<div class="avatar">
 		<img src="/imgs/default.png">
 	</div>
-	<h2>Change your profile picture</h2>
-	<form action="http://localhost:8080" method="post" enctype="multipart/form-data">
+	<form action="/php/profile.phprm " method="post" enctype="multipart/form-data">
 		<p><input type="file" id="myFile" name="filename" hidden>
 		<label for="myFile">Upload</label>
+		<p></p>
 		<span id="file-chosen">No file chosen</span>
-		<p><button class="button" type="submit">Submit</button>
-		<h2>Fill in your profile</h2>
 		<p>First name <input type="text" name="firstname" /></p>
 		<p>Last name <input type="text" name="lastname" /></p>
 		<p>Login <input type="text" name="login" /></p>
-		<p><input type="submit" value="OK"></p>
+		<p><input type="submit" id="validation" value="OK" hidden></p>
+		<label for="validation">SUBMIT</label>
 	</form>
 
 </body>

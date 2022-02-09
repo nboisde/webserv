@@ -7,11 +7,12 @@
 <header>
 	<?php require('header.php'); ?>
 </header>
+	<h1>Welcome to your profile</h1>
+
 	<div class="avatar">
 		<img src="/imgs/default.png">
 	</div>
 	<form action="action.php" method="post">
-		<h1>Welcome to your profile</h1>
 		<p>FIRST NAME <?php echo htmlspecialchars($_POST['firstname']);?></p>
 		<p>LAST NAME <?php echo htmlspecialchars($_POST['lastname']); ?></p>
 		<p>LOGIN <?php echo htmlspecialchars($_POST['login']);?></p>
