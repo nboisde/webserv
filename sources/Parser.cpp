@@ -321,8 +321,8 @@ void	Parser::initParser(void)
 	_default_keys["method"]._methods.push_back("GET");
 	_default_keys["root"] = Value("/www");
 	_default_keys["index"] = Value("/php/index.php");
-	_default_keys["location"] = Value("");
-	_default_keys["upload"] = Value("/uploads");
+	_default_keys["location"] = Value("upload www/uploads/");
+	_default_keys["location"]._locations["upload"] = "www/uploads/";
 }
 
 Server	Parser::getServer( void ) { return _server; }
