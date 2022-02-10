@@ -119,30 +119,30 @@ int Client::uploadFiles( void )
 				f_name = "file";
 				f_name += extension;
 			}	
-			int fd = -1;
-			if (path.length() == 0)
-				fd = open(f_name.c_str(), O_CREAT | O_WRONLY, 0644);
-			else
-			{
-				path += f_name;
-				fd = open(path.c_str(), O_CREAT | O_WRONLY, 0644);
-			}
-			if (fd < 0)
-				continue ;
-			int ret;
-			ret = write(fd, f_content.c_str(), f_content.length());
-			if (ret == -1)
-				std::cout << "Writing problem" << std::endl;
-			close(fd);
-			std::cout << GREEN << "file saved ..." << RESET << std::endl;
-			// if (path.length() != 0)
+			// int fd = -1;
+			// if (path.length() == 0)
+			// 	fd = open(f_name.c_str(), O_CREAT | O_WRONLY, 0644);
+			// else
+			// {
 			// 	path += f_name;
-			// std::fstream fs;
-			// fs.open(f_name.c_str(), std::fstream::out);
-			// fs << f_content;
+			// 	fd = open(path.c_str(), O_CREAT | O_WRONLY, 0644);
+			// }
+			// if (fd < 0)
+			// 	continue ;
+			// int ret;
+			// ret = write(fd, f_content.c_str(), f_content.length());
+			// if (ret == -1)
+			// 	std::cout << "Writing problem" << std::endl;
+			// close(fd);
 			// std::cout << GREEN << "file saved ..." << RESET << std::endl;
-			// fs.close();
-			// chmod(f_name.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+			if (path.length() != 0)
+				f_name = path + f_name;
+			std::fstream fs;
+			fs.open(f_name.c_str(), std::fstream::out);
+			fs << f_content;
+			std::cout << GREEN << "file saved ..." << RESET << std::endl;
+			fs.close();
+			chmod(f_name.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		}
 		int forward = tmp.find(_req.getBoundary()) + _req.getBoundary().length();
 		while (tmp[forward] && (tmp[forward] == '-' || tmp[forward] == '\r' || tmp[forward] == '\n'))
