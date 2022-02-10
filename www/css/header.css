@@ -1,0 +1,60 @@
+header {
+	width: 100%;
+	background-color: rgba(235, 231, 231, 0.541);
+    display: flex;
+    justify-content: space-between;
+    height: 6em;
+    color: #82AC9F;
+    font-weight: bold;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-decoration: none;
+}
+
+div.left {
+    display: flex;
+    align-items: center;
+}
+
+div.left img {
+    width: 5em;
+    margin: 0.5em;
+}
+
+div.left h2 {
+    margin-left: 10;
+    text-transform: uppercase;
+}
+
+div.right {
+    align-self: center;
+}
+
+div.right ul {
+	list-style-type: none;
+	margin-right: 1em;
+	padding-right: 0;
+	overflow: hidden;
+}
+
+div.right li {
+	float: right;
+}
+
+div.title a {
+	text-decoration: none;
+    color: #82AC9F;
+}
+div.right li a {
+    font-size: 20;
+	display: block;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+    color: #82AC9F;
+    font-weight: bold;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* li a:hover {
+	/*Ajouter souligner
+} */
