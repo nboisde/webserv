@@ -3,6 +3,7 @@
 
 # include "webserv.hpp"
 # include "Utils.hpp"
+# include "Files.hpp"
 
 namespace ws 
 {
@@ -86,6 +87,7 @@ class Request
 		std::string					_boundary;
 		int							_continue;
 		int							_upload_authorized;
+		Files						_uploads;
 };
 
 }

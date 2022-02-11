@@ -196,7 +196,7 @@ int Client::receive(void)
 	}
 	_req.setUploadAuthorized(this->uploadAuthorized());
 	std::string tmp(buffer, ret);
-	std::cout << DEV << "Authorized upload: " << _req.getUploadAuthorized() << RESET << std::endl;
+	//std::cout << DEV << "Authorized upload: " << _req.getUploadAuthorized() << RESET << std::endl;
 	int req = _req.concatenateRequest(tmp);
 	//std::cout << _req.getRawContent() << std::endl;
 	if (req == -1 && _req.findContinue() == 0)
@@ -209,7 +209,7 @@ int Client::receive(void)
 	{
 		int head_err = _req.fillHeaderAndBody();
 		//std::cout << BLUE << _req.getHeader() << RESET << std::endl;
-		//std::cout << _req.getBody() << std::endl;
+		std::cout << DEV << _req.getBody() << RESET << std::endl;
 		_req.setContinue(0);
 		if (head_err == ERROR)
 		{
