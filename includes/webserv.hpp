@@ -75,7 +75,8 @@
 # define FIRE "\033[38;5;166m"
 # define PURPLE "\033[38;5;105m"
 # define LIGHTBLUE "\033[38;5;87m"
-
+# define YELLOW "\033[38;5;220m"
+# define DEV "\033[38;5;200m"
 
 //CPP_LIBRARIES//
 # include <fstream>

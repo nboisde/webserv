@@ -14,6 +14,7 @@ Client::Client( int fd, struct sockaddr_in *cli_addr, config_type conf ) : _fd(f
 	std::stringstream port;
 	port << ntohs(cli_addr->sin_port);
 	_port += port.str();
+	_req.setUploadAuthorized(this->uploadAuthorized());
 }
 
 Client::Client( Client const & src ) { *this = src; }
@@ -152,6 +153,34 @@ int Client::uploadFiles( void )
 	return SUCCESS;
 }
 
+void Client::bridgeParsingRequest( void )
+{
+	int not_all = 1;
+
+	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
+	{
+		if ((*it) == _req.getHead()["method"])
+			not_all = 0;
+	}
+	if (not_all == 1)
+		_status = NOT_ALLOWED;
+	else if (static_cast<size_t>(_req.getBody().length()) > _config["client_max_body_size"]._max_body_size
+	|| static_cast<size_t>(_req.getContentLength()) > _config["client_max_body_size"]._max_body_size)
+		_status = REQUEST_ENTITY_TOO_LARGE;
+	else
+		_status = OK;
+}
+
+int Client::uploadAuthorized( void )
+{
+	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
+	{
+		if ((*it) == "POST")
+			return 1;
+	}
+	return 0;
+}
+
 int Client::receive(void)
 {
 	char	buffer[BUFFER_SIZE];
@@ -165,7 +194,9 @@ int Client::receive(void)
 		_status = INTERNAL_SERVER_ERROR;
 		return WRITING;
 	}
+	_req.setUploadAuthorized(this->uploadAuthorized());
 	std::string tmp(buffer, ret);
+	std::cout << DEV << "Authorized upload: " << _req.getUploadAuthorized() << RESET << std::endl;
 	int req = _req.concatenateRequest(tmp);
 	//std::cout << _req.getRawContent() << std::endl;
 	if (req == -1 && _req.findContinue() == 0)
@@ -193,24 +224,6 @@ int Client::receive(void)
 		return WRITING;
 	}
 	return READING;
-}
-
-void Client::bridgeParsingRequest( void )
-{
-	int not_all = 1;
-
-	for (std::vector<std::string>::iterator it = _config["method"]._methods.begin(); it != _config["method"]._methods.end(); it++)
-	{
-		if ((*it) == _req.getHead()["method"])
-			not_all = 0;
-	}
-	if (not_all == 1)
-		_status = NOT_ALLOWED;
-	else if (static_cast<size_t>(_req.getBody().length()) > _config["client_max_body_size"]._max_body_size
-	|| static_cast<size_t>(_req.getContentLength()) > _config["client_max_body_size"]._max_body_size)
-		_status = REQUEST_ENTITY_TOO_LARGE;
-	else
-		_status = OK;
 }
 
 int Client::send( void )
