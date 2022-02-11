@@ -19,7 +19,31 @@ _body(""),
 _status(OK),
 _multipart(0),
 _boundary(""),
-_continue(0)
+_continue(0),
+_upload_authorized(1)
+{
+
+}
+
+Request::Request( int up_auth ):
+_line(0),
+_cursor(0),
+_state(RECEIVING_HEADER),
+_connection(KEEP_ALIVE),
+_raw_content(""),
+_body_reception_encoding(BODY_RECEPTION_NOT_SPECIFIED),
+_body_len_received(0),
+_header_len_received(0),
+_content_length(0),
+_method_type(UNKNOWN),
+_header_size(0),
+_header(""),
+_body(""),
+_status(OK),
+_multipart(0),
+_boundary(""),
+_continue(0),
+_upload_authorized(up_auth)
 {
 
 }
@@ -655,7 +679,10 @@ int										Request::getStatus( void ) const { return _status; }
 int										Request::getMultipart( void ) const { return _multipart; }
 std::string								Request::getBoundary( void ) const { return _boundary; }
 int										Request::getContinue( void ) const { return _continue; }
+int										Request::getUploadAuthorized( void ) const { return _upload_authorized; }
+
 
 void									Request::setContinue( int cont ){ _continue = cont; }
+void									Request::setUploadAuthorized( int up_auth ) { _upload_authorized = up_auth; }
 
 }

@@ -13,6 +13,7 @@ class Request
 
 	public:
 		Request( void );
+		Request( int up_auth );
 		Request( Request const & src );
 		virtual ~Request( void );
 
@@ -51,8 +52,11 @@ class Request
 		int				getMultipart( void ) const;
 		std::string		getBoundary( void ) const;
 		int				getContinue( void ) const;
+		int				getUploadAuthorized( void ) const;
 
 		void			setContinue( int cont );
+		void			setUploadAuthorized( int up_auth );
+
 
 	private:
 		int			findProtocol(std::string buf);
@@ -81,6 +85,7 @@ class Request
 		int							_multipart;
 		std::string					_boundary;
 		int							_continue;
+		int							_upload_authorized;
 };
 
 }

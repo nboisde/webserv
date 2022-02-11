@@ -29,6 +29,7 @@ class Client
 		int				executeHtml( void );
 		int				executeError( Port & port );
 		error_type		init_responseMap( void );
+		int				uploadAuthorized( void );
 
 	protected:
 		int				_fd;
