@@ -9,9 +9,9 @@
 </header>
 	<h1>Welcome to your profile</h1>
 
-	<div class="avatar">
+	<label class="profil">
 		<img src="/imgs/default.png">
-	</div>
+	</label>
 	<form action="action.php" method="post">
 		<p>FIRST NAME <?php echo htmlspecialchars($_POST['firstname']);?></p>
 		<p>LAST NAME <?php echo htmlspecialchars($_POST['lastname']); ?></p>

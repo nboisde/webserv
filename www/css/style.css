@@ -21,26 +21,10 @@ div.methods {
 	justify-content: space-between;
 }
 
-label {
-	text-decoration: none;
-	display: inline-block;
-	background-color: rgb(134, 138, 175);
-	padding: 1.2em;
-	width: 7em;
-	border-radius: 10rem;
-	text-transform: uppercase;
-  	font-size: 1rem;
- 	letter-spacing: .15rem;
-	color: white;
-}
-
-label:hover {
-	transition: all 0.3s;
-	background-color:rgb(91, 94, 119);
-	transform: scale(1.1);
+input[type=file] {
+	display: none;
 	cursor: pointer;
 }
-
 
 div .button {
 	text-decoration: none;
@@ -62,7 +46,7 @@ div .button:hover {
 	cursor: pointer;
 }
 
-div.avatar {
+label.profil {
 	display: inline-block;
 	position: relative;
 	width: 300px;
@@ -70,11 +54,97 @@ div.avatar {
 	overflow: hidden;
 	border-radius: 50%;
 }
-div.avatar img {
+
+label.profil img {
 	width: auto;
 	height: 100%;
 	margin-left: -85px;
+	cursor: pointer;
 }
+
+label.profil img:hover {
+	transition: all 0.2s;
+	transform: scale(1.1);
+}
+
+button.styled {
+	margin-top: 1em;
+	text-decoration: none;
+	display: inline-block;
+	background-color: rgb(134, 138, 175);
+	padding: 1.2em;
+	width: 7em;
+	border-radius: 10rem;
+	text-transform: uppercase;
+  	font-size: 1rem;
+ 	letter-spacing: .15rem;
+	color: white;
+	border-style: none;
+}
+
+button.styled:hover {
+	transition: all 0.3s;
+	background-color:rgb(91, 94, 119);
+	transform: scale(1.1);
+	cursor: pointer;
+}
+
+div.informations {
+	padding: 4em;
+}
+
+label.infos {
+	width: 110px;
+	display: inline-block;
+	vertical-align: top;
+	margin: 6px;
+	font-size: 1rem;
+}
+
+input[type=text] {
+	font-size: 1rem;
+	margin-top: 0.4rem;
+}
+
+input[type=submit] {
+	margin-top: 1em;
+	text-decoration: none;
+	display: inline-block;
+	background-color: rgb(134, 138, 175);
+	padding: 1.2em;
+	width: 7em;
+	border-radius: 10rem;
+	text-transform: uppercase;
+  	font-size: 1rem;
+ 	letter-spacing: .15rem;
+	color: white;
+	border-style: none;
+	margin-top: 2em;
+}
+
+input[type=submit]:hover {
+	transition: all 0.3s;
+	background-color:rgb(91, 94, 119);
+	transform: scale(1.1);
+	cursor: pointer;
+}
+
+div.edit-picture {
+	display: inline-block;
+	position: relative;
+	width: 50px;
+	height: 50px;
+	overflow: hidden;
+	border-radius: 50%;
+}
+
+div.edit-picture label {
+	width: auto;
+	height: 100%;
+	margin-left: -85px;
+	margin-top: -85px;
+}
+
 /*-- FOOTER --*/
 footer {
 	left: 0;
