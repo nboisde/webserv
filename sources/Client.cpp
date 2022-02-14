@@ -301,8 +301,7 @@ int	Client::openFile( std::string path )
 		return ERROR;
 	close(fd);
 	fd = ::open(path.c_str(), O_DIRECTORY);
-	if 
-	(fd > 0)
+	if (fd > 0)
 	{
 		close(fd);
 		return (ERROR);
@@ -336,6 +335,9 @@ int	Client::execution( Server const & serv, Port & port )
 		executeError(port);
 	else
 	{
+		std::cout << "PATH " << _file_path << std::endl;
+		std::cout << "ROOT " << port.getConfig()["root"]._value << std::endl;
+		std::cout << "URL " << _req.getHead()["url"] << std::endl;
 		res_type = checkURI(port, _req.getHead()["url"]);
 		std::cout << "PATH " << _file_path << std::endl;
 		if (res_type == R_PHP || res_type == R_PY)
@@ -386,8 +388,13 @@ int	Client::executeError( Port & port )
 	Value							error = config["error_page"];
 	std::string						error_file_path = error._errors[_status];
 	std::string						body;
+	std::string						root;
 
-	if (error_file_path.size())
+
+	root = port.getConfig()["root"]._value;
+	root += error_file_path;
+	int ret = openFile(root);
+	if (error_file_path.size() && ret > 0)
 	{
 		checkURI(port, error_file_path);
 		_status = 301;
