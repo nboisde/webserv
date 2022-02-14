@@ -5,6 +5,17 @@
 
 namespace ws
 {
+
+typedef struct	s_route
+{
+	std::string					redir;
+	std::string					autoindex;
+	std::string					index;
+	std::string					upload_path;
+	std::vector<std::string>	methods;
+	s_route() : redir(0), autoindex("off"), index(0), upload_path(0) {}
+}				route;
+
 class Value
 {
 	public:
@@ -20,6 +31,7 @@ class Value
 		std::map<int, std::string>			_errors;
 		std::vector<std::string>			_methods;
 		std::map<std::string, std::string>	_locations;
+		// std::map<std::string, route>	_locations;
 };
 
 std::ostream &			operator<<( std::ostream & o, Value const & i );
