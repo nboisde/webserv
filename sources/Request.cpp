@@ -75,6 +75,8 @@ Request &	Request::operator=( Request const & rhs )
 		_status = rhs._status;
 		_multipart = rhs._multipart;
 		_boundary = rhs._boundary;
+		_continue = rhs._continue;
+		_upload_authorized = rhs._upload_authorized;
 	}
 	return *this;
 }
@@ -365,7 +367,6 @@ int Request::concatenateRequest(std::string tmp)
 			_state = HEADER_RECEIVED;
 			multipartFormRaw();
 			findContinue();
-			// ICI, instancier la variable file upload..
 		}
 	}
 	//BODY CATCH
@@ -377,16 +378,7 @@ int Request::concatenateRequest(std::string tmp)
 		size_t i = (r == static_cast<size_t>(-1)) ? r2 : r;
 		// Attention ici a gerer si la content length ne match jamais la reception...
 		if (_multipart == 1 || _continue == 1)
-		{
-			// ICI, upload le file a la volee.
-			if (_multipart == 1)
-			{
-				std::cout << "ici" << std::endl;
-				std::cout << _boundary;
-				_uploads.saveFilePiece(buf, _boundary);
-			}
 			return findBodyEnd();
-		}
 		else if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 			return bodyReceived();
 		else if ((_body_reception_encoding == CONTENT_LENGTH) && (_raw_content.length()) < static_cast<size_t>(_content_length + i + 4))//_body_len_received + _header_len_received < _content_length + i + 4)
@@ -590,6 +582,7 @@ int Request::fillHeaderAndBody(void){
 	int err = parseHeader();
 	if (err == ERROR)
 		return errorReturn(0);
+	// NE PAS ENREGISTRER LE BODY SUR UN UPLOAD..
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 		return SUCCESS;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
