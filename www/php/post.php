@@ -9,13 +9,10 @@
                 ?>
             </header>
             
-            <h1>Upload your picture</h1>
+            <h1>Upload your file</h1>
             <div class="upload">
                 <form action="http://localhost:8080" method="post" enctype="multipart/form-data">
-                    <label class="profil">
-                        <input type="file" name="file1">
-                        <img src="/imgs/default.png">
-                    </label>
+                    <input type="file" name="file1">
                     <p><button class="styled" type="submit">Submit</button></p>
                 </form>
             </div>

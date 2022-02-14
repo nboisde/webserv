@@ -10,7 +10,7 @@
 	<h1>Welcome to your profile</h1>
 
 	<label class="profil">
-		<img src="/imgs/default.png">
+		<img src="/imgs/cute.png">
 	</label>
 	<form action="action.php" method="post">
 		<p>FIRST NAME <?php echo htmlspecialchars($_POST['firstname']);?></p>
