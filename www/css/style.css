@@ -22,7 +22,7 @@ div.methods {
 }
 
 input[type=file] {
-	display: none;
+	/* display: none; */
 	cursor: pointer;
 }
 
