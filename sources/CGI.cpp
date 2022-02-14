@@ -31,6 +31,9 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	typedef std::pair<std::string, std::string>	pair;
 	typedef std::map<std::string, std::string>::iterator map_iterator;
 	
+
+
+
 	map_iterator ite = _header.end();
 
 	if (_header.find("content-length") != ite)
@@ -47,27 +50,21 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
 	_conversion.insert(pair("SERVER_SOFTWARE", "webzerver/0.9"));
 	_conversion.insert(pair("REDIRECT_STATUS", "200"));
-
 	_conversion.insert(pair("REMOTE_ADDR", cli.getIp()));
 	_conversion.insert(pair("REMOTE_PORT", cli.getPort()));
 	_conversion.insert(pair("SERVER_ADDR", serv.getIp()));
 	std::stringstream server_port;
 	server_port << ntohs(port.getPortAddr().sin_port);
 	_conversion.insert(pair("SERVER_PORT", server_port.str()));
-	
-
-	char *buf = NULL;
-	buf = getcwd(buf, 0);
-	std::string root(buf);
+	std::string root("");
 	root += port.getConfig()["root"]._value;
-	free(buf);
-
 	std::string uri_query = _header["url"];
 	std::string url = cli.getFilePath();
 	size_t		pos = url.find(root) + root.size();
 
 	_conversion.insert(pair("DOCUMENT_ROOT", root));
 	_conversion.insert(pair("DOCUMENT_URI", url.substr(pos, url.find(_extension) + _extension.size() - pos)));
+
 	_conversion.insert(pair("SCRIPT_NAME", url.substr(pos, url.find(_extension) + _extension.size() - pos)));
 	_conversion.insert(pair("PHP_SELF", url.substr(pos, url.find(_extension) + _extension.size() - pos)));	
 	_conversion.insert(pair("REQUEST_URI", uri_query));
@@ -199,6 +196,7 @@ int		CGI::execute( Client & cli ){
 	int fd[2];
 	pipe(fd);
 	int child_stat;
+
 
 	pid_t pid = fork();
 	
