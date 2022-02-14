@@ -50,7 +50,7 @@ void	Server::launchServer( void )
 			_ports.erase(it);
 	}
 	if (!_ports.size())
-		exit(1); 
+		exit(1);
 	while (true)
 	{
 		_clean_fds = 0;
@@ -90,6 +90,7 @@ void	Server::launchServer( void )
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
 					int ret = (*ct).receive();
+
 					if ( ret == WRITING)
 					{
 						(findFds((*ct).getFd())).events = POLLOUT;

@@ -12,7 +12,7 @@
 	<div class="avatar">
 		<img src="/imgs/default.png">
 	</div>
-	<form action="/php/profile.phprm " method="post" enctype="multipart/form-data">
+	<form action="/php/profile.php" method="post" enctype="multipart/form-data">
 		<p><input type="file" id="myFile" name="filename" hidden>
 		<label for="myFile">Upload</label>
 		<p></p>

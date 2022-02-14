@@ -337,6 +337,7 @@ int	Client::execution( Server const & serv, Port & port )
 	else
 	{
 		res_type = checkURI(port, _req.getHead()["url"]);
+		std::cout << "PATH " << _file_path << std::endl;
 		if (res_type == R_PHP || res_type == R_PY)
 			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)
