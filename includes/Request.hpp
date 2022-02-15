@@ -33,6 +33,8 @@ class Request
 		int				multipartForm( void );
 		int				findContinue( void );
 		int				multipartFormRaw( void );
+		int				analyseURL(void);
+
 
 
 		// GETTERS
