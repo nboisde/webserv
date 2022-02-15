@@ -57,7 +57,7 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	server_port << ntohs(port.getPortAddr().sin_port);
 	_conversion.insert(pair("SERVER_PORT", server_port.str()));
 	std::string root("");
-	root += port.getConfig()["root"]._value;
+	root += port.getConfig()[cli.getHostname()]["root"]._value;
 	std::string uri_query = _header["url"];
 	std::string url = cli.getFilePath();
 	size_t		pos = url.find(root) + root.size();

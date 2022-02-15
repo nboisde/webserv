@@ -98,10 +98,10 @@ int	Parser::checkServer(void)
 	if (_content[_pos] != '{')
 		return (0);
 	_pos++;
-	_server.addPort(Port(_default_keys));
+	keys_type new_config = _default_keys;
 	while (_pos < _size)
 	{
-		if (!checkKeys())
+		if (!checkKeys(new_config))
 			return (0);
 		while (_pos < _size && isspace(_content[_pos]))
 			_pos++;
@@ -113,14 +113,25 @@ int	Parser::checkServer(void)
 	}
 	if (_pos == _size)
 		return (0);
+	it_port it = _server.getRefPorts().begin();
+	for (; it != _server.getRefPorts().end(); it++)
+	{
+		std::stringstream new_port;
+		new_port << ntohs((it->getPortAddr()).sin_port);
+		if (new_port.str() == new_config["listen"]._value)
+		{
+			it->getConfig()[new_config["server_name"]._value] = new_config;
+		}
+	}
+	_server.addPort(Port(new_config["server_name"]._value, new_config));
 	return (SUCCESS);
 }
 
 
-int	Parser::checkKeys(void)
+int	Parser::checkKeys(keys_type & new_config)
 {
-	std::map<std::string, Value>::iterator it = _default_keys.begin();
-	std::map<std::string, Value>::iterator ite = _default_keys.end();
+	std::map<std::string, Value>::iterator it = new_config.begin();
+	std::map<std::string, Value>::iterator ite = new_config.end();
 	int	found = 0;
 
 	while (_pos < _size && isspace(_content[_pos]))
@@ -137,12 +148,12 @@ int	Parser::checkKeys(void)
 	}
 	if (!found)
 		return (0);
-	if (!setValues((*it).first))
+	if (!setValues((*it).first, new_config))
 		return (0);
 	return (SUCCESS);
 }
 
-int	Parser::setValues(std::string key)
+int	Parser::setValues(std::string key, keys_type & new_config)
 {
 	int	isspaceNb = 0;
 
@@ -159,7 +170,7 @@ int	Parser::setValues(std::string key)
 		if (dot == -1)
 			return (0);
 		std::string value = _content.substr(_pos, dot - _pos);
-		if (!(checkValue(key, value, _server.getRefPorts().back())))
+		if (!(checkValue(key, value, new_config)))
 			return (0);
 		_pos = dot;
 	}
@@ -282,10 +293,10 @@ int	Parser::checkLocation(std::string raw_value, Value & new_value)
 	return (SUCCESS);  
 }
 
-int	Parser::checkValue(std::string key, std::string value, Port & port)
+int	Parser::checkValue(std::string key, std::string value, keys_type & new_config)
 {
-	std::map<std::string, Value>::iterator			ite = port.getConfig().end();
-	std::map<std::string, Value>::iterator			it = port.getConfig().find(key);
+	std::map<std::string, Value>::iterator			ite = new_config.end();
+	std::map<std::string, Value>::iterator			it = new_config.find(key);
 	std::map<std::string, validity_fct>::iterator	cite = _key_checker.end();
 	std::map<std::string, validity_fct>::iterator	cit = _key_checker.find(key);
 
@@ -296,7 +307,7 @@ int	Parser::checkValue(std::string key, std::string value, Port & port)
 		std::cout << key << " : " << value << " is not valid" << std::endl;
 		return (0);
 	}
-	_server.getRefPorts().back().getConfig()[key] = _default_keys[key];
+	new_config[key] = _default_keys[key];
 	return (SUCCESS);
 }
 
@@ -313,8 +324,8 @@ void	Parser::initParser(void)
 	_key_checker["index"] = &Parser::checkIndex;
 	_key_checker["location"] = &Parser::checkLocation;
 	_default_keys["listen"] = Value("8080");
-	_default_keys["host"] = Value("Webserv.com");
-	_default_keys["server_name"] = Value("webserv");
+	_default_keys["host"] = Value(LOCALHOST);
+	_default_keys["server_name"] = Value(LOCALHOST);
 	_default_keys["client_max_body_size"] = Value("100000000");
 	_default_keys["error_page"] = Value("");
 	_default_keys["autoindex"] = Value("off");

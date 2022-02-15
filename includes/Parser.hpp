@@ -4,11 +4,13 @@
 # include "webserv.hpp"
 # include "Server.hpp"
 # include "Value.hpp"
+# include "Port.hpp"
 
 namespace ws
 {
 class Parser
 {
+		typedef std::vector<Port>::iterator 			it_port;
 		typedef	int (Parser::*validity_fct)(std::string, Value &);
 		typedef std::map<std::string, validity_fct>		checker_type;
 		typedef	std::map<std::string, Value>			keys_type;
@@ -30,9 +32,9 @@ class Parser
 		int					initWebServer(void);
 		int					checkHttp(void);
 		int					checkServer(void);
-		int					checkKeys(void);
-		int					setValues(std::string key);
-		int					checkValue(std::string key, std::string value, Port & port);
+		int					checkKeys(keys_type & new_config);
+		int					setValues(std::string key, keys_type & new_config);
+		int					checkValue(std::string key, std::string value, keys_type & new_config);
 
 		int					checkPort(std::string, Value &);
 		int					checkMethod(std::string, Value &);

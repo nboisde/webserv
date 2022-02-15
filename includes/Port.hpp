@@ -12,11 +12,12 @@ class Client;
 
 class Port
 {
-	typedef	std::map<std::string, Value>	config_type;
-	typedef	std::vector<Client>				client_type;
+	typedef	std::map<std::string, Value>		config_type;
+	typedef	std::vector<Client>					client_type;
+	typedef std::map<std::string, config_type>	map_configs;
 
 	public:
-		Port( config_type dictionnary );
+		Port( std::string hostname, config_type dictionnary );
 		Port( Port const & src );
 		virtual ~Port( void );
 
@@ -34,16 +35,18 @@ class Port
 		void				setFd( int fd);
 		std::vector<Client>	&getClients( void );
 		void				setClients( int fd );
-		config_type			getConfig( void ) const;
-		config_type	&		getConfig( void );
+		map_configs			getConfig( void ) const;
+		map_configs	&		getConfig( void );
 
 	protected:
 		Port( void );
 
-		int					_fd;
-		struct sockaddr_in	_port_address;
-		client_type			_clients;
-		config_type			_config;
+		int									_fd;
+		struct sockaddr_in					_port_address;
+		client_type							_clients;
+		map_configs							_config;
+		std::string							_hostname;
+		// hostname, config(key, val)
 };
 
 }

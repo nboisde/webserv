@@ -2,9 +2,14 @@
 
 namespace ws
 {
+typedef	std::map<std::string, Value>		config_type;
+typedef	std::vector<Client>					client_type;
+typedef std::map<std::string, config_type>	map_configs;
 
 Port::Port( void ) {}
-Port::Port( config_type dictionnary ) : _config(dictionnary) {}
+Port::Port( std::string hostname, config_type dictionnary ){
+	_config[hostname] = dictionnary;
+}
 Port::Port( const Port & src ) { *this = src; }
 Port::~Port( void ) {}
 
@@ -60,10 +65,11 @@ int		Port::launchPort( void )
 	memset((char *)&_port_address, 0, sizeof(_port_address));
 	_port_address.sin_family = AF_INET;
 	_port_address.sin_addr.s_addr = htonl(INADDR_ANY);
-	_port_address.sin_port = htons(atoi((_config["listen"]._value).c_str()));
+	map_configs::iterator it = _config.begin();
+	_port_address.sin_port = htons(atoi(((*it).second["listen"]._value).c_str()));
 	if (bind() < 0 || listening() < 0)
 		return ERROR;
-	std::cout << PURPLE << "Listening on port : " << _config["listen"]._value << RESET << std::endl;
+	std::cout << PURPLE << "Listening on port : " << (*it).second["listen"]._value << RESET << std::endl;
 	return SUCCESS;
 }
 
@@ -135,8 +141,8 @@ int								Port::getFd( void ) const { return _fd; }
 struct sockaddr_in				Port::getPortAddr( void ) const { return _port_address; }
 void							Port::setFd( int fd ) {	_fd = fd; }
 std::vector<Client>	&			Port::getClients( void ) { return _clients; }
-std::map<std::string, Value> &	Port::getConfig( void ) { return _config; }
-std::map<std::string, Value>	Port::getConfig(void) const {return _config;}
+map_configs &	Port::getConfig( void ) { return _config; }
+map_configs	Port::getConfig(void) const {return _config;}
 
 /* ************************************************************************** */
 }
