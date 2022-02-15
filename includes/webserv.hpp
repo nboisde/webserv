@@ -68,7 +68,7 @@
 # define INTERNAL_SERVER_ERROR 500
 
 // HOSTNAMES
-# define LOCALHOST "127.0.0.1"
+# define LOCALHOST "localhost"
 
 // COLORS
 # define RED "\033[38;5;124m"

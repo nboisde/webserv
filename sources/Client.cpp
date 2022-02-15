@@ -166,11 +166,6 @@ int Client::receive(void)
 	std::string tmp(buffer, ret);
 	//std::cout << DEV << "Authorized upload: " << _req.getUploadAuthorized() << RESET << std::endl;
 	int req = _req.concatenateRequest(tmp);
-	std::string tmp2 = _req.getHead()["host"];
-	if (size_t pos = tmp2.find(":") >= 0)
-		_hostname = tmp2.substr(pos);
-	else
-		_hostname = tmp2;
 	//std::cout << _req.getRawContent() << std::endl;
 	if (req == -1 && _req.findContinue() == 0)
 	{
@@ -181,6 +176,14 @@ int Client::receive(void)
 	if (req == SUCCESS)// && _req.getContinue() == 0)
 	{
 		int head_err = _req.fillHeaderAndBody();
+		std::cout << DEV << "FUCK" << RESET << std::endl;
+		std::string tmp2 = _req.getHead()["host"];
+		std::cout << tmp2 << std::endl;
+		size_t pos = tmp2.find(":");
+		if (pos >= static_cast<size_t>(0))
+			_hostname = tmp2.substr(pos);
+		else
+			_hostname = tmp2;
 		//std::cout << BLUE << _req.getHeader() << RESET << std::endl;
 		//std::cout << DEV << _req.getBody() << RESET << std::endl;
 		std::cout << DEV << _req.getRawContent() << RESET << std::endl;
