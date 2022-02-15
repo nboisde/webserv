@@ -127,6 +127,7 @@ void Client::bridgeParsingRequest( void )
 
 	for (std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin(); it != _config[_hostname]["method"]._methods.end(); it++)
 	{
+		std::cout << (*it) << std::endl;
 		if ((*it) == _req.getHead()["method"])
 			not_all = 0;
 	}
@@ -181,9 +182,13 @@ int Client::receive(void)
 		std::cout << tmp2 << std::endl;
 		size_t pos = tmp2.find(":");
 		if (pos >= static_cast<size_t>(0))
-			_hostname = tmp2.substr(pos);
+			_hostname = tmp2.substr(0, pos);
 		else
 			_hostname = tmp2;
+		if (_config[_hostname]["server_name"]._value == "")
+			_hostname = _config.begin()->second["server_name"]._value;
+		std::cout << _hostname << std::endl;
+		std::cout << _config[_hostname]["server_name"]._value << std::endl;
 		//std::cout << BLUE << _req.getHeader() << RESET << std::endl;
 		//std::cout << DEV << _req.getBody() << RESET << std::endl;
 		std::cout << DEV << _req.getRawContent() << RESET << std::endl;
@@ -315,14 +320,19 @@ int	Client::checkURI(std::string url)
 	int					ret;
 	std::string			root;
 
+	std::cout << "URL " << url << std::endl;
 	if (url == "/")
 		url = _config[_hostname]["index"]._value;
+	std::cout << "URL " << url << std::endl;
 	root = _config[_hostname]["root"]._value;
 	ret = checkCGI(url);
+	std::cout << "ROOT " << root << std::endl;
+	std::cout << "URL " << url << std::endl;
 	if (checkPath(root, url) > 0)
 		return (ret);
 	if (checkExtension(root, url) > 0)
 		return (ret);
+
 	_status = NOT_FOUND;
 	return (R_ERR);
 }
@@ -391,10 +401,12 @@ int	Client::executeError( void )
 	root = _config[_hostname]["root"]._value;
 	root += error_file_path;
 	int ret = openFile(root);
+	std::cout << "STATUS " << _status << std::endl;
 	if (error_file_path.size() && ret > 0)
 	{
+		std::cout << "STATUS " << _status << std::endl;
 		checkURI(error_file_path);
-		_status = 301;
+		_status = MOVED_PERMANETLY;
 		_res.resetResponse();
 		std::string loc("Location: ");
 		loc += error_file_path;

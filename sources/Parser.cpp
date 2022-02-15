@@ -98,7 +98,7 @@ int	Parser::checkServer(void)
 	if (_content[_pos] != '{')
 		return (0);
 	_pos++;
-	keys_type new_config = _default_keys;
+	keys_type new_config(_default_keys);
 	while (_pos < _size)
 	{
 		if (!checkKeys(new_config))
@@ -113,17 +113,19 @@ int	Parser::checkServer(void)
 	}
 	if (_pos == _size)
 		return (0);
+	std::cout << "Check Server" << std::endl;
 	it_port it = _server.getRefPorts().begin();
 	it_port ite = _server.getRefPorts().end();
 	for (; it != ite; it++)
 	{
-		std::stringstream new_port;
-		new_port << ntohs((it->getPortAddr()).sin_port);
-		if (new_port.str() == new_config["listen"]._value)
+		std::string first_config_port = (*(it->getConfig()).begin()).second["listen"]._value;
+		if (first_config_port == new_config["listen"]._value)
 		{
 			it->getConfig()[new_config["server_name"]._value] = new_config;
 			break;
 		}
+		std::cout << first_config_port << std::endl;
+		std::cout << new_config["listen"]._value << std::endl;
 	}
 	if (it == ite)
 		_server.addPort(Port(new_config["server_name"]._value, new_config));
@@ -198,6 +200,7 @@ int	Parser::checkMethod(std::string raw_value, Value & new_value)
 	std::string	method;
 	int			position;
 
+	new_value._methods.clear();
 	new_value._value = raw_value;
 	while (raw_value.size())
 	{
