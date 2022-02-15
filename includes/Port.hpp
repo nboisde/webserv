@@ -45,7 +45,6 @@ class Port
 		struct sockaddr_in					_port_address;
 		client_type							_clients;
 		map_configs							_config;
-		std::string							_hostname;
 		// hostname, config(key, val)
 };
 

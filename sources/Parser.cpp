@@ -114,16 +114,19 @@ int	Parser::checkServer(void)
 	if (_pos == _size)
 		return (0);
 	it_port it = _server.getRefPorts().begin();
-	for (; it != _server.getRefPorts().end(); it++)
+	it_port ite = _server.getRefPorts().end();
+	for (; it != ite; it++)
 	{
 		std::stringstream new_port;
 		new_port << ntohs((it->getPortAddr()).sin_port);
 		if (new_port.str() == new_config["listen"]._value)
 		{
 			it->getConfig()[new_config["server_name"]._value] = new_config;
+			break;
 		}
 	}
-	_server.addPort(Port(new_config["server_name"]._value, new_config));
+	if (it == ite)
+		_server.addPort(Port(new_config["server_name"]._value, new_config));
 	return (SUCCESS);
 }
 
