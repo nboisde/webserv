@@ -93,6 +93,27 @@ int Request::checkHeaderEnd(void) const
 
 int Request::analyseURL(void)
 {
+	size_t r = _raw_content.find("\r\n");
+	size_t r2 = _raw_content.find("\n");
+	size_t ret = (r == static_cast<size_t>(-1) && r2 != static_cast<size_t>(-1)) ? r2 : r;
+	if (ret == static_cast<size_t>(-1))
+		return 0;
+	std::string fl = _raw_content.substr(0, ret);
+	int i = 0;
+	while (fl[i] && fl[i] != ' ')
+		i++;
+	while (fl[i] == ' ')
+		i++;
+	//std::string url_try = fl.substr(i, fl.length() - i);
+	if (fl[i] != '/')
+	{
+		std::cout << DEV << "ici" << std::endl;
+		return 0;
+	}
+	while (fl[i] && fl[i] != ' ')
+		i++;
+	if (fl[i] == '\0')
+		return 0;
 	return 1;
 }
 
@@ -321,6 +342,8 @@ int Request::concatenateRequest(std::string tmp)
 		{
 			findMethod();
 			_line++;
+			if (!analyseURL())
+				return errorReturn(0);
 			if (_method_type == UNKNOWN)
 				return errorReturn(1);
 			if (!findProtocol(_raw_content))
@@ -427,6 +450,8 @@ int Request::errorHandling(std::vector<std::string> v, int i)
 	int cl = 0;
 	int te = 0;
 	int host = 0;
+	if (!analyseURL())
+		return errorReturn(0);
 	if (_method_type == UNKNOWN)
 		return errorReturn(1);
 	if (!findProtocol(_raw_content))
