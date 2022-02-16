@@ -17,17 +17,19 @@ class Client
 {
 	typedef	std::map<std::string, Value>	config_type;
 	typedef std::map<int, std::string>		error_type;
+	typedef std::map<std::string, config_type>	map_configs;
+
 
 	private:
 		void			saveLogs(void);
 		int				openFile( std::string path );
-		int				checkURI( Port & port, std::string url );
+		int				checkURI( std::string url );
 		int				checkCGI( std::string & url );
-		int				checkPath( std::string & root, std::string & url, Port & port );
-		int				checkExtension( std::string & root, std::string & url, Port & port );
+		int				checkPath( std::string & root, std::string & url );
+		int				checkExtension( std::string & root, std::string & url );
 		int				executePhpPython( Server const & serv, Port & port, int extension_type );
 		int				executeHtml( void );
-		int				executeError( Port & port );
+		int				executeError( void );
 		error_type		init_responseMap( void );
 		int				uploadAuthorized( void );
 
@@ -39,12 +41,14 @@ class Client
 		ws::Request		_req;
 		ws::Response	_res;
 		std::string		_file_path;
-		config_type		_config;
+		map_configs		_config;
 		error_type		_errors;
+		std::string		_hostname;
+
 
 	public:
 		Client( void );
-		Client( int fd, struct sockaddr_in *cli_addr, config_type conf );
+		Client( int fd, struct sockaddr_in *cli_addr, map_configs conf );
 		Client( Client const & src );
 		virtual ~Client();
 			
@@ -68,7 +72,9 @@ class Client
 		std::string		getFilePath( void ) const;
 		std::string		getIp( void ) const;
 		std::string		getPort( void ) const;
-		config_type		getConfig( void ) const;
+		map_configs		getConfig( void ) const;
+		std::string		getHostname( void ) const;
+
 };
 
 }

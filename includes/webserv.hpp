@@ -67,6 +67,9 @@
 # define REQUEST_ENTITY_TOO_LARGE 413
 # define INTERNAL_SERVER_ERROR 500
 
+// HOSTNAMES
+# define LOCALHOST "localhost"
+
 // COLORS
 # define RED "\033[38;5;124m"
 # define RESET "\033[0m"

@@ -91,6 +91,11 @@ int Request::checkHeaderEnd(void) const
 		return (1);
 }
 
+int Request::analyseURL(void)
+{
+	return 1;
+}
+
 void Request::findMethod(void)
 {
 	int g, p, d;
