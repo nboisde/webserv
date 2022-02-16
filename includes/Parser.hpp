@@ -24,6 +24,7 @@ class Parser
 		Server				_server;
 		checker_type		_key_checker;
 		keys_type			_default_keys;
+		checker_type		_default_loc_keys;
 
 		void				initParser(void);
 
@@ -34,6 +35,8 @@ class Parser
 		int					checkServer(void);
 		int					checkKeys(keys_type & new_config);
 		int					setValues(std::string key, keys_type & new_config);
+		int					checkLocationKeys(Value & loc_config);
+		int					setLocationValues(std::string key, keys_type & new_config);
 		int					checkValue(std::string key, std::string value, keys_type & new_config);
 
 		int					checkPort(std::string, Value &);
@@ -47,6 +50,7 @@ class Parser
 		int					checkIndex(std::string, Value &);
 		int					checkLocation(std::string, Value &);
 		int					checkUpload(std::string, Value &);
+		int					checkReturn(std::string, Value &);
 
 	public:
 		
