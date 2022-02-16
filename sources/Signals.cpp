@@ -6,5 +6,5 @@ void	signalHandler(int signum)
 	// Clean exit..
 	sleep(1);	
 	std::cout << GREEN << "Bye bye" << RESET << std::endl;
-	exit(signum);
+	throw SignalEnd(signum);
 }
