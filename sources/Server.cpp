@@ -51,6 +51,7 @@ void	Server::launchServer( void )
 	}
 	if (!_ports.size())
 		exit(1);
+	addToPolling(0); //CHECK STDIN
 	while (true)
 	{
 		_clean_fds = 0;
@@ -68,6 +69,17 @@ void	Server::launchServer( void )
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
 				//std::cout << "REVENTS = " << findFds((*ct).getFd()).revents << std::endl;
+				if (findFds((*ct).getFd()).fd == 0 && (findFds((*ct).getFd()).revents & POLLIN))
+				{
+					std::string input;
+					char buf[BUFFER_SIZE];
+					memset(buf, 0, BUFFER_SIZE);
+					while (read(STDIN, buf, BUFFER_SIZE))
+					{
+						input += buf;
+						memset(buf, 0, BUFFER_SIZE);
+					}
+				}
 				if ((findFds((*ct).getFd()).revents) == 0)
 				{
 					ct++;
@@ -89,6 +101,7 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
+
 					int ret = (*ct).receive();
 
 					if ( ret == WRITING)
@@ -146,7 +159,7 @@ void	Server::closeConnection(it_client & ct, it_port & pt)
 	_clean_fds = 1;
 }
 
-struct pollfd & Server::findFds( int fd)
+struct pollfd & Server::findFds( int fd )
 {
 	std::vector<struct pollfd>::iterator it = _fds.begin();
 	std::vector<struct pollfd>::iterator ite = _fds.end();
