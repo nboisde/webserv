@@ -24,6 +24,13 @@ int	main(int ac, char **av)
 		std::cout << FIRE << f.rdbuf() << RESET << std::endl << std::endl;
 		f.close();
 	}
-	parser.getServer().launchServer();
+	try{
+		parser.getServer().launchServer();
+	}
+	catch (SignalEnd & e)
+	{
+		std::cout << FIRE << e.what() << RESET << std::endl;
+		return (e.getSignal());
+	}
 	return (0);
 }
