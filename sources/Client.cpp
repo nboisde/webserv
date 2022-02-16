@@ -1,24 +1,23 @@
 #include "Client.hpp"
-
+# include "Value.hpp"
 namespace ws
 {
 
-typedef	std::map<std::string, Value>	config_type;
-typedef std::map<int, std::string>		error_type;
-typedef std::map<std::string, config_type>	map_configs;
+	typedef	std::map<std::string, Value>	config_type;
+	typedef std::map<int, std::string>		error_type;
+	typedef std::map<std::string, config_type>	map_configs;
 
 /*
 ** ------------------------------- CONSTRUCTOR / DESTRUCTOR--------------------
 */ 
 Client::Client( void ) {}
 
-Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : _fd(fd), _status(OK), _config(conf), _hostname(LOCALHOST) {
+Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : _fd(fd), _status(OK), _config(conf) {
 	_ip = inet_ntoa(cli_addr->sin_addr);
 	
 	std::stringstream port;
 	port << ntohs(cli_addr->sin_port);
 	_port += port.str();
-	_req.setUploadAuthorized(this->uploadAuthorized());
 }
 
 Client::Client( Client const & src ) { *this = src; }
@@ -40,7 +39,6 @@ Client &	Client::operator=( Client const & rhs )
 		this->_ip = rhs.getIp();
 		this->_port = rhs.getPort();
 		this->_config = rhs.getConfig();
-		this->_hostname = rhs._hostname;
 	}
 	return *this;
 }
@@ -48,12 +46,13 @@ Client &	Client::operator=( Client const & rhs )
 #include <sys/types.h>
 #include <sys/stat.h>
 
-std::string Client::uploadPath( void )
+std::string Client::uploadPath( std::string url)
 {
-	std::map<std::string, std::string> ml = _config[_hostname]["location"]._locations;
-	std::string s = "";
-	
-	return (ml["upload"]);
+	Value							location = _config[_hostname]["location"];
+	std::map<std::string, route>	prout = location._locations;
+	route							caca = prout[url];
+	std::string						ml = caca.upload_path; 
+	return (ml);
 }
 
 // SI FORMULAIRE GERE PAR CGI, EDITER _HEAD...
@@ -93,7 +92,7 @@ int Client::uploadFiles( void )
 		std::string f_content = tmp.substr(0, bd);
 		if (save == 1)
 		{
-			std::string path = uploadPath();
+			std::string path = uploadPath("route");
 			if (!strIsPrintable(f_name))
 			{
 				int ex = f_name.find(".");
@@ -105,13 +104,21 @@ int Client::uploadFiles( void )
 				f_name = "file";
 				f_name += extension;
 			}	
-			if (path.length() != 0)
-				f_name = path + f_name;
-			std::fstream fs;
-			fs.open(f_name.c_str(), std::fstream::out);
-			fs << f_content;
-			fs.close();
-			chmod(f_name.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+			int fd = -1;
+			if (path.length() == 0)
+				fd = open(f_name.c_str(), O_CREAT | O_WRONLY, 0644);
+			else
+			{
+				path += f_name;
+				fd = open(path.c_str(), O_CREAT | O_WRONLY, 0644);
+			}
+			if (fd < 0)
+				continue ;
+			int ret;
+			ret = write(fd, f_content.c_str(), f_content.length());
+			if (ret == -1)
+				std::cout << "Writing problem" << std::endl;
+			close(fd);
 		}
 		int forward = tmp.find(_req.getBoundary()) + _req.getBoundary().length();
 		while (tmp[forward] && (tmp[forward] == '-' || tmp[forward] == '\r' || tmp[forward] == '\n'))
@@ -119,6 +126,45 @@ int Client::uploadFiles( void )
 		data = tmp.substr(forward, tmp.length() - forward);
 	}
 	return SUCCESS;
+}
+
+int Client::receive(void)
+{
+	char	buffer[BUFFER_SIZE];
+
+	for (size_t i = 0; i < BUFFER_SIZE; i++)
+		buffer[i] = 0;
+	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
+	if ( ret < 0 )
+	{
+		perror("\nIn recv");
+		_status = INTERNAL_SERVER_ERROR;
+		return WRITING;
+	}
+	std::string tmp(buffer, ret);
+	int req = _req.concatenateRequest(tmp);
+	if (req == -1)
+	{
+		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
+		_status = _req.getStatus();
+		return WRITING;
+	}
+	if (req == SUCCESS)
+	{
+		int head_err = _req.fillHeaderAndBody();
+		if (head_err == ERROR)
+		{
+			std::cout << RED << "400 bad request (Header reception 2)" << RESET << std::endl;
+			//_status = BAD_REQUEST;
+			_status = _req.getStatus();
+			return WRITING;
+		}
+		bridgeParsingRequest();
+		if (_status == OK && _req.getMultipart() == 1)
+			uploadFiles();
+		return WRITING;
+	}
+	return READING;
 }
 
 void Client::bridgeParsingRequest( void )
@@ -138,74 +184,6 @@ void Client::bridgeParsingRequest( void )
 		_status = REQUEST_ENTITY_TOO_LARGE;
 	else
 		_status = OK;
-}
-
-int Client::uploadAuthorized( void )
-{
-	for (std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin(); it != _config[_hostname]["method"]._methods.end(); it++)
-	{
-		if ((*it) == "POST")
-			return 1;
-	}
-	return 0;
-}
-
-int Client::receive(void)
-{
-	char	buffer[BUFFER_SIZE];
-
-	for (size_t i = 0; i < BUFFER_SIZE; i++)
-		buffer[i] = 0;
-	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
-	if ( ret < 0 )
-	{
-		perror("\nIn recv");
-		_status = INTERNAL_SERVER_ERROR;
-		return WRITING;
-	}
-	_req.setUploadAuthorized(this->uploadAuthorized());
-	std::string tmp(buffer, ret);
-	//std::cout << DEV << "Authorized upload: " << _req.getUploadAuthorized() << RESET << std::endl;
-	int req = _req.concatenateRequest(tmp);
-	//std::cout << _req.getRawContent() << std::endl;
-	if (req == -1 && _req.findContinue() == 0)
-	{
-		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
-		_status = _req.getStatus();
-		return WRITING;
-	}
-	if (req == SUCCESS)// && _req.getContinue() == 0)
-	{
-		int head_err = _req.fillHeaderAndBody();
-		std::cout << DEV << "FUCK" << RESET << std::endl;
-		std::string tmp2 = _req.getHead()["host"];
-		std::cout << tmp2 << std::endl;
-		size_t pos = tmp2.find(":");
-		if (pos >= static_cast<size_t>(0))
-			_hostname = tmp2.substr(0, pos);
-		else
-			_hostname = tmp2;
-		if (_config[_hostname]["server_name"]._value == "")
-			_hostname = _config.begin()->second["server_name"]._value;
-		std::cout << _hostname << std::endl;
-		std::cout << _config[_hostname]["server_name"]._value << std::endl;
-		//std::cout << BLUE << _req.getHeader() << RESET << std::endl;
-		//std::cout << DEV << _req.getBody() << RESET << std::endl;
-		std::cout << DEV << _req.getRawContent() << RESET << std::endl;
-		_req.setContinue(0);
-		if (head_err == ERROR)
-		{
-			std::cout << RED << "400 bad request (Header reception 2)" << RESET << std::endl;
-			//_status = BAD_REQUEST;
-			_status = _req.getStatus();
-			return WRITING;
-		}
-		bridgeParsingRequest();
-		if (_status == OK && _req.getMultipart() == 1)
-			uploadFiles();
-		return WRITING;
-	}
-	return READING;
 }
 
 int Client::send( void )
@@ -233,7 +211,7 @@ int Client::send( void )
 int	Client::checkPath( std::string & root, std::string & url )
 {
 	Value							location = _config[_hostname]["location"];
-	std::string						path = location._locations[url];
+	std::string						path = location._locations[url].redir;
 	std::stringstream				file_path;
 	
 	file_path << root << url;
@@ -252,29 +230,6 @@ int	Client::checkPath( std::string & root, std::string & url )
 			_file_path = file_path.str();
 			return (SUCCESS);
 		}
-	}
-	return (ERROR);
-}
-
-int	Client::checkExtension( std::string & root, std::string & url )
-{
-	int								pos = url.find(".");
-	int								attachement = url.find("/download/");
-	std::stringstream				file_path;
-
-	if (pos > 0 && attachement < 0)
-	{
-		Value		location = _config[_hostname]["location"];
-		std::string	extension = url.substr(pos);
-		std::string	path = location._locations[extension];
-		if (path.size())
-			url = path + url;
-	}
-	file_path << root << url;
-	if (openFile(file_path.str()) > 0)
-	{
-		_file_path = file_path.str();
-		return (SUCCESS);
 	}
 	return (ERROR);
 }
@@ -307,7 +262,8 @@ int	Client::openFile( std::string path )
 		return ERROR;
 	close(fd);
 	fd = ::open(path.c_str(), O_DIRECTORY);
-	if (fd > 0)
+	if 
+	(fd > 0)
 	{
 		close(fd);
 		return (ERROR);
@@ -315,7 +271,7 @@ int	Client::openFile( std::string path )
 	return SUCCESS;
 }
 
-int	Client::checkURI(std::string url)
+int	Client::checkURI( std::string url)
 {
 	int					ret;
 	std::string			root;
@@ -330,9 +286,6 @@ int	Client::checkURI(std::string url)
 	std::cout << "URL " << url << std::endl;
 	if (checkPath(root, url) > 0)
 		return (ret);
-	if (checkExtension(root, url) > 0)
-		return (ret);
-
 	_status = NOT_FOUND;
 	return (R_ERR);
 }
@@ -451,5 +404,4 @@ std::string							Client::getPort( void ) const { return _port; }
 ws::Response						Client::getRes(void ) const { return _res; }
 map_configs							Client::getConfig( void ) const { return _config; }
 std::string							Client::getHostname( void ) const { return _hostname; }
-
 }

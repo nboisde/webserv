@@ -46,6 +46,7 @@ int	Parser::initWebServer(void)
 {
 	if (!checkHttp())
 		return (0);
+
 	while (_pos < _size)
 	{
 		if (!checkServer())
@@ -113,7 +114,6 @@ int	Parser::checkServer(void)
 	}
 	if (_pos == _size)
 		return (0);
-	std::cout << "Check Server" << std::endl;
 	it_port it = _server.getRefPorts().begin();
 	it_port ite = _server.getRefPorts().end();
 	for (; it != ite; it++)
@@ -153,12 +153,67 @@ int	Parser::checkKeys(keys_type & new_config)
 	}
 	if (!found)
 		return (0);
-	if (!setValues((*it).first, new_config))
+	std::cout << "FOUND KEY " << it->first << std::endl;
+	if (it->first == "location")
+	{
+		if (!checkLocationKeys(new_config["location"]))
+			return (0);
+	}
+	else 
+	{	
+		if (!setValues((*it).first, new_config, 0))
+			return (0);
+	}
+	return (SUCCESS);
+}
+
+int	Parser::checkLocationKeys(Value & loc_config, keys_type & new_config)
+{
+	while (_pos < _size && isspace(_content[_pos]))
+		_pos++;
+	int start = _pos;
+	while (_pos < _size && !isspace(_content[_pos]) && _content[_pos] != '{')
+		_pos++;
+	int end = _pos - start;
+	std::string path = _content.substr(start, end);
+	while (_pos < _size && isspace(_content[_pos]))
+		_pos++;
+	if (_content[_pos] != '{')
+		return (0);
+	_pos++;
+	while (_pos < _size && isspace(_content[_pos]))
+		_pos++;
+	std::pair<std::string, route> new_path(path, route());
+	loc_config._locations.insert(new_path);
+
+	std::vector<std::string>::iterator it = loc_config._locations[path].keys.begin();
+	std::vector<std::string>::iterator ite = loc_config._locations[path].keys.end();
+	
+	int	found = 0;
+	for (; it != ite; it++)
+	{
+		std::cout << "KEY " << *it << std::endl;
+		int i = _content.find(*it, _pos);
+		std::cout << "POS " << _pos << std::endl;
+		std::cout << "FIND " << i << std::endl;
+		if (i == _pos)
+		{
+			found = 1;
+			_pos += it->size();
+			break;
+		}
+	}
+	std::cout << "FOUND KEY " << *it << std::endl;
+	return (0);
+	if (!found)
+		return (0);
+	if (!setValues(*it, new_config, &(loc_config._locations[path]), 1))
 		return (0);
 	return (SUCCESS);
 }
 
-int	Parser::setValues(std::string key, keys_type & new_config)
+
+int	Parser::setValues(std::string key, keys_type * new_config, route * location)
 {
 	int	isspaceNb = 0;
 
@@ -280,6 +335,7 @@ int	Parser::checkErrorPage(std::string raw_value, Value & new_value)
 int	Parser::checkRoot(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkIndex(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkUpload(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
+int	Parser::checkReturn(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
 	int			pos = 0;
@@ -295,20 +351,20 @@ int	Parser::checkLocation(std::string raw_value, Value & new_value)
 	for (; pos < size && !isspace(raw_value[pos]); pos++) {}
 	if (pos != size)
 		return (0);
-	new_value._locations.insert(std::pair<std::string, std::string>(location, substitute));
+	//new_value._locations.insert(std::pair<std::string, std::string>(location, substitute));
 	return (SUCCESS);  
 }
 
-int	Parser::checkValue(std::string key, std::string value, keys_type & new_config)
+int	Parser::checkValue(std::string key, std::string value, keys_type * new_config, route * location)
 {
-	std::map<std::string, Value>::iterator			ite = new_config.end();
-	std::map<std::string, Value>::iterator			it = new_config.find(key);
+	std::map<std::string, Value>::iterator			ite = new_config->end();
+	std::map<std::string, Value>::iterator			it = new_config->find(key);
 	std::map<std::string, validity_fct>::iterator	cite = _key_checker.end();
 	std::map<std::string, validity_fct>::iterator	cit = _key_checker.find(key);
 
 	if (it == ite || cite == cit)
 		return (0);
-	if (!((this->*_key_checker[key])(value, _default_keys[key])))
+	if (!((this->*_key_checker[key])(value, _default_keys[key], )))
 	{
 		std::cout << key << " : " << value << " is not valid" << std::endl;
 		return (0);
@@ -329,6 +385,8 @@ void	Parser::initParser(void)
 	_key_checker["root"] = &Parser::checkRoot;
 	_key_checker["index"] = &Parser::checkIndex;
 	_key_checker["location"] = &Parser::checkLocation;
+	_key_checker["upload"] = &Parser::checkUpload;
+	_key_checker["return"] = &Parser::checkReturn;
 	_default_keys["listen"] = Value("8080");
 	_default_keys["host"] = Value(LOCALHOST);
 	_default_keys["server_name"] = Value(LOCALHOST);
@@ -344,9 +402,9 @@ void	Parser::initParser(void)
 	_default_keys["root"] = Value(stream.str());
 	free(buf);
 	_default_keys["index"] = Value("/html/index.html");
-	_default_keys["location"] = Value("upload www/uploads/");
-	_default_keys["location"]._locations["upload"] = "www/uploads/";
+	_default_keys["location"] = Value("");
 }
 
 Server	Parser::getServer( void ) { return _server; }
+
 }

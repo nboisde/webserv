@@ -15,8 +15,8 @@ class Port;
 
 class Client
 {
-	typedef	std::map<std::string, Value>	config_type;
-	typedef std::map<int, std::string>		error_type;
+	typedef	std::map<std::string, Value>		config_type;
+	typedef std::map<int, std::string>			error_type;
 	typedef std::map<std::string, config_type>	map_configs;
 
 
@@ -61,7 +61,7 @@ class Client
 		void			closeConnection( void );
 		void 			bridgeParsingRequest( void );
 		int				uploadFiles( void );
-		std::string		uploadPath( void );
+		std::string		uploadPath( std::string url );
 
 		int				getFd( void ) const;
 		int				getStatus( void ) const;
