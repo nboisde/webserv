@@ -92,6 +92,8 @@
 # include <map>
 # include <csignal>
 # include <algorithm>
+# include <functional>
+
 
 //C_LIBRARIES//#include <string.h>
 # include <string.h>
