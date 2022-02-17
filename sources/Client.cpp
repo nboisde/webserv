@@ -3,8 +3,8 @@
 namespace ws
 {
 
-	typedef	std::map<std::string, Value>	config_type;
-	typedef std::map<int, std::string>		error_type;
+	typedef	std::map<std::string, Value>		config_type;
+	typedef std::map<int, std::string>			error_type;
 	typedef std::map<std::string, config_type>	map_configs;
 
 /*
@@ -48,11 +48,12 @@ Client &	Client::operator=( Client const & rhs )
 
 std::string Client::uploadPath( std::string url)
 {
+	std::string	upload_path;
 	Value							location = _config[_hostname]["location"];
-	std::map<std::string, Route>	prout = location._locations;
-	Route							caca = prout[url];
-	std::string						ml = caca.upload; 
-	return (ml);
+	Route							route = (location._locations)[url];
+ 	
+	upload_path = route.upload; 
+	return (upload_path);
 }
 
 // SI FORMULAIRE GERE PAR CGI, EDITER _HEAD...
@@ -178,7 +179,10 @@ void Client::bridgeParsingRequest( void )
 			not_all = 0;
 	}
 	if (not_all == 1)
+	{
+		std::cout << "HERE\n" << std::endl;
 		_status = NOT_ALLOWED;
+	}
 	else if (static_cast<size_t>(_req.getBody().length()) > _config[_hostname]["client_max_body_size"]._max_body_size
 	|| static_cast<size_t>(_req.getContentLength()) > _config[_hostname]["client_max_body_size"]._max_body_size)
 		_status = REQUEST_ENTITY_TOO_LARGE;

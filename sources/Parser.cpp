@@ -17,6 +17,9 @@ int	Parser::launch(std::string file)
 		return (0);
 	if (!initWebServer())
 		return (0);
+	std::cout << "LOCATION " << _server.getPorts().begin()->getConfig()["location"].begin()->first << std::endl;
+	std::cout << "METHOD " << _server.getPorts().begin()->getConfig()["method"].begin()->first << std::endl;
+	std::cout << "PORT " << _server.getPorts().begin()->getConfig()["listen"].begin()->first << std::endl;
 	return (SUCCESS);
 }
 
@@ -129,7 +132,10 @@ int	Parser::checkServer(void)
 		std::cout << new_config["listen"]._value << std::endl;
 	}
 	if (it == ite)
+	{
+		std::cout << "New Port\n";
 		_server.addPort(Port(new_config["server_name"]._value, new_config));
+	}
 	return (SUCCESS);
 }
 
@@ -154,6 +160,7 @@ int	Parser::checkKeys(keys_type & new_config)
 	}
 	if (!found)
 		return (0);
+	std::cout << "KEY " << it->first << std::endl;
 	if (!setValues((*it).first, new_config))
 		return (0);
 	return (SUCCESS);
