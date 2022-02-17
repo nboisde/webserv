@@ -114,6 +114,7 @@
 # include <sys/socket.h>
 # include <fcntl.h>
 # include <stdio.h>
+# include <dirent.h>
 
 // Function prototypes.
 
