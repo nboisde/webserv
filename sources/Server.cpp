@@ -37,8 +37,29 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
+char *ltrim(char *s)
+{
+    while(isspace(*s)) 
+		s++;
+    return s;
+}
+
+char *rtrim(char *s)
+{
+    char* back = s + strlen(s);
+    while(isspace(*--back));
+    *(back+1) = '\0';
+    return s;
+}
+
+char *trim(char *s)
+{
+    return rtrim(ltrim(s)); 
+}
+
 void	Server::launchServer( void )
 {
+	addToPolling(STDIN); //CHECK STDIN
 	for (std::vector<Port>::iterator it = _ports.begin(); it != _ports.end();)
 	{
 		if ((*it).launchPort() > 0)
@@ -51,13 +72,35 @@ void	Server::launchServer( void )
 	}
 	if (!_ports.size())
 		exit(1);
-	addToPolling(0); //CHECK STDIN
 	while (true)
 	{
 		_clean_fds = 0;
 		setRevents();
 		if (int ret = polling() <= 0)
 			break;
+		if (findFds(STDIN).fd == 0 && (findFds(STDIN).revents & POLLIN))
+			{
+				FILE * stream = fdopen(STDIN, "r");
+				char *line = NULL;
+				size_t n;
+				if (stream == NULL)
+				{	
+					perror("fopen");
+					goto poll_next;
+				}
+				ssize_t ret = getline(&line, &n, stream);
+				if (ret != -1 && !(strcmp(trim(line), "exit")))
+				{
+					if (line)
+						free(line);
+					fclose(stream);
+					std::cout << "EXIT ACTIVATED" << std::endl;
+					return ;
+				}
+				if (line)
+					free(line);
+			}
+		poll_next:
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
 			int fd = 0;
@@ -69,17 +112,6 @@ void	Server::launchServer( void )
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
 				//std::cout << "REVENTS = " << findFds((*ct).getFd()).revents << std::endl;
-				if (findFds((*ct).getFd()).fd == 0 && (findFds((*ct).getFd()).revents & POLLIN))
-				{
-					std::string input;
-					char buf[BUFFER_SIZE];
-					memset(buf, 0, BUFFER_SIZE);
-					while (read(STDIN, buf, BUFFER_SIZE))
-					{
-						input += buf;
-						memset(buf, 0, BUFFER_SIZE);
-					}
-				}
 				if ((findFds((*ct).getFd()).revents) == 0)
 				{
 					ct++;
