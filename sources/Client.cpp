@@ -51,7 +51,7 @@ std::string Client::uploadPath( std::string url)
 	Value							location = _config[_hostname]["location"];
 	std::map<std::string, route>	prout = location._locations;
 	route							caca = prout[url];
-	std::string						ml = caca.upload_path; 
+	std::string						ml = caca.upload; 
 	return (ml);
 }
 
@@ -211,7 +211,7 @@ int Client::send( void )
 int	Client::checkPath( std::string & root, std::string & url )
 {
 	Value							location = _config[_hostname]["location"];
-	std::string						path = location._locations[url].redir;
+	std::string						path = location._locations[url].redirection;
 	std::stringstream				file_path;
 	
 	file_path << root << url;
