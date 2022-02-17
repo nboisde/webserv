@@ -41,7 +41,6 @@ class Server
 		void						setIp( std::string new_ip );
 		void						setPorts( std::vector<Port> new_ports);
 		void						setFds( std::vector<struct pollfd> fds);
-
 	protected:
 		bool						_clean_fds;
 		std::string					_server_ip;

@@ -37,24 +37,54 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 ** --------------------------------- METHODS ----------------------------------
 */
 
-char *ltrim(char *s)
+static char *trim(char *str)
 {
-    while(isspace(*s)) 
+	char *s = str;
+	int i = 0;
+	int end = strlen(s);
+	while (isspace(*s))
+	{
+		i++;
 		s++;
-    return s;
+	}
+	if (i == end)
+		return NULL;
+	end--;
+	while (isspace(s[end]))
+		end--;
+	if (end == -1)
+		return NULL;
+	else
+		s[end + 1] = '\0';
+    return (s); 
 }
 
-char *rtrim(char *s)
+static int	monitor_stdin( void )
 {
-    char* back = s + strlen(s);
-    while(isspace(*--back));
-    *(back+1) = '\0';
-    return s;
-}
-
-char *trim(char *s)
-{
-    return rtrim(ltrim(s)); 
+	int exit_status = 0;
+	FILE * stream = fdopen(dup(STDIN), "r");
+	char *line = NULL;
+	size_t n;
+	if (stream == NULL)
+	{	
+		perror("fopen");
+		return (1);
+	}
+	ssize_t ret = getline(&line, &n, stream);
+	fclose(stream);
+	if (ret == -1 || line == NULL || trim(line) == NULL)
+	{
+		if (errno && errno != EAGAIN)
+			perror("getline");
+		exit_status = 1;
+	}
+	if (!exit_status && !(strcmp(trim(line), "exit")))
+		exit_status = 0;
+	else
+		exit_status = 1;
+	if (line)
+		free(line);
+	return (exit_status);
 }
 
 void	Server::launchServer( void )
@@ -78,29 +108,8 @@ void	Server::launchServer( void )
 		setRevents();
 		if (int ret = polling() <= 0)
 			break;
-		if (findFds(STDIN).fd == 0 && (findFds(STDIN).revents & POLLIN))
-			{
-				FILE * stream = fdopen(STDIN, "r");
-				char *line = NULL;
-				size_t n;
-				if (stream == NULL)
-				{	
-					perror("fopen");
-					goto poll_next;
-				}
-				ssize_t ret = getline(&line, &n, stream);
-				if (ret != -1 && !(strcmp(trim(line), "exit")))
-				{
-					if (line)
-						free(line);
-					fclose(stream);
-					std::cout << "EXIT ACTIVATED" << std::endl;
-					return ;
-				}
-				if (line)
-					free(line);
-			}
-		poll_next:
+		if (findFds(STDIN).fd == 0 && (findFds(STDIN).revents & POLLIN) && !(monitor_stdin()))
+				return ;
 		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
 		{
 			int fd = 0;
