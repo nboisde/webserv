@@ -313,22 +313,17 @@ int	Parser::checkLocation(std::string raw_value, Value & new_value)
 
 	std::pair<std::string, Route> new_path(raw_value, Route());
 	new_value._locations.insert(new_path);
-	std::cout << "NEW PATH IN LOCATION " << raw_value << std::endl;
 	while (_pos < _size && _content[_pos] != '}')
 	{
 		while (_pos < _size && isspace(_content[_pos]))
 			_pos++;
-		std::cout << RED << &(_content[_pos]) << RESET << std::endl;
 		if (!(checkRouteKeys(new_value._locations[raw_value])))
 			return (0);
 		while (_pos < _size && isspace(_content[_pos]))
 			_pos++;
-		std::cout << GREEN << &(_content[_pos]) << RESET << std::endl;
 	}
-	std::cout << YELLOW << &(_content[_pos]) << RESET << std::endl;
 	if (_content[_pos] != '}')
 		return (0);
-	std::cout << "LOCATION DONE" << std::endl;
 	_pos++;
 	return (SUCCESS);
 }
@@ -340,14 +335,12 @@ int	Parser::checkRouteKeys( Route & route )
 
 	if ((key = _content.find("redirection", _pos)) == _pos)
 	{
-		std::cout << "REDIR KEY " << key << std::endl;
 		_pos += 11;
 		if (!(setRouteValues(&(route.redirection), 0)))
 			return (0);
 	}
 	else if ((key = _content.find("autoindex", _pos)) == _pos)
 	{
-		std::cout << "AUTOINDEX KEY " << key << std::endl;
 		_pos += 9;	
 		if (!(setRouteValues(&(route.autoindex), 0)))
 			return (0);
@@ -355,29 +348,23 @@ int	Parser::checkRouteKeys( Route & route )
 	else if ((key = _content.find("index", _pos)) == _pos)
 	{
 		_pos += 5;
-		std::cout << "INDEX KEY " << key << std::endl;
 		if (!(setRouteValues(&(route.index), 0)))
 			return (0);
 	}
 	else if ((key = _content.find("upload", _pos)) == _pos)
 	{
 		_pos += 6;
-		std::cout << "UPLOAD KEY " << key << std::endl;
 		if (!(setRouteValues(&(route.upload), 0)))
 			return (0);
 	}
 	else if ((key = _content.find("method", _pos)) == _pos)
 	{
 		_pos += 6;
-		std::cout << "METHODS KEY " << key << std::endl;
 		if (!(setRouteValues(0, &(route.methods))))
 			return (0);
 	}
 	else
-	{ 
-		std::cout << "NO KEYS FOUND\n";
 		return (0);
-	}
 	return (SUCCESS);
 }
 
@@ -387,7 +374,6 @@ int	Parser::setRouteValues(std::string * value, std::vector<std::string> * metho
 	int			grammar;
 	std::string	new_value;
 
-	std::cout << BLUE << &(_content[_pos]) << RESET << std::endl;
 	while (_pos < _size && isspace(_content[_pos]))
 	{
 		_pos++;
