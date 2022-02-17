@@ -35,9 +35,11 @@ class Parser
 		int					checkServer(void);
 		int					checkKeys(keys_type & new_config);
 		int					setValues(std::string key, keys_type & new_config);
-		int					checkLocationKeys(Value & loc_config);
-		int					setLocationValues(std::string key, keys_type & new_config);
 		int					checkValue(std::string key, std::string value, keys_type & new_config);
+
+		int					checkRouteKeys( Route & route );
+		int					setRouteValues( std::string * value, std::vector<std::string> * methods );
+		int					checkRouteMethod( std::string new_value, std::vector<std::string> * methods);
 
 		int					checkPort(std::string, Value &);
 		int					checkMethod(std::string, Value &);
