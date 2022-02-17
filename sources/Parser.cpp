@@ -6,6 +6,8 @@ namespace ws
 Parser::Parser(void) : _pos(0), _server("127.0.0.1") { initParser(); }
 Parser::~Parser(void) {}
 
+Server	Parser::getServer( void ) { return _server; }
+
 int	Parser::launch(std::string file)
 {
 	_config_file = file;
@@ -46,7 +48,6 @@ int	Parser::initWebServer(void)
 {
 	if (!checkHttp())
 		return (0);
-
 	while (_pos < _size)
 	{
 		if (!checkServer())
@@ -153,7 +154,6 @@ int	Parser::checkKeys(keys_type & new_config)
 	}
 	if (!found)
 		return (0);
-	std::cout << "FOUND KEY " << it->first << std::endl;
 	if (!setValues((*it).first, new_config))
 		return (0);
 	return (SUCCESS);
@@ -178,10 +178,29 @@ int	Parser::setValues(std::string key, keys_type & new_config)
 	if (grammar == -1)
 		return (0);
 	std::string value = _content.substr(_pos, grammar - _pos);
-	std::cout << "FOUND VALUE " << value << std::endl; 
 	if (!(checkValue(key, value, new_config)))
 		return (0);
-	_pos = grammar + 1;
+	if (key != "location")
+		_pos = grammar + 1;
+	return (SUCCESS);
+}
+
+
+int	Parser::checkValue(std::string key, std::string value, keys_type & new_config)
+{
+	std::map<std::string, Value>::iterator			ite = new_config.end();
+	std::map<std::string, Value>::iterator			it = new_config.find(key);
+	std::map<std::string, validity_fct>::iterator	cite = _key_checker.end();
+	std::map<std::string, validity_fct>::iterator	cit = _key_checker.find(key);
+
+	if (it == ite || cite == cit)
+		return (0);
+	if (!((this->*_key_checker[key])(value, _default_keys[key])))
+	{
+		std::cout << key << " : " << value << " is not valid" << std::endl;
+		return (0);
+	}
+	new_config[key] = _default_keys[key];
 	return (SUCCESS);
 }
 
@@ -284,52 +303,135 @@ int	Parser::checkReturn(std::string raw_value, Value & new_value) { new_value._v
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
 	new_value._value = raw_value;
+
+	_pos += raw_value.size();
 	while (_pos < _size && isspace(_content[_pos]))
 		_pos++;
-	std::pair<std::string, route> new_path(raw_value, route());
+	if (_content[_pos] != '{')
+		return (0);
+	_pos++;
+
+	std::pair<std::string, Route> new_path(raw_value, Route());
 	new_value._locations.insert(new_path);
 	std::cout << "NEW PATH IN LOCATION " << raw_value << std::endl;
-
-
-	std::vector<std::string>::iterator it = new_value._locations[raw_value].keys.begin();
-	std::vector<std::string>::iterator ite = new_value._locations[raw_value].keys.end();
-	
-	int	found = 0;
-	for (; it != ite; it++)
+	while (_pos < _size && _content[_pos] != '}')
 	{
-		std::cout << "KEY " << *it << std::endl;
-		int i = _content.find(*it, _pos);
-		std::cout << "POS " << _pos << std::endl;
-		std::cout << "FIND " << i << std::endl;
-		if (i == _pos)
-		{
-			found = 1;
-			_pos += it->size();
+		while (_pos < _size && isspace(_content[_pos]))
+			_pos++;
+		std::cout << RED << &(_content[_pos]) << RESET << std::endl;
+		if (!(checkRouteKeys(new_value._locations[raw_value])))
+			return (0);
+		while (_pos < _size && isspace(_content[_pos]))
+			_pos++;
+		std::cout << GREEN << &(_content[_pos]) << RESET << std::endl;
+	}
+	std::cout << YELLOW << &(_content[_pos]) << RESET << std::endl;
+	if (_content[_pos] != '}')
+		return (0);
+	std::cout << "LOCATION DONE" << std::endl;
+	_pos++;
+	return (SUCCESS);
+}
+
+
+int	Parser::checkRouteKeys( Route & route )
+{
+	int key;
+
+	if ((key = _content.find("redirection", _pos)) == _pos)
+	{
+		std::cout << "REDIR KEY " << key << std::endl;
+		_pos += 11;
+		if (!(setRouteValues(&(route.redirection), 0)))
+			return (0);
+	}
+	else if ((key = _content.find("autoindex", _pos)) == _pos)
+	{
+		std::cout << "AUTOINDEX KEY " << key << std::endl;
+		_pos += 9;	
+		if (!(setRouteValues(&(route.autoindex), 0)))
+			return (0);
+	}
+	else if ((key = _content.find("index", _pos)) == _pos)
+	{
+		_pos += 5;
+		std::cout << "INDEX KEY " << key << std::endl;
+		if (!(setRouteValues(&(route.index), 0)))
+			return (0);
+	}
+	else if ((key = _content.find("upload", _pos)) == _pos)
+	{
+		_pos += 6;
+		std::cout << "UPLOAD KEY " << key << std::endl;
+		if (!(setRouteValues(&(route.upload), 0)))
+			return (0);
+	}
+	else if ((key = _content.find("method", _pos)) == _pos)
+	{
+		_pos += 6;
+		std::cout << "METHODS KEY " << key << std::endl;
+		if (!(setRouteValues(0, &(route.methods))))
+			return (0);
+	}
+	else
+	{ 
+		std::cout << "NO KEYS FOUND\n";
+		return (0);
+	}
+	return (SUCCESS);
+}
+
+int	Parser::setRouteValues(std::string * value, std::vector<std::string> * methods)
+{
+	int			isspaceNb = 0;
+	int			grammar;
+	std::string	new_value;
+
+	std::cout << BLUE << &(_content[_pos]) << RESET << std::endl;
+	while (_pos < _size && isspace(_content[_pos]))
+	{
+		_pos++;
+		isspaceNb++;
+	}
+	if (!isspaceNb)
+		return (0);
+	if ((grammar = _content.find_first_of(";", _pos)) == -1)
+		return (0);
+	new_value = _content.substr(_pos, grammar - _pos);
+	if (value)
+		*value = new_value;
+	else
+		if (!(checkRouteMethod(new_value, methods)))
+			return (0);
+	_pos = grammar + 1;
+	return (SUCCESS);
+}
+
+int	Parser::checkRouteMethod( std::string new_value, std::vector<std::string> * methods )
+{
+	std::string	method;
+	int			position;
+
+	methods->clear();
+	while (new_value.size())
+	{
+		position = new_value.find("|");
+		if (position < 0)
+		{	
+			if (new_value != "GET" && new_value != "POST" && new_value != "DELETE")
+				return (0);
+			methods->push_back(new_value);
 			break;
 		}
+		method = new_value.substr(0, position);
+		new_value = new_value.substr(position + 1);
+		if (method != "GET" && method != "POST" && method != "DELETE")
+			return (0);
+		methods->push_back(method);
 	}
-
-
 	return (SUCCESS);
 }
 
-int	Parser::checkValue(std::string key, std::string value, keys_type & new_config)
-{
-	std::map<std::string, Value>::iterator			ite = new_config.end();
-	std::map<std::string, Value>::iterator			it = new_config.find(key);
-	std::map<std::string, validity_fct>::iterator	cite = _key_checker.end();
-	std::map<std::string, validity_fct>::iterator	cit = _key_checker.find(key);
-
-	if (it == ite || cite == cit)
-		return (0);
-	if (!((this->*_key_checker[key])(value, _default_keys[key])))
-	{
-		std::cout << key << " : " << value << " is not valid" << std::endl;
-		return (0);
-	}
-	new_config[key] = _default_keys[key];
-	return (SUCCESS);
-}
 
 void	Parser::initParser(void)
 {
@@ -362,6 +464,5 @@ void	Parser::initParser(void)
 	_default_keys["location"] = Value("");
 }
 
-Server	Parser::getServer( void ) { return _server; }
 
 }

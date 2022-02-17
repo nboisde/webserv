@@ -49,8 +49,8 @@ Client &	Client::operator=( Client const & rhs )
 std::string Client::uploadPath( std::string url)
 {
 	Value							location = _config[_hostname]["location"];
-	std::map<std::string, route>	prout = location._locations;
-	route							caca = prout[url];
+	std::map<std::string, Route>	prout = location._locations;
+	Route							caca = prout[url];
 	std::string						ml = caca.upload; 
 	return (ml);
 }
