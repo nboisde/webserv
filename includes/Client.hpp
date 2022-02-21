@@ -56,7 +56,7 @@ class Client
 
 		int				execution( Server const & serv, Port & port );
 
-		int 			receive( void );
+		int 			receive( std::string const & serv_ip );
 		int				send( void );
 		void			closeConnection( void );
 		void 			bridgeParsingRequest( void );
