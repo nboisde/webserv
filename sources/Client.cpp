@@ -331,6 +331,8 @@ int	Client::checkURI( std::string url)
 	int					ret;
 	std::string			root;
 
+	std::cout << "URL " << url << std::endl;
+	// SI URL EST UN DIR => FAIRE FONCTIONS D'AUTOINDEX..
 	if (url == "/")
 		url = _config[_hostname]["index"]._value;
 	root = _config[_hostname]["root"]._value;
