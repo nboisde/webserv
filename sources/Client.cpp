@@ -126,8 +126,17 @@ int Client::uploadFiles( void )
 			forward++;
 		data = tmp.substr(forward, tmp.length() - forward);
 	}
-	std::cout << "HOSTNAME " << _hostname << std::endl;
 	return SUCCESS;
+}
+
+int Client::uploadAuthorized( void )
+{
+	for (std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin(); it != _config[_hostname]["method"]._methods.end(); it++)
+	{
+		if ((*it) == "POST")
+			return 1;
+	}
+	return 0;
 }
 
 int Client::receive(void)
@@ -145,15 +154,27 @@ int Client::receive(void)
 	}
 	std::string tmp(buffer, ret);
 	int req = _req.concatenateRequest(tmp);
-	if (req == -1)
+	if (req == -1 && _req.findContinue() == 0)
 	{
 		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
 		_status = _req.getStatus();
 		return WRITING;
 	}
-	if (req == SUCCESS)
+	if (req == SUCCESS)// && _req.getContinue() == 0)
 	{
 		int head_err = _req.fillHeaderAndBody();
+		std::string tmp2 = _req.getHead()["host"];
+		std::cout << tmp2 << std::endl;
+		size_t pos = tmp2.find(":");
+		if (pos >= static_cast<size_t>(0))
+			_hostname = tmp2.substr(0, pos);
+		else
+			_hostname = tmp2;
+		if (_config[_hostname]["server_name"]._value == "")
+			_hostname = _config.begin()->second["server_name"]._value;
+		std::cout << DEV << _req.getRawContent() << RESET << std::endl;
+		_req.setUploadAuthorized(this->uploadAuthorized());
+		_req.setContinue(0);
 		if (head_err == ERROR)
 		{
 			std::cout << RED << "400 bad request (Header reception 2)" << RESET << std::endl;
@@ -173,7 +194,6 @@ void Client::bridgeParsingRequest( void )
 {
 	int not_all = 1;
 
-	std::cout << "HOSTNAME " << _hostname << std::endl;
 	for (std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin(); it != _config[_hostname]["method"]._methods.end(); it++)
 	{
 		std::cout << (*it) << std::endl;
