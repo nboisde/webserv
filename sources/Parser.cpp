@@ -17,11 +17,6 @@ int	Parser::launch(std::string file)
 		return (0);
 	if (!initWebServer())
 		return (0);
-	std::cout << "LOCATION " << _server.getPorts().begin()->getConfig().begin()->second["location"]._value << std::endl;
-	std::cout << "METHOD " << _server.getPorts().begin()->getConfig().begin()->second["method"]._value << std::endl;
-	std::cout << "PORT " << _server.getPorts().begin()->getConfig().begin()->second["listen"]._value << std::endl;
-	std::cout << "AUTOINDEX " << _server.getPorts().begin()->getConfig().begin()->second["autoindex"]._value << std::endl;
-	std::cout << "CLIENT " << _server.getPorts().begin()->getConfig().begin()->second["client_max_body_size"]._value << std::endl;
 	return (SUCCESS);
 }
 
