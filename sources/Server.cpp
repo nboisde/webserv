@@ -89,7 +89,7 @@ static int	monitor_stdin( void )
 
 void	Server::launchServer( void )
 {
-	addToPolling(STDIN); //CHECK STDIN
+	addToPolling(STDIN);
 	for (std::vector<Port>::iterator it = _ports.begin(); it != _ports.end();)
 	{
 		if ((*it).launchPort() > 0)
