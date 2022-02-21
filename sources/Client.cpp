@@ -18,6 +18,7 @@ Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : _fd(f
 	std::stringstream port;
 	port << ntohs(cli_addr->sin_port);
 	_port += port.str();
+	std::cout << "DEFAULT HOST " << _config.begin()->second["server_name"]._value << std::endl;
 }
 
 Client::Client( Client const & src ) { *this = src; }
@@ -139,10 +140,11 @@ int Client::uploadAuthorized( void )
 	return 0;
 }
 
-int Client::receive(void)
+int Client::receive(std::string const & serv_ip)
 {
 	char	buffer[BUFFER_SIZE];
 
+	(void)serv_ip;
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
@@ -170,8 +172,17 @@ int Client::receive(void)
 			_hostname = tmp2.substr(0, pos);
 		else
 			_hostname = tmp2;
-		if (_config[_hostname]["server_name"]._value == "")
-			_hostname = _config.begin()->second["server_name"]._value;
+		std::cout << "1 DEFAULT HOST " << _config.begin()->second["server_name"]._value << std::endl;
+		std::cout << "Hostname " << _hostname << std::endl;
+		map_configs::iterator it = _config.end();
+		if (_config.find(_hostname) == it)
+		{
+			it--;
+			std::cout << "BEFORE DEFAULT HOST " << _config.begin()->second["server_name"]._value << std::endl;
+			_hostname = it->second["server_name"]._value;
+			std::cout << "BEFORE DEFAULT HOST " << _config.begin()->second["server_name"]._value << std::endl;
+		}
+		std::cout << "HOSTNAME " << _hostname << std::endl;
 		std::cout << DEV << _req.getRawContent() << RESET << std::endl;
 		_req.setUploadAuthorized(this->uploadAuthorized());
 		_req.setContinue(0);

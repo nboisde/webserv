@@ -142,8 +142,7 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
-
-					int ret = (*ct).receive();
+					int ret = (*ct).receive(_server_ip);
 
 					if ( ret == WRITING)
 					{
@@ -179,6 +178,7 @@ void	Server::launchServer( void )
 					}
 					else
 						ct++;
+					
 				}
 				else
 					ct++;
