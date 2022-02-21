@@ -12,9 +12,9 @@ namespace ws
 */ 
 Client::Client( void ) {}
 
-Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : _fd(fd), _status(OK), _config(conf) {
+Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : _fd(fd), _status(OK), _config(conf)
+{
 	_ip = inet_ntoa(cli_addr->sin_addr);
-	
 	std::stringstream port;
 	port << ntohs(cli_addr->sin_port);
 	_port += port.str();
@@ -126,6 +126,7 @@ int Client::uploadFiles( void )
 			forward++;
 		data = tmp.substr(forward, tmp.length() - forward);
 	}
+	std::cout << "HOSTNAME " << _hostname << std::endl;
 	return SUCCESS;
 }
 
@@ -172,6 +173,7 @@ void Client::bridgeParsingRequest( void )
 {
 	int not_all = 1;
 
+	std::cout << "HOSTNAME " << _hostname << std::endl;
 	for (std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin(); it != _config[_hostname]["method"]._methods.end(); it++)
 	{
 		std::cout << (*it) << std::endl;
@@ -179,10 +181,7 @@ void Client::bridgeParsingRequest( void )
 			not_all = 0;
 	}
 	if (not_all == 1)
-	{
-		std::cout << "HERE\n" << std::endl;
 		_status = NOT_ALLOWED;
-	}
 	else if (static_cast<size_t>(_req.getBody().length()) > _config[_hostname]["client_max_body_size"]._max_body_size
 	|| static_cast<size_t>(_req.getContentLength()) > _config[_hostname]["client_max_body_size"]._max_body_size)
 		_status = REQUEST_ENTITY_TOO_LARGE;

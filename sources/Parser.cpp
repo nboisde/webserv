@@ -17,9 +17,11 @@ int	Parser::launch(std::string file)
 		return (0);
 	if (!initWebServer())
 		return (0);
-	std::cout << "LOCATION " << _server.getPorts().begin()->getConfig()["location"].begin()->first << std::endl;
-	std::cout << "METHOD " << _server.getPorts().begin()->getConfig()["method"].begin()->first << std::endl;
-	std::cout << "PORT " << _server.getPorts().begin()->getConfig()["listen"].begin()->first << std::endl;
+	std::cout << "LOCATION " << _server.getPorts().begin()->getConfig().begin()->second["location"]._value << std::endl;
+	std::cout << "METHOD " << _server.getPorts().begin()->getConfig().begin()->second["method"]._value << std::endl;
+	std::cout << "PORT " << _server.getPorts().begin()->getConfig().begin()->second["listen"]._value << std::endl;
+	std::cout << "AUTOINDEX " << _server.getPorts().begin()->getConfig().begin()->second["autoindex"]._value << std::endl;
+	std::cout << "CLIENT " << _server.getPorts().begin()->getConfig().begin()->second["client_max_body_size"]._value << std::endl;
 	return (SUCCESS);
 }
 
@@ -132,10 +134,7 @@ int	Parser::checkServer(void)
 		std::cout << new_config["listen"]._value << std::endl;
 	}
 	if (it == ite)
-	{
-		std::cout << "New Port\n";
 		_server.addPort(Port(new_config["server_name"]._value, new_config));
-	}
 	return (SUCCESS);
 }
 
@@ -160,7 +159,6 @@ int	Parser::checkKeys(keys_type & new_config)
 	}
 	if (!found)
 		return (0);
-	std::cout << "KEY " << it->first << std::endl;
 	if (!setValues((*it).first, new_config))
 		return (0);
 	return (SUCCESS);
@@ -309,7 +307,7 @@ int	Parser::checkUpload(std::string raw_value, Value & new_value) { new_value._v
 int	Parser::checkReturn(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
-	new_value._value = raw_value;
+	new_value._value += raw_value;
 
 	_pos += raw_value.size();
 	while (_pos < _size && isspace(_content[_pos]))
