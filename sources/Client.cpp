@@ -287,8 +287,7 @@ int	Client::openFile( std::string path )
 		return ERROR;
 	close(fd);
 	fd = ::open(path.c_str(), O_DIRECTORY);
-	if 
-	(fd > 0)
+	if (fd > 0)
 	{
 		close(fd);
 		return (ERROR);
@@ -301,17 +300,17 @@ int	Client::checkURI( std::string url)
 	int					ret;
 	std::string			root;
 
-	std::cout << "URL " << url << std::endl;
 	if (url == "/")
 		url = _config[_hostname]["index"]._value;
-	std::cout << "URL " << url << std::endl;
 	root = _config[_hostname]["root"]._value;
 	ret = checkCGI(url);
-	std::cout << "ROOT " << root << std::endl;
-	std::cout << "URL " << url << std::endl;
 	if (checkPath(root, url) > 0)
+	{
+		std::cout << RED << "RET " << ret << RESET << std::endl;
 		return (ret);
+	}
 	_status = NOT_FOUND;
+	std::cout << RED << "RET " << R_ERR << RESET << std::endl;
 	return (R_ERR);
 }
 
@@ -319,15 +318,14 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 
-	std::cout << "STATUS BEFORE EXEC " << _status << std::endl;
-
 	saveLogs();
 	if (_status != OK)
 		executeError(_req.getHead()["url"]);
 	else
 	{
 		res_type = checkURI(_req.getHead()["url"]);
-		std::cout << "PATH " << _file_path << std::endl;
+		std::cout << RED << "URL " << _req.getHead()["url"] << RESET << std::endl;
+		std::cout << RED << "RET " << res_type << RESET << std::endl;
 		if (res_type == R_PHP || res_type == R_PY)
 			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)
@@ -384,27 +382,28 @@ int	Client::executeRedir( std::string new_path)
 
 int	Client::executeError( std::string url )
 {
-	Value			location = _config[_hostname]["location"];
-	std::string		route = "";
-	(void)url;
-	// std::cout << FIRE << "URL [" << url << "]" << RESET << std::endl;
-	// if (checkLocation(url, route))
-	// {
-	// 	std::string redirection = location._locations[route].redirection;
-	// 	if (redirection != "")
-	// 	{
-	// 		std::cout << FIRE << "ROUTE [" << route << "]" << RESET << std::endl;
-	// 		int	pos = url.find(route);
-	// 		std::cout << FIRE << "POS " << pos << RESET << std::endl;
-	// 		std::string new_url = url.substr(0, pos);
-	// 		std::cout << FIRE << "FIRST PART URL " << new_url << RESET << std::endl;
-	// 		new_url += redirection;
-	// 		new_url += url.substr(pos + route.size());
-	// 		std::cout << FIRE << "NEW URL " << new_url << RESET << std::endl;
-	// 		executeRedir(new_url);
-	// 	} 
-	// }
 
+	Value			location = _config[_hostname]["location"];
+
+	std::string		route = "";
+
+	if (checkLocation(url, route))
+	{
+		std::string redirection = location._locations[route].redirection;
+		if (redirection != "")
+		{
+			int	pos = url.find(route);
+			std::cout << "POS " << pos << std::endl;
+			if (pos >= 0)
+			{
+				std::string new_url = url.substr(0, pos);
+				new_url += redirection;
+				new_url += url.substr(pos + route.size());
+				executeRedir(new_url);
+				return (SUCCESS);
+			}
+		} 
+	}
 	Value				error = _config[_hostname]["error_page"];
 	std::string			error_file_path = error._errors[_status];
 	std::string			body;
@@ -414,9 +413,7 @@ int	Client::executeError( std::string url )
 	root += error_file_path;
 	int ret = openFile(root);
 	if (error_file_path.size() && ret > 0)
-	{
 		executeRedir(error_file_path);
-	}
 	else
 	{
 		std::string body = _res.genBody(_status);
