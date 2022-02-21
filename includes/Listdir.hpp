@@ -8,10 +8,10 @@ class listdir {
 		listdir();
 		~listdir();
 
-		std::string					genetateAutoindex(std::string root, std::string path);
+		std::string					genetateAutoindex(std::string path, std::string loc);
 
 	private:
-		void						listFiles(std::string root, std::string path);
+		void						listFiles(std::string path, std::string loc);
 		std::string					generateHTML( void );
 
 		std::vector<std::string>	_dirs;

@@ -326,6 +326,31 @@ std::string Client::getLocalHostname( void ) const
 	return local_host_name;
 }
 
+int Client::isURLDirectory( std::string url )
+{
+	std::string path = _config[_hostname]["root"]._value + url;
+	//std::cout << DEV << path << std::endl;
+	int fd = ::open(path.c_str(), O_DIRECTORY);
+	if (fd > 0)
+	{
+		close(fd);
+		return (1);
+	}
+	close(fd);
+	return (0);
+}
+
+int Client::directoryProcessing( std::string url )
+{
+	std::cout << RED << "autoindex: " << _config[_hostname]["location"]._locations[url].autoindex << RESET << std::endl;
+	if (_config[_hostname]["location"]._locations[url].autoindex == "on")
+	{
+		listdir ld;
+		std::cout << ld.genetateAutoindex(_config[_hostname]["root"]._value + url, url) << std::endl;
+	}
+	return 1;
+}
+
 int	Client::checkURI( std::string url)
 {
 	int					ret;
@@ -333,6 +358,9 @@ int	Client::checkURI( std::string url)
 
 	std::cout << "URL " << url << std::endl;
 	// SI URL EST UN DIR => FAIRE FONCTIONS D'AUTOINDEX..
+	if (isURLDirectory(url))
+		directoryProcessing(url);
+	std::cout << YELLOW << "url is a directory: " << isURLDirectory(url) << RESET << std::endl;
 	if (url == "/")
 		url = _config[_hostname]["index"]._value;
 	root = _config[_hostname]["root"]._value;
