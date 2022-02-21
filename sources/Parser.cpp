@@ -302,8 +302,12 @@ int	Parser::checkUpload(std::string raw_value, Value & new_value) { new_value._v
 int	Parser::checkReturn(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
+	size_t length = 0;
+	while (!isspace(raw_value[length]))
+		length++;
+	if (raw_value.size() > length)
+		raw_value = raw_value.substr(0, length);
 	new_value._value += raw_value;
-
 	_pos += raw_value.size();
 	while (_pos < _size && isspace(_content[_pos]))
 		_pos++;

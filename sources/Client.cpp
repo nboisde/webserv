@@ -50,8 +50,8 @@ Client &	Client::operator=( Client const & rhs )
 std::string Client::uploadPath( std::string url)
 {
 	std::string	upload_path;
-	Value							location = _config[_hostname]["location"];
-	Route							route = (location._locations)[url];
+	Value		location = _config[_hostname]["location"];
+	Route		route = (location._locations)[url];
  	
 	upload_path = route.upload; 
 	return (upload_path);
@@ -94,6 +94,7 @@ int Client::uploadFiles( void )
 		std::string f_content = tmp.substr(0, bd);
 		if (save == 1)
 		{
+			
 			std::string path = uploadPath("route");
 			if (!strIsPrintable(f_name))
 			{
@@ -106,21 +107,13 @@ int Client::uploadFiles( void )
 				f_name = "file";
 				f_name += extension;
 			}	
-			int fd = -1;
-			if (path.length() == 0)
-				fd = open(f_name.c_str(), O_CREAT | O_WRONLY, 0644);
-			else
-			{
-				path += f_name;
-				fd = open(path.c_str(), O_CREAT | O_WRONLY, 0644);
-			}
-			if (fd < 0)
-				continue ;
-			int ret;
-			ret = write(fd, f_content.c_str(), f_content.length());
-			if (ret == -1)
-				std::cout << "Writing problem" << std::endl;
-			close(fd);
+			if (path.length() != 0)
+                f_name = path + f_name;
+            std::fstream fs;
+            fs.open(f_name.c_str(), std::fstream::out);
+            fs << f_content;
+            fs.close();
+            chmod(f_name.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		}
 		int forward = tmp.find(_req.getBoundary()) + _req.getBoundary().length();
 		while (tmp[forward] && (tmp[forward] == '-' || tmp[forward] == '\r' || tmp[forward] == '\n'))
@@ -172,18 +165,12 @@ int Client::receive(std::string const & serv_ip)
 			_hostname = tmp2.substr(0, pos);
 		else
 			_hostname = tmp2;
-		std::cout << "1 DEFAULT HOST " << _config.begin()->second["server_name"]._value << std::endl;
-		std::cout << "Hostname " << _hostname << std::endl;
 		map_configs::iterator it = _config.end();
 		if (_config.find(_hostname) == it)
 		{
 			it--;
-			std::cout << "BEFORE DEFAULT HOST " << _config.begin()->second["server_name"]._value << std::endl;
 			_hostname = it->second["server_name"]._value;
-			std::cout << "BEFORE DEFAULT HOST " << _config.begin()->second["server_name"]._value << std::endl;
 		}
-		std::cout << "HOSTNAME " << _hostname << std::endl;
-		std::cout << DEV << _req.getRawContent() << RESET << std::endl;
 		_req.setUploadAuthorized(this->uploadAuthorized());
 		_req.setContinue(0);
 		if (head_err == ERROR)
@@ -242,10 +229,25 @@ int Client::send( void )
 	return WRITING;
 }
 
+int 	Client::checkLocation( std::string & url, std::string & route)
+{
+	Value									location = _config[_hostname]["location"];
+	std::map<std::string, Route>::iterator	it = location._locations.begin();
+	std::map<std::string, Route>::iterator	ite = location._locations.end();
+	
+	for (; it != ite; it++)
+	{
+		if (url.find(it->first) >= 0)
+		{
+			route = it->first;
+			return (1);
+		}
+	}
+	return (0);
+}
+
 int	Client::checkPath( std::string & root, std::string & url )
 {
-	Value							location = _config[_hostname]["location"];
-	std::string						path = location._locations[url].redirection;
 	std::stringstream				file_path;
 	
 	file_path << root << url;
@@ -253,17 +255,6 @@ int	Client::checkPath( std::string & root, std::string & url )
 	{
 		_file_path = file_path.str();
 		return (SUCCESS);
-	}
-	if (path.size())
-	{
-		file_path.str("");
-		url = path + url;
-		file_path << root << url;
-		if (openFile(file_path.str()) > 0)
-		{
-			_file_path = file_path.str();
-			return (SUCCESS);
-		}
 	}
 	return (ERROR);
 }
@@ -328,9 +319,11 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 
+	std::cout << "STATUS BEFORE EXEC " << _status << std::endl;
+
 	saveLogs();
 	if (_status != OK)
-		executeError();
+		executeError(_req.getHead()["url"]);
 	else
 	{
 		res_type = checkURI(_req.getHead()["url"]);
@@ -340,7 +333,7 @@ int	Client::execution( Server const & serv, Port & port )
 		else if (res_type == R_HTML)
 			executeHtml();
 		else if (res_type == R_ERR)
-			executeError();
+			executeError(_req.getHead()["url"]);
 	}
 	return SUCCESS;
 }
@@ -377,28 +370,52 @@ int	Client::executeHtml( void )
 	return SUCCESS;
 }
 
-int	Client::executeError( void )
+int	Client::executeRedir( std::string new_path)
 {
-	Value							error = _config[_hostname]["error_page"];
-	std::string						error_file_path = error._errors[_status];
-	std::string						body;
-	std::string						root;
+	checkURI(new_path);
+	_status = MOVED_PERMANETLY;
+	_res.resetResponse();
+	std::string loc("Location: ");
+	loc += new_path;
+	_res.setHeader(loc);
+	_res.response(_status);
+	return SUCCESS;
+}
 
+int	Client::executeError( std::string url )
+{
+	Value			location = _config[_hostname]["location"];
+	std::string		route = "";
+	(void)url;
+	// std::cout << FIRE << "URL [" << url << "]" << RESET << std::endl;
+	// if (checkLocation(url, route))
+	// {
+	// 	std::string redirection = location._locations[route].redirection;
+	// 	if (redirection != "")
+	// 	{
+	// 		std::cout << FIRE << "ROUTE [" << route << "]" << RESET << std::endl;
+	// 		int	pos = url.find(route);
+	// 		std::cout << FIRE << "POS " << pos << RESET << std::endl;
+	// 		std::string new_url = url.substr(0, pos);
+	// 		std::cout << FIRE << "FIRST PART URL " << new_url << RESET << std::endl;
+	// 		new_url += redirection;
+	// 		new_url += url.substr(pos + route.size());
+	// 		std::cout << FIRE << "NEW URL " << new_url << RESET << std::endl;
+	// 		executeRedir(new_url);
+	// 	} 
+	// }
+
+	Value				error = _config[_hostname]["error_page"];
+	std::string			error_file_path = error._errors[_status];
+	std::string			body;
+	std::string			root;
 
 	root = _config[_hostname]["root"]._value;
 	root += error_file_path;
 	int ret = openFile(root);
-	std::cout << "STATUS " << _status << std::endl;
 	if (error_file_path.size() && ret > 0)
 	{
-		std::cout << "STATUS " << _status << std::endl;
-		checkURI(error_file_path);
-		_status = MOVED_PERMANETLY;
-		_res.resetResponse();
-		std::string loc("Location: ");
-		loc += error_file_path;
-		_res.setHeader(loc);
-		_res.response(_status);
+		executeRedir(error_file_path);
 	}
 	else
 	{
