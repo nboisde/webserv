@@ -248,9 +248,11 @@ int 	Client::checkLocation( std::string & url, std::string & route)
 	
 	for (; it != ite; it++)
 	{
-		if (url.find(it->first) >= 0)
+		if (url.find(it->first) != static_cast<size_t>(-1))
 		{
+			std::cout << route << std::endl;
 			route = it->first;
+			std::cout << "here motherfucker" << std::endl;
 			return (1);
 		}
 	}
@@ -342,13 +344,21 @@ int Client::isURLDirectory( std::string url )
 
 int Client::directoryProcessing( std::string url )
 {
+	std::string loc = url;
+	std::string route = "";
+	checkLocation(loc, route);
+	std::cout << "loc: " << loc << std::endl;
+	std::cout << "route: " << route << std::endl;
 	std::cout << RED << "autoindex: " << _config[_hostname]["location"]._locations[url].autoindex << RESET << std::endl;
 	std::cout << LIGHTBLUE << _config[_hostname]["root"]._value + url << RESET << std::endl;
+	if (_config[_hostname]["location"]._locations[url].index != "")
+		std::cout << DEV << "BRUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUH" << RESET <<  std::endl;
 	if (_config[_hostname]["location"]._locations[url].autoindex == "on")
 	{
 		listdir ld;
 		std::cout << ld.genetateAutoindex(_config[_hostname]["root"]._value + url, url) << std::endl;
 	}
+	std::cout << "location_index : [" << _config[_hostname]["location"]._locations[url].index << "]" << std::endl;
 	return 1;
 }
 
