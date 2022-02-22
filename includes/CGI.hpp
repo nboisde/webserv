@@ -16,7 +16,7 @@ class Port;
 class CGI {
 	public:
 
-		CGI( Client const & cli, Port const & port, Server const & serv, int extension_type );
+		CGI( Client const & cli, Port const & port, Server const & serv );
 		CGI( CGI const & src );
 		virtual ~CGI( void );
 

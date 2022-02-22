@@ -8,22 +8,11 @@
 namespace ws{
 
 
-CGI::CGI( Client const & cli , Port const & port, Server const & serv, int extension_type) : _arg(NULL), _env(NULL)
+CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _arg(NULL), _env(NULL)
 {
-	//typedef	std::map<std::string, Value>	config_type;
-	//typedef std::map<std::string, config_type>	map_configs;
-
-	//map_configs config = static_cast<map_configs const &>(cli.getConfig());
-	if (extension_type == R_PY)
-	{	
-		_extension = ".py";
-		_bin_location = "/usr/bin/python3";
-	}
-	else
-	{
-		_extension = ".php";		
-		_bin_location = "/usr/bin/php-cgi";
-	}
+	std::string bin_path = cli.getConfig()[cli.getHostname()]["cgi"]._locations[cli.getExtension()];
+	_extension = cli.getExtension();
+	_bin_location = bin_path;
 	this->_header = cli.getReq().getHead();
 	init_conversion( cli, port, serv );
 	generate_env();

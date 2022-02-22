@@ -276,22 +276,29 @@ int	Client::checkPath( std::string & root, std::string & url )
 int	Client::checkCGI( std::string & url )
 {
 	int		query_pos = url.find("?");
-	int		php_pos = url.find(".php");
-	int		py_pos = url.find(".py");
-	int		size = url.size();
 
-	if (query_pos >= 0 )
+	if ( query_pos >= 0 )
 			url = url.substr(0, query_pos);
-	if (php_pos >= 0 && size - php_pos == 4)
-		return (R_PHP);
-	else if (query_pos >= 0 && php_pos >= 0 && php_pos < query_pos)
-		return (R_PHP);
-	else if (py_pos >= 0 && size - py_pos == 3)
-		return (R_PY);
-	else if (py_pos >= 0 && py_pos >= 0 && py_pos < query_pos)
-		return (R_PY);
-	else
-		return (R_HTML);
+	size_t i = url.size() - 1;
+	for (i = url.size() - 1; url[i] != '.'; i--);
+	_extension = url.substr(i);
+	std::cout << YELLOW << _extension << RESET << std::endl;
+
+	//Cette partie du code parcourt les extensions que possede notre fichier de conf
+	Value cgi = _config[_hostname]["cgi"];
+	std::map<std::string, std::string> extension = cgi._locations;
+	std::map<std::string, std::string>::iterator map_it = extension.begin();
+	for (;map_it != extension.end(); map_it++)
+	{
+		std::cout << YELLOW << map_it->first << RESET << std::endl;
+		std::cout << YELLOW << map_it->second << RESET << std::endl;
+		if (_extension == map_it->first)
+		{	
+			std::cout << YELLOW << "Nous Possedons cette extension en notre sein" << RESET << std::endl;
+			return R_EXT;
+		}
+	}
+	return (R_HTML);
 }
 
 int	Client::openFile( std::string path )
@@ -370,8 +377,8 @@ int Client::executeAutoin( std::string url, Server const & serv, Port & port )
 			return SUCCESS;
 		}
 		res_type = checkCGI(index);
-		if (res_type == R_PHP || res_type == R_PY)
-			executePhpPython(serv, port, res_type);
+		if (res_type == R_EXT)
+			executeExtension(serv, port);
 		else if (res_type == R_HTML)
 			executeHtml();
 		else if (res_type == R_ERR)
@@ -434,8 +441,8 @@ int	Client::execution( Server const & serv, Port & port )
 			std::cout << _req.getHead()["url"] << std::endl;
 			executeAutoin(_req.getHead()["url"], serv, port);
 		}
-		else if (res_type == R_PHP || res_type == R_PY)
-			executePhpPython(serv, port, res_type);
+		else if (res_type == R_EXT)
+			executeExtension(serv, port);
 		else if (res_type == R_HTML)
 			executeHtml();
 		else if (res_type == R_ERR)
@@ -444,9 +451,9 @@ int	Client::execution( Server const & serv, Port & port )
 	return SUCCESS;
 }
 
-int Client::executePhpPython( Server const & serv, Port & port, int extension_type)
+int Client::executeExtension( Server const & serv, Port & port)
 {
-	CGI cgi(*this, port, serv, extension_type);
+	CGI cgi(*this, port, serv);
 	cgi.execute(*this);
 	return SUCCESS;
 }
@@ -563,4 +570,5 @@ ws::Response						Client::getRes(void ) const { return _res; }
 map_configs							Client::getConfig( void ) const { return _config; }
 map_configs const & 				Client::getConfig( void ) { std::cout << DEV "je suis passe ici\n" RESET;return _config; }
 std::string							Client::getHostname( void ) const { return _hostname; }
+std::string const & 				Client::getExtension( void ) const {return _extension;}
 }

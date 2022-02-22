@@ -9,7 +9,7 @@ Value::Value( Value const & src ) { *this = src; }
 Value::~Value( void ) {}
 
 Value & Value::operator=( Value const & rhs ) 
-{
+{w
 	if (this != &rhs)
 	{
 		_value = rhs._value;
@@ -22,6 +22,7 @@ Value & Value::operator=( Value const & rhs )
 }
 
 Route::Route( Route const & src ) { *this = src; }
+
 Route & Route::operator=( Route const & rhs ) 
 {
 	if (this != &rhs)
@@ -33,6 +34,11 @@ Route & Route::operator=( Route const & rhs )
 		methods = rhs.methods;
 	}
 	return *this;
+
+std::ostream &			operator<<( std::ostream & o, Value const & i )
+{
+	o << i._value;
+	return o;
 }
 
 }
