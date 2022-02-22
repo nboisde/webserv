@@ -165,7 +165,7 @@ int Client::receive( void )
 		else
 			_hostname = tmp2;
 		map_configs::iterator it = _config.end();
-		if (_config.find(_hostname) == it)
+		if (_config.find(_hostname) == it && _hostname != LOCALHOST)
 		{
 			if (_hostname == "127.0.0.1" || _hostname == getLocalHostname())
 				_hostname = LOCALHOST;
