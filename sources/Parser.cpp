@@ -446,7 +446,7 @@ int Parser::checkCGI(std::string raw_value, Value & new_value)
 	for(; raw_value[i] && !isspace(raw_value[i]); i++);
 	std::string binary = raw_value.substr(start, i - start);
 	for(; raw_value[i] && isspace(raw_value[i]); i++);
-	if (raw_value[i] || binary.empty() || !microparse_extension(extension))
+	if (raw_value[i] || binary.empty() || !microparse_extension(extension) || !isfile(binary))
 		return (0);
 	new_value._locations.insert(std::pair<std::string, std::string>(extension, binary));
 	return SUCCESS;
