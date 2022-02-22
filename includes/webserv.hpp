@@ -28,11 +28,11 @@
 # define KEEP_ALIVE 1
 
 // RESPONSE TYPES
-# define R_PHP 1
-# define R_PY 2
-# define R_HTML 3
-# define R_ERR 4
-# define R_AUTO 5
+
+# define R_EXT 1
+# define R_HTML 2
+# define R_ERR 3
+# define R_AUTO 4
 
 // CLIENT STATUS
 # define CLOSING 0

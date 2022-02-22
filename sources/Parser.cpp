@@ -438,7 +438,9 @@ int Parser::checkCGI(std::string raw_value, Value & new_value)
 {
 	int i;
 
-	new_value._value = raw_value;
+	if (!new_value._value.empty())
+		new_value._value += " | ";
+	new_value._value += raw_value;
 	for(i = 0; raw_value[i] && !isspace(raw_value[i]); i++);
 	std::string extension = raw_value.substr(0, i);
 	for(; raw_value[i] && isspace(raw_value[i]); i++);

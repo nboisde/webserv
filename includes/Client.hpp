@@ -29,7 +29,7 @@ class Client
 		int				checkPath( std::string & root, std::string & url );
 		int				checkLocation( std::string & url, std::string & route);
 		int				checkExtension( std::string & root, std::string & url );
-		int				executePhpPython( Server const & serv, Port & port, int extension_type );
+		int				executeExtension( Server const & serv, Port & port );
 		int				executeHtml( void );
 		int				executeError( std::string url );
 		int				executeRedir( std::string new_path);
@@ -51,6 +51,7 @@ class Client
 		map_configs		_config;
 		error_type		_errors;
 		std::string		_hostname;
+		std::string		_extension;
 
 
 	public:
@@ -83,6 +84,7 @@ class Client
 		map_configs const & getConfig( void );
 		std::string		getHostname( void ) const;
 		std::string		getLocalHostname( void) const ;
+		std::string const & getExtension( void ) const;
 
 };
 
