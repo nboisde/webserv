@@ -37,7 +37,7 @@ class Client
 		int				uploadAuthorized( void );
 		int				isURLDirectory( std::string url );
 		int				directoryProcessing( std::string url );
-
+		int				executeAutoin( std::string url, Server const & serv, Port & port );
 
 
 	protected:

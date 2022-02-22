@@ -22,6 +22,7 @@ void		listdir::listFiles(std::string path, std::string loc){
 				continue ;
 			if (f->d_type == DT_DIR)
 			{
+				_dirs.push_back(loc + f->d_name);
 				std::cout << f->d_name << std::endl;
 				std::cout << path + "/" + f->d_name << std::endl;
 				listFiles(path + "/" + f->d_name, loc);
@@ -32,7 +33,7 @@ void		listdir::listFiles(std::string path, std::string loc){
 				//if (static_cast<int>(p.find(root)) != -1)
 				//_dirs.push_back(p.substr(p.find_first_of("/")));
 				//_dirs.push_back(p.substr(p.find_last_of("/")));
-				_dirs.push_back(p);
+				_dirs.push_back(p.substr(p.find(loc)));
 			}
 		}
 		closedir(dir);
