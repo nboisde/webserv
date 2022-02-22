@@ -8,7 +8,7 @@ class listdir {
 		listdir();
 		~listdir();
 
-		std::string					genetateAutoindex(std::string path, std::string loc);
+		std::string					generateAutoindex(std::string path, std::string loc);
 
 	private:
 		void						listFiles(std::string path, std::string loc);

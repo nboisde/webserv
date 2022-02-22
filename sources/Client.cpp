@@ -354,7 +354,7 @@ int Client::directoryProcessing( std::string url )
 	if (_config[_hostname]["location"]._locations[route].autoindex == "on")
 	{
 		listdir ld;
-		std::cout << ld.genetateAutoindex(_config[_hostname]["root"]._value + route, route) << std::endl;
+		std::cout << ld.generateAutoindex(_config[_hostname]["root"]._value + route, route) << std::endl;
 		//_res.setBody(ld.genetateAutoindex(_config[_hostname]["root"]._value + route, route));
 	}
 	std::cout << "location_index : [" << _config[_hostname]["location"]._locations[route].index << "]" << std::endl;
@@ -372,17 +372,25 @@ int Client::executeAutoin( std::string url, Server const & serv, Port & port )
 	{
 		std::cout << "ici" << std::endl;
 		_file_path = _config[_hostname]["location"]._locations[route].index;
+		std::cout << _file_path << std::endl;
 		std::cout << "la" << std::endl;
 		res_type = checkCGI(url);
+		std::cout << "ici la " << std::endl;
+		std::cout << res_type << std::endl;
 		if (res_type == R_PHP || res_type == R_PY)
+		{
+			std::cout << "iciiiiiiii" << std::endl;
 			executePhpPython(serv, port, res_type);
+		}
 		else if (res_type == R_HTML)
 			executeHtml();
+		else if (res_type == R_ERR)
+			executeError(_req.getHead()["url"]);
 		return SUCCESS;
 	}
 	else if (_config[_hostname]["location"]._locations[route].autoindex == "on")
 	{
-		_res.setBody(ld.genetateAutoindex(_config[_hostname]["root"]._value + route, route));
+		_res.setBody(ld.generateAutoindex(_config[_hostname]["root"]._value + route, route));
 		_file_path = _config[_hostname]["root"]._value + route;
 		_res.setContentType(_file_path);
 		_res.setContentDisposition(_file_path);

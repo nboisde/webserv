@@ -3,7 +3,7 @@
 listdir::listdir(){}
 listdir::~listdir(){}
 
-std::string		listdir::genetateAutoindex(std::string path, std::string loc)
+std::string		listdir::generateAutoindex(std::string path, std::string loc)
 {
 	listFiles(path, loc);
 	std::string autoindex = generateHTML();
