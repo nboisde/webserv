@@ -343,6 +343,7 @@ int Client::isURLDirectory( std::string url )
 int Client::directoryProcessing( std::string url )
 {
 	std::cout << RED << "autoindex: " << _config[_hostname]["location"]._locations[url].autoindex << RESET << std::endl;
+	std::cout << LIGHTBLUE << _config[_hostname]["root"]._value + url << RESET << std::endl;
 	if (_config[_hostname]["location"]._locations[url].autoindex == "on")
 	{
 		listdir ld;

@@ -21,18 +21,29 @@ void		listdir::listFiles(std::string path, std::string loc){
 			if (f->d_name[0] == '.')
 				continue ;
 			if (f->d_type == DT_DIR)
-				listFiles(path + f->d_name + "/", loc);
+			{
+				std::cout << f->d_name << std::endl;
+				std::cout << path + "/" + f->d_name << std::endl;
+				listFiles(path + "/" + f->d_name, loc);
+			}
 			if (f->d_type == DT_REG)
 			{
 				std::string p = path + "/" + f->d_name;
 				//if (static_cast<int>(p.find(root)) != -1)
-				_dirs.push_back(p.substr(p.find_first_of("/")));
+				//_dirs.push_back(p.substr(p.find_first_of("/")));
 				//_dirs.push_back(p.substr(p.find_last_of("/")));
-				//_dirs.push_back(p);
+				_dirs.push_back(p);
 			}
 		}
 		closedir(dir);
 	}
+}
+
+
+std::string		listdir::resolvePath( std::string path )
+{
+	std::string new_path = path;
+	return new_path;
 }
 
 std::string		listdir::generateHTML( void )
