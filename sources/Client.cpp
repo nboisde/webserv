@@ -561,5 +561,6 @@ std::string							Client::getIp( void ) const { return _ip; }
 std::string							Client::getPort( void ) const { return _port; }
 ws::Response						Client::getRes(void ) const { return _res; }
 map_configs							Client::getConfig( void ) const { return _config; }
+map_configs const & 				Client::getConfig( void ) { std::cout << DEV "je suis passe ici\n" RESET;return _config; }
 std::string							Client::getHostname( void ) const { return _hostname; }
 }

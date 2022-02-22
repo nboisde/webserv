@@ -10,6 +10,10 @@ namespace ws{
 
 CGI::CGI( Client const & cli , Port const & port, Server const & serv, int extension_type) : _arg(NULL), _env(NULL)
 {
+	//typedef	std::map<std::string, Value>	config_type;
+	//typedef std::map<std::string, config_type>	map_configs;
+
+	//map_configs config = static_cast<map_configs const &>(cli.getConfig());
 	if (extension_type == R_PY)
 	{	
 		_extension = ".py";
