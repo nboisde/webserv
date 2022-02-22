@@ -58,7 +58,7 @@ class Client
 
 		int				execution( Server const & serv, Port & port );
 
-		int 			receive( std::string const & serv_ip );
+		int 			receive( void );
 		int				send( void );
 		void			closeConnection( void );
 		void 			bridgeParsingRequest( void );
@@ -76,6 +76,7 @@ class Client
 		std::string		getPort( void ) const;
 		map_configs		getConfig( void ) const;
 		std::string		getHostname( void ) const;
+		std::string		getLocalHostname( void) const ;
 
 };
 

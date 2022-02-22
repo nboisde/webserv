@@ -133,11 +133,10 @@ int Client::uploadAuthorized( void )
 	return 0;
 }
 
-int Client::receive(std::string const & serv_ip)
+int Client::receive( void )
 {
 	char	buffer[BUFFER_SIZE];
 
-	(void)serv_ip;
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
@@ -167,6 +166,18 @@ int Client::receive(std::string const & serv_ip)
 			_hostname = tmp2;
 		map_configs::iterator it = _config.end();
 		if (_config.find(_hostname) == it)
+		{
+			if (_hostname == "127.0.0.1" || _hostname == getLocalHostname())
+				_hostname = LOCALHOST;
+			else
+			{
+				_status = BAD_REQUEST;
+				return WRITING;
+			}
+				it--;
+				_hostname = it->second["server_name"]._value;
+		}
+		if (_hostname == LOCALHOST)
 		{
 			it--;
 			_hostname = it->second["server_name"]._value;
@@ -293,6 +304,26 @@ int	Client::openFile( std::string path )
 		return (ERROR);
 	}
 	return SUCCESS;
+}
+
+std::string Client::getLocalHostname( void ) const
+{
+	int fd;
+	struct ifreq ifr;
+	
+    // replace with your interface name
+    // or ask user to input
+    
+	char iface[] = "enp3s0f0";
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
+	//Type of address to retrieve - IPv4 IP address
+	ifr.ifr_addr.sa_family = AF_INET;
+	//Copy the interface name in the ifreq structure
+	strncpy(ifr.ifr_name , iface , IFNAMSIZ-1);
+	ioctl(fd, SIOCGIFADDR, &ifr);
+	close(fd);
+    std::string local_host_name = inet_ntoa(( (struct sockaddr_in *)&ifr.ifr_addr )->sin_addr);
+	return local_host_name;
 }
 
 int	Client::checkURI( std::string url)
