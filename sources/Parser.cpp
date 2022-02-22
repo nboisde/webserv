@@ -422,6 +422,35 @@ int	Parser::checkRouteMethod( std::string new_value, std::vector<std::string> * 
 	return (SUCCESS);
 }
 
+static bool microparse_extension(std::string extension)
+{
+	if (*(extension.begin()) != '.')
+		return false;
+	for (int pos = 1; extension[pos]; pos++)
+	{
+		if (!isalnum(extension[pos]) || !islower(extension[pos]))
+			return false;
+	}
+	return true;
+}
+
+int Parser::checkCGI(std::string raw_value, Value & new_value)
+{
+	int i;
+
+	new_value._value = raw_value;
+	for(i = 0; raw_value[i] && !isspace(raw_value[i]); i++);
+	std::string extension = raw_value.substr(0, i);
+	for(; raw_value[i] && isspace(raw_value[i]); i++);
+	int start = i;
+	for(; raw_value[i] && !isspace(raw_value[i]); i++);
+	std::string binary = raw_value.substr(start, i - start);
+	for(; raw_value[i] && isspace(raw_value[i]); i++);
+	if (raw_value[i] || binary.empty() || !microparse_extension(extension))
+		return (0);
+	new_value._locations.insert(std::pair<std::string, std::string>(extension, binary));
+	return SUCCESS;
+}
 
 void	Parser::initParser(void)
 {
@@ -436,6 +465,7 @@ void	Parser::initParser(void)
 	_key_checker["index"] = &Parser::checkIndex;
 	_key_checker["location"] = &Parser::checkLocation;
 	_key_checker["upload"] = &Parser::checkUpload;
+	_key_checker["cgi"] = &Parser::checkCGI;
 	_default_keys["listen"] = Value("8080");
 	_default_keys["host"] = Value(LOCALHOST);
 	_default_keys["server_name"] = Value(LOCALHOST);
@@ -452,6 +482,7 @@ void	Parser::initParser(void)
 	free(buf);
 	_default_keys["index"] = Value("/php/index.php");
 	_default_keys["location"] = Value("");
+	_default_keys["cgi"] = Value("");
 }
 
 

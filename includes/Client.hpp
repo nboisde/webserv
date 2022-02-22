@@ -80,6 +80,7 @@ class Client
 		std::string		getIp( void ) const;
 		std::string		getPort( void ) const;
 		map_configs		getConfig( void ) const;
+		map_configs const & getConfig( void );
 		std::string		getHostname( void ) const;
 		std::string		getLocalHostname( void) const ;
 

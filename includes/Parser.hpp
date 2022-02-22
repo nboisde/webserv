@@ -53,6 +53,7 @@ class Parser
 		int					checkLocation(std::string, Value &);
 		int					checkUpload(std::string, Value &);
 		int					checkReturn(std::string, Value &);
+		int 				checkCGI(std::string, Value &);
 
 	public:
 		
