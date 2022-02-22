@@ -20,3 +20,20 @@ int strIsPrintable(std::string str)
 	}
 	return 1;
 }
+
+bool	isfile(std::string const & path)
+{
+	struct stat buf;
+	if ((stat(path.c_str(), &buf)) < 0)
+	{
+		perror("stat");
+		return false;
+	}
+	else
+	{
+		if (!S_ISREG(buf.st_mode))
+			return false;
+		else
+			return true;
+	}
+}
