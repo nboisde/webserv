@@ -421,7 +421,7 @@ int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
-s
+
 	saveLogs();
 	if (_status != OK)
 		executeError(_req.getHead()["url"]);
