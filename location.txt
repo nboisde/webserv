@@ -1,0 +1,5 @@
+si directory (check uri):
+    1 . location existante 
+        - oui : autoindex on;
+        - non : index set ? oui -> balancer page
+                            non -> server total autoindex on ou default page (index.)

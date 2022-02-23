@@ -246,14 +246,17 @@ int 	Client::checkLocation( std::string & url, std::string & route)
 	std::map<std::string, Route>::iterator	it = location._locations.begin();
 	std::map<std::string, Route>::iterator	ite = location._locations.end();
 	
+	std::cout << url << std::endl;
 	for (; it != ite; it++)
 	{
-		if (url.find(it->first) >= 0)
+		std::cout << it->first << ", ";
+		if (url.find(it->first) != static_cast<size_t>(-1))
 		{
 			route = it->first;
 			return (1);
 		}
 	}
+	std::cout << std::endl;
 	return (0);
 }
 
@@ -326,6 +329,74 @@ std::string Client::getLocalHostname( void ) const
 	return local_host_name;
 }
 
+int Client::isURLDirectory( std::string url )
+{
+	std::string path = _config[_hostname]["root"]._value + url;
+	//std::cout << DEV << path << std::endl;
+	int fd = ::open(path.c_str(), O_DIRECTORY);
+	std::cout << YELLOW << "Directory " << fd << RESET << std::endl;
+	if (fd > 0)
+	{
+		close(fd);
+		return (1);
+	}
+	close(fd);
+	return (0);
+}
+
+int Client::executeAutoin( std::string url, Server const & serv, Port & port )
+{
+	int	res_type = ERROR;
+	std::string loc = url;
+	std::string route = "";
+	if (!checkLocation(loc, route))
+	{
+		_status = FORBIDDEN;
+		executeError(_req.getHead()["url"]);
+		return SUCCESS;
+	}
+	listdir ld;
+	if (route != "" && _config[_hostname]["location"]._locations[route].index != "")
+	{
+		std::string index = _config[_hostname]["root"]._value + url + "/" + _config[_hostname]["location"]._locations[route].index;
+		_file_path = index;
+		_req.setHeadKey("url", url + "/" + _config[_hostname]["location"]._locations[route].index);
+		int check_existance  = ::open(index.c_str(), O_RDONLY);
+		if (check_existance < 0)
+		{
+			_status = NOT_FOUND;
+			res_type = R_ERR;
+			executeError(index);
+			return SUCCESS;
+		}
+		res_type = checkCGI(index);
+		if (res_type == R_PHP || res_type == R_PY)
+			executePhpPython(serv, port, res_type);
+		else if (res_type == R_HTML)
+			executeHtml();
+		else if (res_type == R_ERR)
+		{
+			executeError(_req.getHead()["url"]);
+		}
+		return SUCCESS;
+	}
+	else if (route != "" && _config[_hostname]["location"]._locations[route].autoindex == "on")
+	{
+		_res.setBody(ld.generateAutoindex(_config[_hostname]["root"]._value + route, route));
+		_file_path = _config[_hostname]["root"]._value + route;
+		_res.setContentType(_file_path);
+		_res.setContentDisposition(_file_path);
+		_res.response(_status);
+		return SUCCESS;
+	}
+	else
+	{
+		_status = FORBIDDEN;
+		executeError(_req.getHead()["url"]);
+	}
+	return SUCCESS;
+}
+
 int	Client::checkURI( std::string url)
 {
 	int					ret;
@@ -333,21 +404,23 @@ int	Client::checkURI( std::string url)
 
 	if (url == "/")
 		url = _config[_hostname]["index"]._value;
+	if (isURLDirectory(url))
+	{
+		_status = OK;
+		return R_AUTO;
+	}
 	root = _config[_hostname]["root"]._value;
 	ret = checkCGI(url);
 	if (checkPath(root, url) > 0)
-	{
-		std::cout << RED << "RET " << ret << RESET << std::endl;
 		return (ret);
-	}
 	_status = NOT_FOUND;
-	std::cout << RED << "RET " << R_ERR << RESET << std::endl;
 	return (R_ERR);
 }
 
 int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
+	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
 
 	saveLogs();
 	if (_status != OK)
@@ -355,9 +428,13 @@ int	Client::execution( Server const & serv, Port & port )
 	else
 	{
 		res_type = checkURI(_req.getHead()["url"]);
-		std::cout << RED << "URL " << _req.getHead()["url"] << RESET << std::endl;
-		std::cout << RED << "RET " << res_type << RESET << std::endl;
-		if (res_type == R_PHP || res_type == R_PY)
+		if (res_type == R_AUTO)
+		{
+			std::cout << "ici" << std::endl;
+			std::cout << _req.getHead()["url"] << std::endl;
+			executeAutoin(_req.getHead()["url"], serv, port);
+		}
+		else if (res_type == R_PHP || res_type == R_PY)
 			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)
 			executeHtml();
@@ -465,7 +542,9 @@ void	Client::saveLogs( void )
 	ofs.close();
 }
 
-void Client::closeConnection(){}
+void Client::closeConnection(){
+	_status = OK;
+}
 
 /*
 ** --------------------------------- ACCESSOR ---------------------------------

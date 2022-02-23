@@ -21,4 +21,18 @@ Value & Value::operator=( Value const & rhs )
 	return *this;
 }
 
+Route::Route( Route const & src ) { *this = src; }
+Route & Route::operator=( Route const & rhs ) 
+{
+	if (this != &rhs)
+	{
+		redirection = rhs.redirection;
+		autoindex = rhs.autoindex;
+		index = rhs.index;
+		upload = rhs.upload;
+		methods = rhs.methods;
+	}
+	return *this;
+}
+
 }

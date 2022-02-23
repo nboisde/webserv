@@ -59,8 +59,15 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	std::string root("");
 	root += port.getConfig()[cli.getHostname()]["root"]._value;
 	std::string uri_query = _header["url"];
+	std::cout << "cgi root" << root << std::endl;
+	std::cout << "uri_query: "<< uri_query << std::endl;
 	std::string url = cli.getFilePath();
 	size_t		pos = url.find(root) + root.size();
+	std::cout << pos << std::endl;
+
+	std::cout << "URL : [" << url << "]" << std::endl;
+	std::cout << "ex : [" << _extension << "]" << std::endl;
+	std::cout << "root : [" << root << "]" << std::endl;
 
 	_conversion.insert(pair("DOCUMENT_ROOT", root));
 	_conversion.insert(pair("DOCUMENT_URI", url.substr(pos, url.find(_extension) + _extension.size() - pos)));
@@ -68,7 +75,7 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	_conversion.insert(pair("SCRIPT_NAME", url.substr(pos, url.find(_extension) + _extension.size() - pos)));
 	_conversion.insert(pair("PHP_SELF", url.substr(pos, url.find(_extension) + _extension.size() - pos)));	
 	_conversion.insert(pair("REQUEST_URI", uri_query));
-	
+	std::cout << "ok ?" << std::endl;
 	std::string query;
 	if (uri_query.find(".php?") != std::string::npos)
 		query = uri_query.substr(uri_query.find(".php?") + 5);

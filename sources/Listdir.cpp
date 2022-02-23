@@ -3,32 +3,48 @@
 listdir::listdir(){}
 listdir::~listdir(){}
 
-std::string		listdir::genetateAutoindex(std::string root, std::string path)
+std::string		listdir::generateAutoindex(std::string path, std::string loc)
 {
-	listFiles(root, path);
-	std::string autoindex = generateHTML();	
+	listFiles(path, loc);
+	std::string autoindex = generateHTML();
+	for (std::vector<std::string>::iterator it = _dirs.begin(); it != _dirs.end(); it++)
+		std::cout << *(it) << std::endl;
 	_dirs.clear();
 	return (autoindex);
 }
 
-void		listdir::listFiles(std::string root, std::string path){
-		if (DIR *dir = opendir(path.c_str()))
+void		listdir::listFiles(std::string path, std::string loc){
+	if (DIR *dir = opendir(path.c_str()))
 	{
 		while (struct dirent *f = readdir(dir))
 		{
 			if (f->d_name[0] == '.')
 				continue ;
 			if (f->d_type == DT_DIR)
-				listFiles(path + f->d_name + "/", root);
+			{
+				_dirs.push_back(loc + f->d_name);
+				std::cout << f->d_name << std::endl;
+				std::cout << path + "/" + f->d_name << std::endl;
+				listFiles(path + "/" + f->d_name, loc);
+			}
 			if (f->d_type == DT_REG)
 			{
-				std::string p = path + f->d_name;
-				if (static_cast<int>(p.find(root)) != -1)
-					_dirs.push_back(p.substr(p.find_first_of("/")));
+				std::string p = path + "/" + f->d_name;
+				//if (static_cast<int>(p.find(root)) != -1)
+				//_dirs.push_back(p.substr(p.find_first_of("/")));
+				//_dirs.push_back(p.substr(p.find_last_of("/")));
+				_dirs.push_back(p.substr(p.find(loc)));
 			}
 		}
 		closedir(dir);
 	}
+}
+
+
+std::string		listdir::resolvePath( std::string path )
+{
+	std::string new_path = path;
+	return new_path;
 }
 
 std::string		listdir::generateHTML( void )

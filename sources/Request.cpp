@@ -717,5 +717,6 @@ int										Request::getUploadAuthorized( void ) const { return _upload_authori
 
 void									Request::setContinue( int cont ){ _continue = cont; }
 void									Request::setUploadAuthorized( int up_auth ) { _upload_authorized = up_auth; }
+void									Request::setHeadKey( std::string key, std::string value ) { _head[key] = value; }
 
 }

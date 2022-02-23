@@ -8,6 +8,7 @@
 # include "Server.hpp"
 # include "Port.hpp"
 # include "Value.hpp"
+# include "Listdir.hpp"
 
 namespace ws {
 
@@ -34,6 +35,10 @@ class Client
 		int				executeRedir( std::string new_path);
 		error_type		init_responseMap( void );
 		int				uploadAuthorized( void );
+		int				isURLDirectory( std::string url );
+		int				directoryProcessing( std::string url );
+		int				executeAutoin( std::string url, Server const & serv, Port & port );
+
 
 	protected:
 		int				_fd;

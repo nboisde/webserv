@@ -32,6 +32,7 @@
 # define R_PY 2
 # define R_HTML 3
 # define R_ERR 4
+# define R_AUTO 5
 
 // CLIENT STATUS
 # define CLOSING 0

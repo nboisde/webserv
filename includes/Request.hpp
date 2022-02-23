@@ -58,6 +58,7 @@ class Request
 
 		void			setContinue( int cont );
 		void			setUploadAuthorized( int up_auth );
+		void			setHeadKey( std::string key, std::string value );
 
 
 	private:
