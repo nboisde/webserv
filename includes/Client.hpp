@@ -24,15 +24,21 @@ class Client
 	private:
 		void			saveLogs(void);
 		int				openFile( std::string path );
+	
 		int				checkURI( std::string url );
-		int				checkCGI( std::string & url );
-		int				checkPath( std::string & root, std::string & url );
+		int				checkCGI( void );
+		int				checkPath( void );
 		int				checkLocation( std::string & url, std::string & route);
+		int				checkMethod( void );
 		int				checkExtension( std::string & root, std::string & url );
 		int				executeExtension( Server const & serv, Port & port );
 		int				executeHtml( void );
+	
+		int				executePhpPython( Server const & serv, Port & port, int extension_type );
+		void			executeHtml( void );
 		int				executeError( std::string url );
 		int				executeRedir( std::string new_path);
+	
 		error_type		init_responseMap( void );
 		int				uploadAuthorized( void );
 		int				isURLDirectory( std::string url );
@@ -48,6 +54,7 @@ class Client
 		ws::Request		_req;
 		ws::Response	_res;
 		std::string		_file_path;
+		Route *			_route;
 		map_configs		_config;
 		error_type		_errors;
 		std::string		_hostname;
@@ -70,6 +77,10 @@ class Client
 		void 			bridgeParsingRequest( void );
 		int				uploadFiles( void );
 		std::string		uploadPath( std::string url );
+
+		void			setPath( void );
+		void			setRoute( void );
+		int				setExecution( void );
 
 		int				getFd( void ) const;
 		int				getStatus( void ) const;

@@ -230,46 +230,26 @@ int Client::send( void )
 	return WRITING;
 }
 
-int 	Client::checkLocation( std::string & url, std::string & route)
+void 	Client::setRoute( void )
 {
 	Value									location = _config[_hostname]["location"];
 	std::map<std::string, Route>::iterator	it = location._locations.begin();
 	std::map<std::string, Route>::iterator	ite = location._locations.end();
-	
-	std::cout << url << std::endl;
+	_route = NULL;
+
 	for (; it != ite; it++)
 	{
-		std::cout << it->first << ", ";
-		if (url.find(it->first) != static_cast<size_t>(-1))
-		{
-			route = it->first;
-			return (1);
-		}
+		if (_file_path.find(it->first) >= 0)
+			_route = &(it->second);
 	}
-	std::cout << std::endl;
-	return (0);
-}
-
-int 	Client::checkMethod( std::string & url, std::string & route)
-{
-}
-
-int	Client::checkPath( std::string & root, std::string & url )
-{
-	std::stringstream				file_path;
-	
-	file_path << root << url;
-	if (openFile(file_path.str()) > 0)
-	{
-		_file_path = file_path.str();
-		return (SUCCESS);
-	}
-	return (ERROR);
 }
 
 int	Client::checkCGI( std::string & url )
 {
 	int		query_pos = url.find("?");
+	int		php_pos = _file_path.find(".php");
+	int		py_pos = _file_path.find(".py");
+	int		size = _file_path.size();
 
 	if ( query_pos >= 0 )
 			url = url.substr(0, query_pos);
@@ -290,18 +270,15 @@ int	Client::checkCGI( std::string & url )
 	return (R_HTML);
 }
 
-int	Client::openFile( std::string path )
+int	Client::checkPath( void )
 {
-	int fd = ::open(path.c_str(), O_RDONLY);
+	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
-		return ERROR;
-	close(fd);
-	fd = ::open(path.c_str(), O_DIRECTORY);
-	if (fd > 0)
 	{
-		close(fd);
-		return (ERROR);
+		_status = BAD_REQUEST;
+		return 0;
 	}
+	close(fd);
 	return SUCCESS;
 }
 
@@ -395,8 +372,7 @@ int Client::executeAutoin( std::string url, Server const & serv, Port & port )
 
 int	Client::checkURI( std::string url)
 {
-	int					ret;
-	std::string			root;
+	std::string method = _req.getHead()["method"];
 
 	if (url == "/")
 		url = _config[_hostname]["index"]._value;
@@ -413,61 +389,53 @@ int	Client::checkURI( std::string url)
 	return (R_ERR);
 }
 
-int Client::execution( Server const & serv, Port & port)
+void	Client::setPath( void )
 {
 	std::string url = _req.getHead()["url"];
-	std::string path = getPath(url);
-	std::string route = getLocation(url);
+	std::string	root = _config[_hostname]["root"]._value;
 
-	ret = setExecution(td::string & path);
-	if (ret == CGI)
-		executeCGI(std::string & path);
-	else if (ret = DIRECTORY)
-		executeDir(std::string & path);
-	else if (ret = HTML)
-		executeHTML(std::string & path);
-	else
-		executeError(std::string & path);
+	if (url == "/")
+		url = _config[_hostname]["index"]._value;
+	_file_path = root + url;
+	//virer le query ?
 }
 
-int	Client::setexecution( Server const & serv, Port & port )
+int Client::execution( Server const & serv, Port & port)
 {
 	int	res_type = ERROR;
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
 
 	saveLogs();
-	if (_status != OK)
-		executeError(url);
-	{
-		getPath(url); ->recup PATH
-		getLocation(); -> recup ROUTE
-		checkMethod(); -> check Method for all and route
-	}
-	ret = html;
-	ret = checkUpload(); (dans cgi ou a lexterieur)
-	ret = checkDirectory(); -> OUT AUTOINDEX OU INDEX OU PAS 
-	ret = checkCgi(); -> OUT CGI
-	}
-	->
-	RET = HTML / CGI / AUTOINDEX / ERROR;
-	Execute (RET);
+	setPath();
+	setRoute();
+	
+	int ret = setExecution();
+	if (ret == R_PHP || ret == R_PY)
+		executeCGI();
+	else if (ret = R_AUTO)
+		executeAuto();
+	else if (ret = R_HTML)
+		executeHTML();
 	else
-	{
-		res_type = checkURI(_req.getHead()["url"]);
-		if (res_type == R_AUTO)
-		{
-			std::cout << "ici" << std::endl;
-			std::cout << _req.getHead()["url"] << std::endl;
-			executeAutoin(_req.getHead()["url"], serv, port);
-		}
-		else if (res_type == R_EXT)
-			executeExtension(serv, port);
-		else if (res_type == R_HTML)
-			executeHtml();
-		else if (res_type == R_ERR)
-			executeError(_req.getHead()["url"]);
-	}
-	return SUCCESS;
+		executeError( );
+}
+
+int	Client::setExecution( void )
+{
+	if (_status != OK)
+		return R_ERR;
+	if (!checkMethod())
+		return R_ERR;
+	// if ((ret = checkAuto()) //NICO
+	// 	return ret;
+	if (!checkPath())
+		return R_ERR;
+	// if ((ret = checkUpload()))
+	// 	return ret;
+	if ((ret = checkCGI()))
+		return ret;
+	return R_HTML;
+
 }
 
 int Client::executeExtension( Server const & serv, Port & port)
@@ -477,7 +445,7 @@ int Client::executeExtension( Server const & serv, Port & port)
 	return SUCCESS;
 }
 
-int	Client::executeHtml( void )
+void	Client::executeHtml( void )
 {
 	std::string	content;
 	char		*line = NULL;
