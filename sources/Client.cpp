@@ -402,13 +402,13 @@ int	Client::checkURI( std::string url)
 	int					ret;
 	std::string			root;
 
+	if (url == "/")
+		url = _config[_hostname]["index"]._value;
 	if (isURLDirectory(url))
 	{
 		_status = OK;
 		return R_AUTO;
 	}
-	if (url == "/")
-		url = _config[_hostname]["index"]._value;
 	root = _config[_hostname]["root"]._value;
 	ret = checkCGI(url);
 	if (checkPath(root, url) > 0)
