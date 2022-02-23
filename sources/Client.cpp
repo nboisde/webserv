@@ -331,6 +331,7 @@ int Client::isURLDirectory( std::string url )
 	std::string path = _config[_hostname]["root"]._value + url;
 	//std::cout << DEV << path << std::endl;
 	int fd = ::open(path.c_str(), O_DIRECTORY);
+	std::cout << YELLOW << "Directory " << fd << RESET << std::endl;
 	if (fd > 0)
 	{
 		close(fd);
@@ -338,27 +339,6 @@ int Client::isURLDirectory( std::string url )
 	}
 	close(fd);
 	return (0);
-}
-
-int Client::directoryProcessing( std::string url )
-{
-	std::string loc = url;
-	std::string route = "";
-	checkLocation(loc, route);
-	std::cout << "loc: " << loc << std::endl;
-	std::cout << "route: " << route << std::endl;
-	std::cout << RED << "autoindex: " << _config[_hostname]["location"]._locations[url].autoindex << RESET << std::endl;
-	std::cout << LIGHTBLUE << _config[_hostname]["root"]._value + url << RESET << std::endl;
-	if (_config[_hostname]["location"]._locations[route].index != "")
-		std::cout << DEV << "BRUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUH" << RESET << std::endl;
-	if (_config[_hostname]["location"]._locations[route].autoindex == "on")
-	{
-		listdir ld;
-		std::cout << ld.generateAutoindex(_config[_hostname]["root"]._value + route, route) << std::endl;
-		//_res.setBody(ld.genetateAutoindex(_config[_hostname]["root"]._value + route, route));
-	}
-	std::cout << "location_index : [" << _config[_hostname]["location"]._locations[route].index << "]" << std::endl;
-	return 1;
 }
 
 int Client::executeAutoin( std::string url, Server const & serv, Port & port )
@@ -372,35 +352,46 @@ int Client::executeAutoin( std::string url, Server const & serv, Port & port )
 	{
 		std::string index = _config[_hostname]["root"]._value + url + "/" + _config[_hostname]["location"]._locations[route].index;
 		_file_path = index;
-		// changer la valeur de la rq dans get head.
 		_req.setHeadKey("url", url + "/" + _config[_hostname]["location"]._locations[route].index);
 		int check_existance  = ::open(index.c_str(), O_RDONLY);
 		if (check_existance < 0)
 		{
+			std::cout << BLUE << _file_path << RESET << std::endl;
 			_status = NOT_FOUND;
 			res_type = R_ERR;
 			executeError(index);
 			return SUCCESS;
 		}
+		std::cout << BLUE << _file_path << RESET << std::endl;
 		res_type = checkCGI(index);
 		if (res_type == R_PHP || res_type == R_PY)
 			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)
 			executeHtml();
 		else if (res_type == R_ERR)
+		{
+			std::cout << "ICI" << std::endl;
 			executeError(_req.getHead()["url"]);
+		}
 		return SUCCESS;
 	}
 	else if (_config[_hostname]["location"]._locations[route].autoindex == "on")
 	{
 		_res.setBody(ld.generateAutoindex(_config[_hostname]["root"]._value + route, route));
 		_file_path = _config[_hostname]["root"]._value + route;
+		std::cout << BLUE << _file_path << RESET << std::endl;
 		_res.setContentType(_file_path);
 		_res.setContentDisposition(_file_path);
 		_res.response(_status);
+		return SUCCESS;
 	}
 	else
+	{
+		std::cout << "FORBIDDEN : " << _file_path << std::endl;
+		_status = FORBIDDEN;
 		executeError(_req.getHead()["url"]);
+		_file_path = "";
+	}
 	return SUCCESS;
 }
 
@@ -414,10 +405,9 @@ int	Client::checkURI( std::string url)
 	if (isURLDirectory(url))
 	{
 		//directoryProcessing(url);
-		_status = 200;
+		_status = OK;
 		return R_AUTO;
 	}
-	std::cout << YELLOW << "url is a directory: " << isURLDirectory(url) << RESET << std::endl;
 	if (url == "/")
 		url = _config[_hostname]["index"]._value;
 	root = _config[_hostname]["root"]._value;
@@ -438,11 +428,14 @@ int	Client::execution( Server const & serv, Port & port )
 
 	saveLogs();
 	if (_status != OK)
+	{
+		std::cout << DEV << "OMG" <<RESET << std::endl;
 		executeError(_req.getHead()["url"]);
+	}
 	else
 	{
 		res_type = checkURI(_req.getHead()["url"]);
-		std::cout << "PATH " << _file_path << std::endl;
+		std::cout << GREEN << "PATH " << _file_path << RESET << std::endl;
 		if (res_type == R_AUTO)
 			executeAutoin(_req.getHead()["url"], serv, port);
 		else if (res_type == R_PHP || res_type == R_PY)
@@ -553,7 +546,9 @@ void	Client::saveLogs( void )
 	ofs.close();
 }
 
-void Client::closeConnection(){}
+void Client::closeConnection(){
+	_status = OK;
+}
 
 /*
 ** --------------------------------- ACCESSOR ---------------------------------
