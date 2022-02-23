@@ -201,17 +201,7 @@ int Client::receive( void )
 
 void Client::bridgeParsingRequest( void )
 {
-	int not_all = 1;
-
-	for (std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin(); it != _config[_hostname]["method"]._methods.end(); it++)
-	{
-		std::cout << (*it) << std::endl;
-		if ((*it) == _req.getHead()["method"])
-			not_all = 0;
-	}
-	if (not_all == 1)
-		_status = NOT_ALLOWED;
-	else if (static_cast<size_t>(_req.getBody().length()) > _config[_hostname]["client_max_body_size"]._max_body_size
+	if (static_cast<size_t>(_req.getBody().length()) > _config[_hostname]["client_max_body_size"]._max_body_size
 	|| static_cast<size_t>(_req.getContentLength()) > _config[_hostname]["client_max_body_size"]._max_body_size)
 		_status = REQUEST_ENTITY_TOO_LARGE;
 	else
@@ -255,6 +245,10 @@ int 	Client::checkLocation( std::string & url, std::string & route)
 		}
 	}
 	return (0);
+}
+
+int 	Client::checkMethod( std::string & url, std::string & route)
+{
 }
 
 int	Client::checkPath( std::string & root, std::string & url )
@@ -345,18 +339,50 @@ int	Client::checkURI( std::string url)
 	return (R_ERR);
 }
 
-int	Client::execution( Server const & serv, Port & port )
+int Client::execution( Server const & serv, Port & port)
+{
+	std::string url = _req.getHead()["url"];
+	std::string path = getPath(url);
+	std::string route = getLocation(url);
+
+	ret = setExecution(td::string & path);
+	if (ret == CGI)
+		executeCGI(std::string & path);
+	else if (ret = DIRECTORY)
+		executeDir(std::string & path);
+	else if (ret = HTML)
+		executeHTML(std::string & path);
+	else
+		executeError(std::string & path);
+}
+
+int	Client::setexecution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
 
 	saveLogs();
 	if (_status != OK)
-		executeError(_req.getHead()["url"]);
+		executeError(url);
+	{
+		getPath(url); ->recup PATH
+		getLocation(); -> recup ROUTE
+		checkMethod(); -> check Method for all and route
+	}
+	ret = html;
+	ret = checkUpload(); (dans cgi ou a lexterieur)
+	ret = checkDirectory(); -> OUT AUTOINDEX OU INDEX OU PAS 
+	ret = checkCgi(); -> OUT CGI
+	}
+	->
+	RET = HTML / CGI / AUTOINDEX / ERROR;
+	Execute (RET);
 	else
 	{
-		res_type = checkURI(_req.getHead()["url"]);
-		std::cout << RED << "URL " << _req.getHead()["url"] << RESET << std::endl;
-		std::cout << RED << "RET " << res_type << RESET << std::endl;
+		if (!(res_type = checkURI(url)))
+			executeError(url);
+		if (!(res_type = checkMethod(url))))
+			executeError(url);
+		std::cout << RED << "URL " << url << RESET << std::endl;
 		if (res_type == R_PHP || res_type == R_PY)
 			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)

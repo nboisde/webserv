@@ -31,7 +31,7 @@
 # define R_PHP 1
 # define R_PY 2
 # define R_HTML 3
-# define R_ERR 4
+# define R_ERR 0
 
 // CLIENT STATUS
 # define CLOSING 0
