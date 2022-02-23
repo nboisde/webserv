@@ -16,6 +16,7 @@ Value & Value::operator=( Value const & rhs )
 		_max_body_size = rhs._max_body_size;
 		_errors = rhs._errors;
 		_methods = rhs._methods;
+		_list = rhs._list;
 		_locations = rhs._locations;
 	}
 	return *this;

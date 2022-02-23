@@ -32,11 +32,13 @@ class Value
 
 		Value &		operator=( Value const & rhs );
 
-		std::string						_value;
-		unsigned long					_max_body_size;
-		std::map<int, std::string>		_errors;
-		std::vector<std::string>		_methods;
-		std::map<std::string, Route>	_locations;
+		std::string							_value;
+		unsigned long						_max_body_size;
+		std::map<int, std::string>			_errors;
+		std::vector<std::string>			_methods;
+		std::map<std::string, Route>		_locations;
+		//ONLY USED BY CGI, BASED ON OLD ARCHI
+		std::map<std::string, std::string>	_list;
 };
 
 std::ostream &			operator<<( std::ostream & o, Value const & i );

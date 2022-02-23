@@ -10,9 +10,11 @@ namespace ws{
 
 CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _arg(NULL), _env(NULL)
 {
-	std::string bin_path = cli.getConfig()[cli.getHostname()]["cgi"]._locations[cli.getExtension()];
+	std::string bin_path = cli.getConfig()[cli.getHostname()]["cgi"]._list[cli.getExtension()];
 	_extension = cli.getExtension();
 	_bin_location = bin_path;
+	std::cout << DEV << "EXTENSION = " << _extension << RESET << std::endl;
+	std::cout << DEV << "BIN_LOC = " << _bin_location << RESET << std::endl;
 	this->_header = cli.getReq().getHead();
 	init_conversion( cli, port, serv );
 	generate_env();
