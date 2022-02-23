@@ -282,21 +282,16 @@ int	Client::checkCGI( std::string & url )
 	size_t i = url.size() - 1;
 	for (i = url.size() - 1; url[i] != '.'; i--);
 	_extension = url.substr(i);
-	std::cout << YELLOW << _extension << RESET << std::endl;
 
 	//Cette partie du code parcourt les extensions que possede notre fichier de conf
-	Value cgi = _config[_hostname]["cgi"];
-	std::map<std::string, std::string> extension = cgi._locations;
-	std::map<std::string, std::string>::iterator map_it = extension.begin();
-	for (;map_it != extension.end(); map_it++)
+	Value const & cgi = _config[_hostname]["cgi"];
+	std::map<std::string, std::string> const & extensions = cgi._list;
+	std::map<std::string, std::string>::const_iterator map_it = extensions.begin();
+	std::map<std::string, std::string>::const_iterator map_end = extensions.end();
+	for (;map_it != map_end; map_it++)
 	{
-		std::cout << YELLOW << map_it->first << RESET << std::endl;
-		std::cout << YELLOW << map_it->second << RESET << std::endl;
 		if (_extension == map_it->first)
-		{	
-			std::cout << YELLOW << "Nous Possedons cette extension en notre sein" << RESET << std::endl;
 			return R_EXT;
-		}
 	}
 	return (R_HTML);
 }
@@ -568,7 +563,7 @@ std::string							Client::getIp( void ) const { return _ip; }
 std::string							Client::getPort( void ) const { return _port; }
 ws::Response						Client::getRes(void ) const { return _res; }
 map_configs							Client::getConfig( void ) const { return _config; }
-map_configs const & 				Client::getConfig( void ) { std::cout << DEV "je suis passe ici\n" RESET;return _config; }
+map_configs const & 				Client::getConfig( void ) { return _config; }
 std::string							Client::getHostname( void ) const { return _hostname; }
 std::string const & 				Client::getExtension( void ) const {return _extension;}
 }

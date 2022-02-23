@@ -434,23 +434,34 @@ static bool microparse_extension(std::string extension)
 	return true;
 }
 
-int Parser::checkCGI(std::string raw_value, Value & new_value)
+//IN CHECKCGI WE CREATE A SINGLE INSTANCE OF VALUE NAMED CGI
+//This Value store a pair in _list, and the raw string in _value. Nothing else is used.
+//the pair is composed of :
+// 		1) the Extension encountered ".php", ".mp3", ".py", etc...
+//		2) the Path to the binary, that launch that extension
+int Parser::checkCGI(std::string raw_value, Value & cgi)
 {
 	int i;
 
-	if (!new_value._value.empty())
-		new_value._value += " | ";
-	new_value._value += raw_value;
+	if (!cgi._value.empty())
+		cgi._value += " | ";
+	cgi._value += raw_value;
 	for(i = 0; raw_value[i] && !isspace(raw_value[i]); i++);
+
+	//HERE WE PARSE THE EXTENSION, AND SAVE IT IN A STRING
 	std::string extension = raw_value.substr(0, i);
+	
 	for(; raw_value[i] && isspace(raw_value[i]); i++);
 	int start = i;
 	for(; raw_value[i] && !isspace(raw_value[i]); i++);
+
+	//HERE WE PARSE THE BINARY PATH, AND SAVE IT IN A STRING
 	std::string binary = raw_value.substr(start, i - start);
+
 	for(; raw_value[i] && isspace(raw_value[i]); i++);
 	if (raw_value[i] || binary.empty() || !microparse_extension(extension) || !isfile(binary))
 		return (0);
-	new_value._locations.insert(std::pair<std::string, std::string>(extension, binary));
+	cgi._list.insert(std::pair<std::string, std::string>(extension, binary));
 	return SUCCESS;
 }
 
