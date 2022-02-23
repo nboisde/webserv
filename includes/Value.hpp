@@ -17,6 +17,9 @@ class	Route
 
 		Route() : redirection(""), autoindex("off"), index(""), upload("") {};
 		~Route() {};
+		Route( Route const & src );
+		Route &		operator=( Route const & rhs ); 
+		
 };
 
 class Value

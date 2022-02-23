@@ -246,14 +246,17 @@ int 	Client::checkLocation( std::string & url, std::string & route)
 	std::map<std::string, Route>::iterator	it = location._locations.begin();
 	std::map<std::string, Route>::iterator	ite = location._locations.end();
 	
+	std::cout << url << std::endl;
 	for (; it != ite; it++)
 	{
+		std::cout << it->first << ", ";
 		if (url.find(it->first) != static_cast<size_t>(-1))
 		{
 			route = it->first;
 			return (1);
 		}
 	}
+	std::cout << std::endl;
 	return (0);
 }
 
@@ -346,9 +349,14 @@ int Client::executeAutoin( std::string url, Server const & serv, Port & port )
 	int	res_type = ERROR;
 	std::string loc = url;
 	std::string route = "";
-	checkLocation(loc, route);
+	if (!checkLocation(loc, route))
+	{
+		_status = FORBIDDEN;
+		executeError(_req.getHead()["url"]);
+		return SUCCESS;
+	}
 	listdir ld;
-	if (_config[_hostname]["location"]._locations[route].index != "")
+	if (route != "" && _config[_hostname]["location"]._locations[route].index != "")
 	{
 		std::string index = _config[_hostname]["root"]._value + url + "/" + _config[_hostname]["location"]._locations[route].index;
 		_file_path = index;
@@ -356,13 +364,11 @@ int Client::executeAutoin( std::string url, Server const & serv, Port & port )
 		int check_existance  = ::open(index.c_str(), O_RDONLY);
 		if (check_existance < 0)
 		{
-			std::cout << BLUE << _file_path << RESET << std::endl;
 			_status = NOT_FOUND;
 			res_type = R_ERR;
 			executeError(index);
 			return SUCCESS;
 		}
-		std::cout << BLUE << _file_path << RESET << std::endl;
 		res_type = checkCGI(index);
 		if (res_type == R_PHP || res_type == R_PY)
 			executePhpPython(serv, port, res_type);
@@ -370,16 +376,14 @@ int Client::executeAutoin( std::string url, Server const & serv, Port & port )
 			executeHtml();
 		else if (res_type == R_ERR)
 		{
-			std::cout << "ICI" << std::endl;
 			executeError(_req.getHead()["url"]);
 		}
 		return SUCCESS;
 	}
-	else if (_config[_hostname]["location"]._locations[route].autoindex == "on")
+	else if (route != "" && _config[_hostname]["location"]._locations[route].autoindex == "on")
 	{
 		_res.setBody(ld.generateAutoindex(_config[_hostname]["root"]._value + route, route));
 		_file_path = _config[_hostname]["root"]._value + route;
-		std::cout << BLUE << _file_path << RESET << std::endl;
 		_res.setContentType(_file_path);
 		_res.setContentDisposition(_file_path);
 		_res.response(_status);
@@ -387,10 +391,8 @@ int Client::executeAutoin( std::string url, Server const & serv, Port & port )
 	}
 	else
 	{
-		std::cout << "FORBIDDEN : " << _file_path << std::endl;
 		_status = FORBIDDEN;
 		executeError(_req.getHead()["url"]);
-		_file_path = "";
 	}
 	return SUCCESS;
 }
@@ -400,11 +402,8 @@ int	Client::checkURI( std::string url)
 	int					ret;
 	std::string			root;
 
-	std::cout << "URL " << url << std::endl;
-	// SI URL EST UN DIR => FAIRE FONCTIONS D'AUTOINDEX..
 	if (isURLDirectory(url))
 	{
-		//directoryProcessing(url);
 		_status = OK;
 		return R_AUTO;
 	}
@@ -413,31 +412,28 @@ int	Client::checkURI( std::string url)
 	root = _config[_hostname]["root"]._value;
 	ret = checkCGI(url);
 	if (checkPath(root, url) > 0)
-	{
-		std::cout << RED << "RET " << ret << RESET << std::endl;
 		return (ret);
-	}
 	_status = NOT_FOUND;
-	std::cout << RED << "RET " << R_ERR << RESET << std::endl;
 	return (R_ERR);
 }
 
 int	Client::execution( Server const & serv, Port & port )
 {
 	int	res_type = ERROR;
-
+	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
+s
 	saveLogs();
 	if (_status != OK)
-	{
-		std::cout << DEV << "OMG" <<RESET << std::endl;
 		executeError(_req.getHead()["url"]);
-	}
 	else
 	{
 		res_type = checkURI(_req.getHead()["url"]);
-		std::cout << GREEN << "PATH " << _file_path << RESET << std::endl;
 		if (res_type == R_AUTO)
+		{
+			std::cout << "ici" << std::endl;
+			std::cout << _req.getHead()["url"] << std::endl;
 			executeAutoin(_req.getHead()["url"], serv, port);
+		}
 		else if (res_type == R_PHP || res_type == R_PY)
 			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)
