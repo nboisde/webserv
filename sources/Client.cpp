@@ -370,18 +370,21 @@ int Client::executeAutoin( std::string url, Server const & serv, Port & port )
 	listdir ld;
 	if (_config[_hostname]["location"]._locations[route].index != "")
 	{
-		std::cout << "ici" << std::endl;
-		_file_path = _config[_hostname]["location"]._locations[route].index;
-		std::cout << _file_path << std::endl;
-		std::cout << "la" << std::endl;
-		res_type = checkCGI(url);
-		std::cout << "ici la " << std::endl;
-		std::cout << res_type << std::endl;
-		if (res_type == R_PHP || res_type == R_PY)
+		std::string index = _config[_hostname]["root"]._value + url + "/" + _config[_hostname]["location"]._locations[route].index;
+		_file_path = index;
+		// changer la valeur de la rq dans get head.
+		_req.setHeadKey("url", url + "/" + _config[_hostname]["location"]._locations[route].index);
+		int check_existance  = ::open(index.c_str(), O_RDONLY);
+		if (check_existance < 0)
 		{
-			std::cout << "iciiiiiiii" << std::endl;
-			executePhpPython(serv, port, res_type);
+			_status = NOT_FOUND;
+			res_type = R_ERR;
+			executeError(index);
+			return SUCCESS;
 		}
+		res_type = checkCGI(index);
+		if (res_type == R_PHP || res_type == R_PY)
+			executePhpPython(serv, port, res_type);
 		else if (res_type == R_HTML)
 			executeHtml();
 		else if (res_type == R_ERR)
