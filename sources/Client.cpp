@@ -271,6 +271,17 @@ int	Client::checkCGI( std::string & url )
 	return (R_HTML);
 }
 
+int	Client::checkAutoindex( void )
+{
+	return SUCCESS;
+}
+
+int	Client::checkUpload( void )
+{
+	return SUCCESS;
+}
+
+
 int	Client::checkPath( void )
 {
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
@@ -511,8 +522,7 @@ int	Client::executeError( void )
 
 	root = _config[_hostname]["root"]._value;
 	root += error_file_path;
-	int ret = openFile(root);
-	if (error_file_path.size() && ret > 0)
+	if (error_file_path.size())
 	{
 		_file_path = error_file_path;
 		executeRedir();
