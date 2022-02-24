@@ -9,13 +9,14 @@ namespace ws
 class	Route
 {
 	public:
+		std::string					route;
 		std::string					redirection;
 		std::string					autoindex;
 		std::string					index;
 		std::string					upload;
 		std::vector<std::string>	methods;
 
-		Route() : redirection(""), autoindex("off"), index(""), upload("") {};
+		Route() : route(""), redirection(""), autoindex("off"), index(""), upload("") {};
 		~Route() {};
 		Route( Route const & src );
 		Route &		operator=( Route const & rhs ); 
