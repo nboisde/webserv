@@ -65,6 +65,7 @@ static int	monitor_stdin( void )
 	FILE * stream = fdopen(dup(STDIN), "r");
 	char *line = NULL;
 	size_t n;
+	//std::cout << "MONITORING" << std::endl;
 	if (stream == NULL)
 	{	
 		perror("fopen");

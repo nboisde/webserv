@@ -27,7 +27,8 @@ class Client
 		void			setPath( void );
 		void			setRoute( void );
 		int				setExecution( void );
-
+		int				setHostname( void );
+	
 		int				checkCGI( void );
 		int				checkPath( void );
 		int				checkRedirection( void );
@@ -45,6 +46,7 @@ class Client
 	
 		error_type		init_responseMap( void );
 		int				uploadAuthorized( void );
+		int				uploadFiles( std::string upload_path );
 		int				isURLDirectory( void );
 		int				directoryProcessing( std::string url );
 
@@ -78,7 +80,6 @@ class Client
 		int				send( void );
 		void			closeConnection( void );
 		void 			bridgeParsingRequest( void );
-		int				uploadFiles( void );
 		std::string		uploadPath( std::string url );
 
 		int				getFd( void ) const;

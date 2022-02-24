@@ -482,6 +482,7 @@ void	Parser::initParser(void)
 	_key_checker["cgi"] = &Parser::checkCGI;
 	_default_keys["listen"] = Value("8080");
 	_default_keys["host"] = Value(LOCALHOST);
+	_default_keys["upload"] = Value("");
 	_default_keys["server_name"] = Value(LOCALHOST);
 	_default_keys["client_max_body_size"] = Value("100000000");
 	_default_keys["error_page"] = Value("");
