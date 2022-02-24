@@ -22,10 +22,12 @@ class Client
 
 
 	private:
-		void			saveLogs(void);
-		int				openFile( std::string path );
+		void			saveLogs( void );
 	
-		int				checkURI( std::string url );
+		void			setPath( void );
+		void			setRoute( void );
+		int				setExecution( void );
+
 		int				checkCGI( void );
 		int				checkPath( void );
 		int				checkRedirection( void );
@@ -34,20 +36,17 @@ class Client
 		int				checkLocation( std::string & url, std::string & route);
 		int				checkMethod( void );
 		int				checkExtension( std::string & root, std::string & url );
+		
 		int				executeExtension( Server const & serv, Port & port );
-		int				executeHtml( void );
-	
-		int				executePhpPython( Server const & serv, Port & port, int extension_type );
+		int				executeAutoin( void );
+		void			executeRedir( void );
 		void			executeHtml( void );
 		int				executeError( void );
-		void			executeRedir( void );
-		void			executeAuto( void );
 	
 		error_type		init_responseMap( void );
 		int				uploadAuthorized( void );
-		int				isURLDirectory( std::string url );
+		int				isURLDirectory( void );
 		int				directoryProcessing( std::string url );
-		int				executeAutoin( std::string url, Server const & serv, Port & port );
 
 
 	protected:
@@ -81,10 +80,6 @@ class Client
 		void 			bridgeParsingRequest( void );
 		int				uploadFiles( void );
 		std::string		uploadPath( std::string url );
-
-		void			setPath( void );
-		void			setRoute( void );
-		int				setExecution( void );
 
 		int				getFd( void ) const;
 		int				getStatus( void ) const;

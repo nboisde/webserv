@@ -12,17 +12,20 @@ namespace ws
 */ 
 Client::Client( void ) {}
 
-Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : _fd(fd), _status(OK), _config(conf)
+Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : _fd(fd), _status(OK), _route(NULL), _config(conf)
 {
 	_ip = inet_ntoa(cli_addr->sin_addr);
 	std::stringstream port;
 	port << ntohs(cli_addr->sin_port);
 	_port += port.str();
-	std::cout << "DEFAULT HOST " << _config.begin()->second["server_name"]._value << std::endl;
 }
 
 Client::Client( Client const & src ) { *this = src; }
-Client::~Client() {}
+Client::~Client()
+{ 
+	if (_route)
+		delete _route;
+}
 
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
@@ -235,34 +238,38 @@ void 	Client::setRoute( void )
 	Value									location = _config[_hostname]["location"];
 	std::map<std::string, Route>::iterator	it = location._locations.begin();
 	std::map<std::string, Route>::iterator	ite = location._locations.end();
-	_route = NULL;
 
 	for (; it != ite; it++)
 	{
-		if (_file_path.find(it->first) >= 0)
-			_route = &(it->second);
+		int ret = 0;
+		if ((ret = _file_path.find(it->first)) >= 0)
+		{
+			_route = new Route(it->second);
+			return;
+		}
 	}
 }
 
-int	Client::checkCGI( std::string & url )
+int	Client::checkCGI( void )
 {
-	int		query_pos = url.find("?");
-	int		php_pos = _file_path.find(".php");
-	int		py_pos = _file_path.find(".py");
-	int		size = _file_path.size();
+
+	std::cout << YELLOW <<_file_path << RESET << std::endl; 
+
 	int		query_pos = _file_path.find("?");
 
 	if ( query_pos >= 0 )
-			url = url.substr(0, query_pos);
-	size_t i = url.size() - 1;
-	for (i = url.size() - 1; url[i] != '.'; i--);
-	_extension = url.substr(i);
+			_file_path = _file_path.substr(0, query_pos);
+	size_t i = _file_path.size() - 1;
+	for (i = _file_path.size() - 1; _file_path[i] != '.'; i--);
+	_extension = _file_path.substr(i);
 
 	//Cette partie du code parcourt les extensions que possede notre fichier de conf
 	Value const & cgi = _config[_hostname]["cgi"];
 	std::map<std::string, std::string> const & extensions = cgi._list;
 	std::map<std::string, std::string>::const_iterator map_it = extensions.begin();
 	std::map<std::string, std::string>::const_iterator map_end = extensions.end();
+
+
 	for (;map_it != map_end; map_it++)
 	{
 		if (_extension == map_it->first)
@@ -271,14 +278,65 @@ int	Client::checkCGI( std::string & url )
 	return (R_HTML);
 }
 
+int Client::checkRedirection( void )
+{
+	if (!_route)
+		return (0);
+	std::string redirection = _route->redirection;
+	if (redirection == "")
+		return (0);
+	int	pos = _file_path.find(_route->route);
+	if (pos >= 0)
+	{
+		std::string new_url = _file_path.substr(0, pos);
+		new_url += redirection;
+		new_url += _file_path.substr(pos + _route->route.size());
+		_file_path = new_url;
+		return (SUCCESS);
+	} 
+	return R_REDIR;
+}
+
+int Client::checkMethod( void )
+{
+	std::string method = _req.getHead()["method"];
+
+	if (_route)
+	{
+		std::vector<std::string>::iterator it = _route->methods.begin();
+		std::vector<std::string>::iterator ite = _route->methods.end();
+		for (; it != ite; it++)
+			if (method == *it)
+				return (SUCCESS);
+	}
+	std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin();
+	std::vector<std::string>::iterator ite = _config[_hostname]["method"]._methods.end();
+	for (; it != ite; it++)
+		if (method == *it)
+			return (SUCCESS);
+	_status = BAD_REQUEST;
+	return (0);
+}
+
 int	Client::checkAutoindex( void )
 {
-	return SUCCESS;
+	if (!isURLDirectory())
+		return 0;
+	else if (_route->index != "")
+	{
+		std::string index = _config[_hostname]["root"]._value + _route->index;
+		_file_path = index;
+		std::cout << GREEN << _file_path << RESET << std::endl;
+		
+	}
+	else if (_route->autoindex == "on")
+		return R_AUTO;
+	return 0;
 }
 
 int	Client::checkUpload( void )
 {
-	return SUCCESS;
+	return 0;
 }
 
 
@@ -314,12 +372,9 @@ std::string Client::getLocalHostname( void ) const
 	return local_host_name;
 }
 
-int Client::isURLDirectory( std::string url )
+int Client::isURLDirectory( void )
 {
-	std::string path = _config[_hostname]["root"]._value + url;
-	//std::cout << DEV << path << std::endl;
-	int fd = ::open(path.c_str(), O_DIRECTORY);
-	std::cout << YELLOW << "Directory " << fd << RESET << std::endl;
+	int fd = ::open(_file_path.c_str(), O_DIRECTORY);
 	if (fd > 0)
 	{
 		close(fd);
@@ -329,83 +384,19 @@ int Client::isURLDirectory( std::string url )
 	return (0);
 }
 
-int Client::executeAutoin( std::string url, Server const & serv, Port & port )
+int Client::executeAutoin( void )
 {
-	int	res_type = ERROR;
-	std::string loc = url;
-	std::string route = "";
-	if (!checkLocation(loc, route))
-	{
-		_status = FORBIDDEN;
-		executeError(_req.getHead()["url"]);
-		return SUCCESS;
-	}
+	std::string loc = _file_path;
+
 	listdir ld;
-	if (route != "" && _config[_hostname]["location"]._locations[route].index != "")
-	{
-		std::string index = _config[_hostname]["root"]._value + url + "/" + _config[_hostname]["location"]._locations[route].index;
-		_file_path = index;
-		_req.setHeadKey("url", url + "/" + _config[_hostname]["location"]._locations[route].index);
-		int check_existance  = ::open(index.c_str(), O_RDONLY);
-		if (check_existance < 0)
-		{
-			_status = NOT_FOUND;
-			res_type = R_ERR;
-			executeError(index);
-			return SUCCESS;
-		}
-		res_type = checkCGI(index);
-		if (res_type == R_EXT)
-			executeExtension(serv, port);
-		else if (res_type == R_HTML)
-			executeHtml();
-		else if (res_type == R_ERR)
-		{
-			executeError(_req.getHead()["url"]);
-		}
-		return SUCCESS;
-	}
-	else if (route != "" && _config[_hostname]["location"]._locations[route].autoindex == "on")
-	{
-		_res.setBody(ld.generateAutoindex(_config[_hostname]["root"]._value + route, route));
-		_file_path = _config[_hostname]["root"]._value + route;
-		_res.setContentType(_file_path);
-		_res.setContentDisposition(_file_path);
-		_res.response(_status);
-		return SUCCESS;
-	}
-	else
-	{
-		_status = FORBIDDEN;
-		executeError(_req.getHead()["url"]);
-	}
+	std::cout << PURPLE << _route->index << RESET << std::endl;
+
+	_res.setBody(ld.generateAutoindex(_config[_hostname]["root"]._value + _route->route, _route->route));
+	_file_path = _config[_hostname]["root"]._value + _route->route;
+	_res.setContentType(_file_path);
+	_res.setContentDisposition(_file_path);
+	_res.response(_status);
 	return SUCCESS;
-}
-
-int	Client::checkURI( std::string url)
-{
-	std::string method = _req.getHead()["method"];
-
-	if (url == "/")
-		url = _config[_hostname]["index"]._value;
-	if (isURLDirectory(url))
-	{
-		_status = OK;
-		return R_AUTO;
-	}
-	root = _config[_hostname]["root"]._value;
-	ret = checkCGI(url);
-	if (checkPath(root, url) > 0)
-		return (ret);
-	_status = NOT_FOUND;
-	return (R_ERR);
-	std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin();
-	std::vector<std::string>::iterator ite = _config[_hostname]["method"]._methods.end();
-	for (; it != ite; it++)
-		if (method == *it)
-			return (SUCCESS);
-	_status = BAD_REQUEST;
-	return (0);
 }
 
 void	Client::setPath( void )
@@ -422,18 +413,22 @@ void	Client::setPath( void )
 
 int Client::execution( Server const & serv, Port & port)
 {
-	int	res_type = ERROR;
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
-
+	_route = NULL;
 	saveLogs();
 	setPath();
 	setRoute();
-	
+
+	std::cout << DEV << "FILE PATH = " << _file_path << std::endl;
+	if (_route)
+		std::cout << "ROUTE = " << _route->route << RESET << std::endl;
+	else
+		std::cout << "ROUTE = EMPTY" << RESET << std::endl;
 	int ret = setExecution();
-	if (ret == R_PHP || ret == R_PY)
-		executePhpPython(serv, port, ret);
+	if (ret == R_EXT)
+		executeExtension(serv, port);
 	else if (ret == R_AUTO)
-		executeAuto();
+		executeAutoin();
 	else if (ret == R_HTML)
 		executeHtml();
 	else if (ret == R_REDIR)
@@ -449,18 +444,25 @@ int	Client::setExecution( void )
 
 	if (_status != OK)
 		return R_ERR;
+	std::cout << BLUE << "NO REQUEST ERROR\n" << RESET;
 	if ((ret = checkRedirection()))
 		return ret;
+	std::cout << BLUE << "NO REDIRECTION\n" << RESET;
 	if (!checkMethod())
 		return R_ERR;
-	 if ((ret = checkAutoindex()))
+	std::cout << BLUE << "METHOD AUTHORIZED\n" << RESET;
+	if ((ret = checkAutoindex()))
 	 	return ret;
+	std::cout << BLUE << "NO AUTOINDEX\n" << RESET;
 	if (!checkPath())
 		return R_ERR;
-	 if ((ret = checkUpload()))
+	std::cout << BLUE << "FILE EXISTING\n" << RESET;
+	if ((ret = checkUpload()))
 	 	return ret;
+	std::cout << BLUE << "NO UPLOAD\n" << RESET;
 	if ((ret = checkCGI()))
 		return ret;
+	std::cout << BLUE << "NO CGI\n" << RESET;
 	return R_HTML;
 
 }
@@ -470,11 +472,6 @@ int Client::executeExtension( Server const & serv, Port & port)
 	CGI cgi(*this, port, serv);
 	cgi.execute(*this);
 	return SUCCESS;
-}
-
-void	Client::executeAuto( void )
-{
-
 }
 
 void	Client::executeRedir( void )

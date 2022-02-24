@@ -28,6 +28,7 @@ Route & Route::operator=( Route const & rhs )
 {
 	if (this != &rhs)
 	{
+		route = rhs.route;
 		redirection = rhs.redirection;
 		autoindex = rhs.autoindex;
 		index = rhs.index;
