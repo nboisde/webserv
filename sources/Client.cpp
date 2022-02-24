@@ -12,19 +12,26 @@ namespace ws
 */ 
 Client::Client( void ) {}
 
-Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : _fd(fd), _status(OK), _route(NULL), _config(conf)
+Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf )
 {
+	_fd = fd;
+	_status = OK;
 	_ip = inet_ntoa(cli_addr->sin_addr);
 	std::stringstream port;
 	port << ntohs(cli_addr->sin_port);
 	_port += port.str();
+	_route = NULL;
+	_config = conf;
 }
 
 Client::Client( Client const & src ) { *this = src; }
 Client::~Client()
 { 
 	if (_route)
+	{
 		delete _route;
+		_route = NULL;
+	}
 }
 
 /*
@@ -37,12 +44,17 @@ Client &	Client::operator=( Client const & rhs )
 	{
 		this->_fd = rhs.getFd();
 		this->_status = rhs.getStatus();
+		this->_ip = rhs.getIp();
+		this->_port = rhs.getPort();
 		this->_req = rhs.getReq();
 		this->_res = rhs.getRes();
 		this->_file_path = rhs.getFilePath();
-		this->_ip = rhs.getIp();
-		this->_port = rhs.getPort();
+		this->_route = rhs._route;
 		this->_config = rhs.getConfig();
+		this->_errors = rhs._errors;
+		this->_hostname = rhs._hostname;
+		this->_extension = rhs._extension;
+
 	}
 	return *this;
 }
@@ -243,6 +255,8 @@ void 	Client::setRoute( void )
 		int ret = 0;
 		if ((ret = _file_path.find(it->first)) >= 0)
 		{
+			 if (_route)
+			 	delete _route;
 			_route = new Route(it->second);
 			return;
 		}
@@ -421,7 +435,6 @@ void	Client::setPath( void )
 int Client::execution( Server const & serv, Port & port)
 {
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
-	_route = NULL;
 	saveLogs();
 	setPath();
 	setRoute();
