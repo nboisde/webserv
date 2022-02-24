@@ -368,12 +368,10 @@ int	Client::checkAutoindex( void )
 		std::string index = _config[_hostname]["root"]._value + _route->index;
 		_file_path = index;
 		std::cout << GREEN << _file_path << RESET << std::endl;
-		
+		return 0;
 	}
 	else if (_route && _route->autoindex == "on")
-	{
 		return R_AUTO;
-	}
 	_status = FORBIDDEN;
 	return R_ERR;
 }
@@ -441,14 +439,18 @@ int Client::executeAutoin( void )
 	std::string loc = _file_path;
 
 	listdir ld;
-	std::cout << PURPLE << _route->index << RESET << std::endl;
 
-	_res.setBody(ld.generateAutoindex(_config[_hostname]["root"]._value + _route->route, _route->route));
-	_file_path = _config[_hostname]["root"]._value + _route->route;
-	_res.setContentType(_file_path);
-	_res.setContentDisposition(_file_path);
-	_res.response(_status);
-	return SUCCESS;
+	if (_route)
+	{
+		_file_path = _config[_hostname]["root"]._value + _route->route;
+		_res.setBody(ld.generateAutoindex(_file_path, _route->route));
+		_res.setContentType(_file_path);
+		_res.setContentDisposition(_file_path);
+		_res.response(_status);
+		return SUCCESS;
+	}
+	_status = NOT_FOUND;
+	return 0;
 }
 
 void	Client::setPath( void )
