@@ -250,13 +250,15 @@ void 	Client::setRoute( void )
 	std::map<std::string, Route>::iterator	it = location._locations.begin();
 	std::map<std::string, Route>::iterator	ite = location._locations.end();
 
+	if (_route)
+		delete _route;
+	_route = NULL;
+
 	for (; it != ite; it++)
 	{
 		int ret = 0;
 		if ((ret = _file_path.find(it->first)) >= 0)
 		{
-			 if (_route)
-			 	delete _route;
 			_route = new Route(it->second);
 			return;
 		}
@@ -435,9 +437,7 @@ void	Client::setPath( void )
 int Client::execution( Server const & serv, Port & port)
 {
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
-	if (_route)
-		delete _route;
-	_route = NULL;
+
 	saveLogs();
 	setPath();
 	setRoute();
