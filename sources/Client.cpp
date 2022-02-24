@@ -362,16 +362,20 @@ int	Client::checkAutoindex( void )
 {
 	if (!isURLDirectory())
 		return 0;
-	else if (_route->index != "")
+	else if (_route && _route->index != "")
 	{
+
 		std::string index = _config[_hostname]["root"]._value + _route->index;
 		_file_path = index;
 		std::cout << GREEN << _file_path << RESET << std::endl;
 		
 	}
-	else if (_route->autoindex == "on")
+	else if (_route && _route->autoindex == "on")
+	{
 		return R_AUTO;
-	return 0;
+	}
+	_status = FORBIDDEN;
+	return R_ERR;
 }
 
 int	Client::checkUpload( void )
