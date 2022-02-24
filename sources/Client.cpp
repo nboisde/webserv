@@ -435,6 +435,9 @@ void	Client::setPath( void )
 int Client::execution( Server const & serv, Port & port)
 {
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
+	if (_route)
+		delete _route;
+	_route = NULL;
 	saveLogs();
 	setPath();
 	setRoute();
