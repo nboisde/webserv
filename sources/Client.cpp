@@ -50,21 +50,12 @@ Client &	Client::operator=( Client const & rhs )
 #include <sys/types.h>
 #include <sys/stat.h>
 
-std::string Client::uploadPath( std::string url)
-{
-	std::string	upload_path;
-	Value		location = _config[_hostname]["location"];
-	Route		route = (location._locations)[url];
- 	
-	upload_path = route.upload; 
-	return (upload_path);
-}
-
 // SI FORMULAIRE GERE PAR CGI, EDITER _HEAD...
-int Client::uploadFiles( void )
+int Client::uploadFiles( std::string upload_path)
 {
 	std::string data = _req.getBody();
 	std::string file;
+	
 	while (!data.empty())
 	{
 		int save = 1;
@@ -97,8 +88,9 @@ int Client::uploadFiles( void )
 		std::string f_content = tmp.substr(0, bd);
 		if (save == 1)
 		{
-			
-			std::string path = uploadPath("route");
+			int pos = _file_path.find(_route->route);
+			std::string path = _file_path.substr(0, pos + _route->route.size()) + upload_path;
+			std::cout << "UPLOAD PATH " << path << std::endl;
 			if (!strIsPrintable(f_name))
 			{
 				int ex = f_name.find(".");
@@ -111,7 +103,9 @@ int Client::uploadFiles( void )
 				f_name += extension;
 			}	
 			if (path.length() != 0)
-                f_name = path + f_name;
+                f_name = path + "/" + f_name;
+			
+			std::cout << DEV << f_name << RESET << std::endl;
             std::fstream fs;
             fs.open(f_name.c_str(), std::fstream::out);
             fs << f_content;
@@ -134,6 +128,35 @@ int Client::uploadAuthorized( void )
 			return 1;
 	}
 	return 0;
+}
+
+int	Client::setHostname( void )
+{
+	std::string tmp2 = _req.getHead()["host"];
+	size_t pos = tmp2.find(":");
+	if (pos >= static_cast<size_t>(0))
+		_hostname = tmp2.substr(0, pos);
+	else
+		_hostname = tmp2;
+	map_configs::iterator it = _config.end();
+	if (_config.find(_hostname) == it && _hostname != LOCALHOST)
+	{
+		if (_hostname == "127.0.0.1" || _hostname == getLocalHostname())
+			_hostname = LOCALHOST;
+		else
+		{
+			_status = BAD_REQUEST;
+			return WRITING;
+		}
+			it--;
+			_hostname = it->second["server_name"]._value;
+	}
+	if (_hostname == LOCALHOST)
+	{
+		it--;
+		_hostname = it->second["server_name"]._value;
+	}
+	return (0);
 }
 
 int Client::receive( void )
@@ -160,31 +183,8 @@ int Client::receive( void )
 	if (req == SUCCESS)// && _req.getContinue() == 0)
 	{
 		int head_err = _req.fillHeaderAndBody();
-		std::string tmp2 = _req.getHead()["host"];
-		std::cout << tmp2 << std::endl;
-		size_t pos = tmp2.find(":");
-		if (pos >= static_cast<size_t>(0))
-			_hostname = tmp2.substr(0, pos);
-		else
-			_hostname = tmp2;
-		map_configs::iterator it = _config.end();
-		if (_config.find(_hostname) == it && _hostname != LOCALHOST)
-		{
-			if (_hostname == "127.0.0.1" || _hostname == getLocalHostname())
-				_hostname = LOCALHOST;
-			else
-			{
-				_status = BAD_REQUEST;
-				return WRITING;
-			}
-				it--;
-				_hostname = it->second["server_name"]._value;
-		}
-		if (_hostname == LOCALHOST)
-		{
-			it--;
-			_hostname = it->second["server_name"]._value;
-		}
+		if (setHostname())
+			return WRITING;
 		_req.setUploadAuthorized(this->uploadAuthorized());
 		_req.setContinue(0);
 		if (head_err == ERROR)
@@ -195,8 +195,6 @@ int Client::receive( void )
 			return WRITING;
 		}
 		bridgeParsingRequest();
-		if (_status == OK && _req.getMultipart() == 1)
-			uploadFiles();
 		return WRITING;
 	}
 	return READING;
@@ -204,6 +202,7 @@ int Client::receive( void )
 
 void Client::bridgeParsingRequest( void )
 {
+	std::cout << "ici" << std::endl;
 	if (static_cast<size_t>(_req.getBody().length()) > _config[_hostname]["client_max_body_size"]._max_body_size
 	|| static_cast<size_t>(_req.getContentLength()) > _config[_hostname]["client_max_body_size"]._max_body_size)
 		_status = REQUEST_ENTITY_TOO_LARGE;
@@ -314,7 +313,7 @@ int Client::checkMethod( void )
 	for (; it != ite; it++)
 		if (method == *it)
 			return (SUCCESS);
-	_status = BAD_REQUEST;
+	_status = NOT_ALLOWED;
 	return (0);
 }
 
@@ -336,9 +335,17 @@ int	Client::checkAutoindex( void )
 
 int	Client::checkUpload( void )
 {
+	if (_req.getMultipart() == 1)
+	{	
+		if (_route && _route->upload != "")
+			uploadFiles(_route->upload);
+		else if (_config[_hostname]["upload"]._value != "")
+			uploadFiles(_config[_hostname]["upload"]._value);
+		else
+			return R_ERR;
+	}
 	return 0;
 }
-
 
 int	Client::checkPath( void )
 {
@@ -444,25 +451,18 @@ int	Client::setExecution( void )
 
 	if (_status != OK)
 		return R_ERR;
-	std::cout << BLUE << "NO REQUEST ERROR\n" << RESET;
 	if ((ret = checkRedirection()))
 		return ret;
-	std::cout << BLUE << "NO REDIRECTION\n" << RESET;
 	if (!checkMethod())
 		return R_ERR;
-	std::cout << BLUE << "METHOD AUTHORIZED\n" << RESET;
 	if ((ret = checkAutoindex()))
 	 	return ret;
-	std::cout << BLUE << "NO AUTOINDEX\n" << RESET;
 	if (!checkPath())
 		return R_ERR;
-	std::cout << BLUE << "FILE EXISTING\n" << RESET;
 	if ((ret = checkUpload()))
 	 	return ret;
-	std::cout << BLUE << "NO UPLOAD\n" << RESET;
 	if ((ret = checkCGI()))
 		return ret;
-	std::cout << BLUE << "NO CGI\n" << RESET;
 	return R_HTML;
 
 }

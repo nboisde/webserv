@@ -40,3 +40,4 @@ re:					fclean all
 
 .SUFFIXES:			.cpp .o .hpp
 .PHONY:				all clean fclean re
+
