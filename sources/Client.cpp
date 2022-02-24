@@ -10,9 +10,34 @@ namespace ws
 /*
 ** ------------------------------- CONSTRUCTOR / DESTRUCTOR--------------------
 */ 
-Client::Client( void ) {}
+Client::Client( void ) :
+_fd(0),
+_status(0),
+_ip(""),
+_port(""),
+_req(),
+_res(),
+_file_path(""),
+_route(NULL),
+_config(),
+_errors(),
+_hostname(""),
+_extension("")
+{}
 
-Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf )
+Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : 
+_fd(0),
+_status(0),
+_ip(""),
+_port(""),
+_req(),
+_res(),
+_file_path(""),
+_route(NULL),
+_config(),
+_errors(),
+_hostname(""),
+_extension("")
 {
 	_fd = fd;
 	_status = OK;
@@ -30,8 +55,8 @@ Client::~Client()
 	if (_route)
 	{
 		delete _route;
-		_route = NULL;
 	}
+	_route = NULL;
 }
 
 /*
