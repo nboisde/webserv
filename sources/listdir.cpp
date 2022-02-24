@@ -45,10 +45,10 @@ std::string generateAutoindexHTML(void)
 	return html;
 }
 
-int main(void)
-{
-	listFiles("/mnt/nfs/homes/nboisde/sgoinfre/webserv/www/php/");
-	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)
-		std::cout << (*it) << std::endl;
-	generateAutoindexHTML();
-}
+// int main(void)
+// {
+// 	listFiles("/mnt/nfs/homes/nboisde/sgoinfre/webserv/www/php/");
+// 	for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); it++)
+// 		std::cout << (*it) << std::endl;
+// 	generateAutoindexHTML();
+// }
