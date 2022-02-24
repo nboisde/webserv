@@ -2,7 +2,7 @@
 NAME				= webserver
 CC					= clang++
 RM					= rm -rf
-CFLAGS				= -Wall -Werror -Wextra -std=c++98 -g -fsanitize=address
+CFLAGS				= -Wall -Werror -Wextra -std=c++98 -g3
 IFLAGS				= -I${INC_DIR}
 SRCS_DIR			= sources
 INC_DIR				= includes

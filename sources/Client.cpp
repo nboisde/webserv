@@ -388,7 +388,8 @@ std::string Client::getLocalHostname( void ) const
 	//Copy the interface name in the ifreq structure
 	strncpy(ifr.ifr_name , iface , IFNAMSIZ-1);
 	ioctl(fd, SIOCGIFADDR, &ifr);
-	close(fd);
+	if (fd >= 0)
+		close(fd);
     std::string local_host_name = inet_ntoa(( (struct sockaddr_in *)&ifr.ifr_addr )->sin_addr);
 	return local_host_name;
 }
@@ -401,7 +402,6 @@ int Client::isURLDirectory( void )
 		close(fd);
 		return (1);
 	}
-	close(fd);
 	return (0);
 }
 
