@@ -28,6 +28,9 @@ class Client
 		int				checkURI( std::string url );
 		int				checkCGI( void );
 		int				checkPath( void );
+		int				checkRedirection( void );
+		int				checkAutoindex( void );
+		int				checkUpload( void );
 		int				checkLocation( std::string & url, std::string & route);
 		int				checkMethod( void );
 		int				checkExtension( std::string & root, std::string & url );
@@ -36,8 +39,9 @@ class Client
 	
 		int				executePhpPython( Server const & serv, Port & port, int extension_type );
 		void			executeHtml( void );
-		int				executeError( std::string url );
-		int				executeRedir( std::string new_path);
+		int				executeError( void );
+		void			executeRedir( void );
+		void			executeAuto( void );
 	
 		error_type		init_responseMap( void );
 		int				uploadAuthorized( void );

@@ -250,6 +250,7 @@ int	Client::checkCGI( std::string & url )
 	int		php_pos = _file_path.find(".php");
 	int		py_pos = _file_path.find(".py");
 	int		size = _file_path.size();
+	int		query_pos = _file_path.find("?");
 
 	if ( query_pos >= 0 )
 			url = url.substr(0, query_pos);
@@ -387,6 +388,13 @@ int	Client::checkURI( std::string url)
 		return (ret);
 	_status = NOT_FOUND;
 	return (R_ERR);
+	std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin();
+	std::vector<std::string>::iterator ite = _config[_hostname]["method"]._methods.end();
+	for (; it != ite; it++)
+		if (method == *it)
+			return (SUCCESS);
+	_status = BAD_REQUEST;
+	return (0);
 }
 
 void	Client::setPath( void )
@@ -397,7 +405,8 @@ void	Client::setPath( void )
 	if (url == "/")
 		url = _config[_hostname]["index"]._value;
 	_file_path = root + url;
-	//virer le query ?
+	int query = _file_path.find("?");
+	_file_path = _file_path.substr(0, query);
 }
 
 int Client::execution( Server const & serv, Port & port)
@@ -411,27 +420,34 @@ int Client::execution( Server const & serv, Port & port)
 	
 	int ret = setExecution();
 	if (ret == R_PHP || ret == R_PY)
-		executeCGI();
-	else if (ret = R_AUTO)
+		executePhpPython(serv, port, ret);
+	else if (ret == R_AUTO)
 		executeAuto();
-	else if (ret = R_HTML)
-		executeHTML();
+	else if (ret == R_HTML)
+		executeHtml();
+	else if (ret == R_REDIR)
+		executeRedir();
 	else
-		executeError( );
+		executeError();
+	return SUCCESS;
 }
 
 int	Client::setExecution( void )
 {
+	int ret;
+
 	if (_status != OK)
 		return R_ERR;
+	if ((ret = checkRedirection()))
+		return ret;
 	if (!checkMethod())
 		return R_ERR;
-	// if ((ret = checkAuto()) //NICO
-	// 	return ret;
+	 if ((ret = checkAutoindex()))
+	 	return ret;
 	if (!checkPath())
 		return R_ERR;
-	// if ((ret = checkUpload()))
-	// 	return ret;
+	 if ((ret = checkUpload()))
+	 	return ret;
 	if ((ret = checkCGI()))
 		return ret;
 	return R_HTML;
@@ -443,6 +459,21 @@ int Client::executeExtension( Server const & serv, Port & port)
 	CGI cgi(*this, port, serv);
 	cgi.execute(*this);
 	return SUCCESS;
+}
+
+void	Client::executeAuto( void )
+{
+
+}
+
+void	Client::executeRedir( void )
+{
+	_status = MOVED_PERMANETLY;
+	_res.resetResponse();
+	std::string loc("Location: ");
+	loc += _file_path;
+	_res.setHeader(loc);
+	_res.response(_status);
 }
 
 void	Client::executeHtml( void )
@@ -467,55 +498,25 @@ void	Client::executeHtml( void )
 	_res.setContentType(_file_path);
 	_res.setContentDisposition(_file_path);
 	_res.response(_status);
-	return SUCCESS;
 }
 
-int	Client::executeRedir( std::string new_path)
-{
-	checkURI(new_path);
-	_status = MOVED_PERMANETLY;
-	_res.resetResponse();
-	std::string loc("Location: ");
-	loc += new_path;
-	_res.setHeader(loc);
-	_res.response(_status);
-	return SUCCESS;
-}
-
-int	Client::executeError( std::string url )
+int	Client::executeError( void )
 {
 
 	Value			location = _config[_hostname]["location"];
-
-	std::string		route = "";
-
-	if (checkLocation(url, route))
-	{
-		std::string redirection = location._locations[route].redirection;
-		if (redirection != "")
-		{
-			int	pos = url.find(route);
-			std::cout << "POS " << pos << std::endl;
-			if (pos >= 0)
-			{
-				std::string new_url = url.substr(0, pos);
-				new_url += redirection;
-				new_url += url.substr(pos + route.size());
-				executeRedir(new_url);
-				return (SUCCESS);
-			}
-		} 
-	}
-	Value				error = _config[_hostname]["error_page"];
-	std::string			error_file_path = error._errors[_status];
-	std::string			body;
-	std::string			root;
+	Value			error = _config[_hostname]["error_page"];
+	std::string		error_file_path = error._errors[_status];
+	std::string		body;
+	std::string		root;
 
 	root = _config[_hostname]["root"]._value;
 	root += error_file_path;
 	int ret = openFile(root);
 	if (error_file_path.size() && ret > 0)
-		executeRedir(error_file_path);
+	{
+		_file_path = error_file_path;
+		executeRedir();
+	}
 	else
 	{
 		std::string body = _res.genBody(_status);

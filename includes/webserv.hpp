@@ -33,6 +33,7 @@
 # define R_HTML 2
 # define R_ERR 3
 # define R_AUTO 4
+# define R_REDIR 5
 
 // CLIENT STATUS
 # define CLOSING 0

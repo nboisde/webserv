@@ -317,6 +317,7 @@ int	Parser::checkLocation(std::string raw_value, Value & new_value)
 
 	std::pair<std::string, Route> new_path(raw_value, Route());
 	new_value._locations.insert(new_path);
+	new_value._locations[raw_value].route = raw_value;
 	while (_pos < _size && _content[_pos] != '}')
 	{
 		while (_pos < _size && isspace(_content[_pos]))
