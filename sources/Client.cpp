@@ -393,7 +393,7 @@ int	Client::checkPath( void )
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
 	{
-		_status = BAD_REQUEST;
+		_status = NOT_FOUND;
 		return 0;
 	}
 	close(fd);
