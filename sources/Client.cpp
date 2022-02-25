@@ -79,6 +79,8 @@ Client &	Client::operator=( Client const & rhs )
 		this->_errors = rhs._errors;
 		this->_hostname = rhs._hostname;
 		this->_extension = rhs._extension;
+		this->_url = rhs._url;
+		this->_root = rhs._root;
 
 	}
 	return *this;
@@ -453,12 +455,12 @@ int Client::executeAutoin( void )
 
 void	Client::setPath( void )
 {
-	std::string url = _req.getHead()["url"];
-	std::string	root = _config[_hostname]["root"]._value;
+	_url = _req.getHead()["url"];
+	_root = _config[_hostname]["root"]._value;
 
-	if (url == "/")
-		url = _config[_hostname]["index"]._value;
-	_file_path = root + url;
+	if (_url == "/")
+		_url = _config[_hostname]["index"]._value;
+	_file_path = _root + _url;
 	int query = _file_path.find("?");
 	_file_path = _file_path.substr(0, query);
 }
