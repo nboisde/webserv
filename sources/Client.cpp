@@ -296,12 +296,15 @@ int	Client::checkCGI( void )
 
 	std::cout << YELLOW <<_file_path << RESET << std::endl; 
 
-	int		query_pos = _file_path.find("?");
+	size_t		pos = _file_path.find(".");
 
-	if ( query_pos >= 0 )
-			_file_path = _file_path.substr(0, query_pos);
+	std::cout << _file_path << std::endl;
+	std::cout << static_cast<size_t>(-1);
+	std::cout << "POS: " << pos << std::endl;
+	if (pos == static_cast<size_t>(-1))
+		return 0;
 	size_t i = _file_path.size() - 1;
-	for (i = _file_path.size() - 1; _file_path[i] != '.'; i--);
+	for (i = _file_path.size() - 1; (_file_path[i] != '.'); i--);
 	_extension = _file_path.substr(i);
 
 	//Cette partie du code parcourt les extensions que possede notre fichier de conf
@@ -364,10 +367,8 @@ int	Client::checkAutoindex( void )
 		return 0;
 	else if (_route && _route->index != "")
 	{
-
 		std::string index = _config[_hostname]["root"]._value + _route->index;
 		_file_path = index;
-		std::cout << GREEN << _file_path << RESET << std::endl;
 		return 0;
 	}
 	else if (_route && _route->autoindex == "on")
@@ -442,7 +443,7 @@ int Client::executeAutoin( void )
 
 	if (_route)
 	{
-		_file_path = _config[_hostname]["root"]._value + _route->route;
+		//_file_path = _config[_hostname]["root"]._value + _route->route;
 		_res.setBody(ld.generateAutoindex(_file_path, _route->route));
 		_res.setContentType(_file_path);
 		_res.setContentDisposition(_file_path);
@@ -462,7 +463,8 @@ void	Client::setPath( void )
 		_url = _config[_hostname]["index"]._value;
 	_file_path = _root + _url;
 	int query = _file_path.find("?");
-	_file_path = _file_path.substr(0, query);
+	if (query != -1)
+		_file_path = _file_path.substr(0, query);
 }
 
 int Client::execution( Server const & serv, Port & port)
