@@ -21,7 +21,8 @@ _file_path(""),
 _config(),
 _errors(),
 _hostname(""),
-_extension("")
+_extension(""),
+_file_complete(true)
 {}
 
 Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : 
@@ -35,7 +36,8 @@ _file_path(""),
 _config(),
 _errors(),
 _hostname(""),
-_extension("")
+_extension(""),
+_file_complete(true)
 {
 	_fd = fd;
 	_status = OK;
@@ -71,6 +73,7 @@ Client &	Client::operator=( Client const & rhs )
 		this->_extension = rhs._extension;
 		this->_url = rhs._url;
 		this->_root = rhs._root;
+		this->_file_complete = rhs.getFileFlag();
 
 	}
 	return *this;
@@ -463,11 +466,11 @@ int Client::execution( Server const & serv, Port & port)
 	setPath();
 	setRoute();
 
-	std::cout << DEV << "FILE PATH = " << _file_path << std::endl;
-	if (_route.route != "")
-		std::cout << "ROUTE = " << _route.route << RESET << std::endl;
-	else
-		std::cout << "ROUTE = EMPTY" << RESET << std::endl;
+	// std::cout << DEV << "FILE PATH = " << _file_path << std::endl;
+	// if (_route)
+	// 	std::cout << "ROUTE = " << _route->route << RESET << std::endl;
+	// else
+	// 	std::cout << "ROUTE = EMPTY" << RESET << std::endl;
 	int ret = setExecution();
 	if (ret == R_EXT)
 		executeExtension(serv, port);
@@ -594,7 +597,8 @@ int									Client::getFd(void) const { return _fd; }
 Request &							Client::getReq( void ) { return _req; }
 Request								Client::getReq( void ) const { return _req; }
 Response &							Client::getRes( void ) { return _res; }
-
+bool								Client::getFileFlag(void) const {return _file_complete;}
+void								Client::setFileFlag(bool new_bool) {_file_complete = new_bool;}
 std::string							Client::getFilePath( void ) const { return _file_path; }
 std::string							Client::getIp( void ) const { return _ip; }
 std::string							Client::getPort( void ) const { return _port; }

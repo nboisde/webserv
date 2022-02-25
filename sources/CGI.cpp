@@ -199,33 +199,29 @@ int		CGI::execute( Client & cli ){
 	pipe(fd);
 	int child_stat;
 
-
+	if (_header["method"] == "POST")
+	{
+		std::string body = cli.getReq().getBody();
+		char buf[BUFFER_SIZE];
+		memset(&buf, 0, BUFFER_SIZE);
+		int fd2[2];
+		pipe(fd2);
+		while (!body.empty())
+		{
+			size_t added = body.copy(buf, BUFFER_SIZE);
+			size_t ret = write(fd2[1], buf, added);
+			body = body.substr(ret);
+			memset(&buf, 0, added);
+		}
+		memset(&buf, 0, BUFFER_SIZE);
+		close(fd2[1]);
+		dup2(fd2[0], STDIN);
+		close(fd2[0]);
+	}
 	pid_t pid = fork();
 	
 	if (pid == 0)
 	{
-		//for (int i = 0; _env[i]; i++)
-		//	std::cout << FIRE << _env[i] << RESET << std::endl;
-		if (_header["method"] == "POST")
-		{
-			std::string body = cli.getReq().getBody();
-			char buf[BUFFER_SIZE];
-			memset(&buf, 0, BUFFER_SIZE);
-			int fd2[2];
-			pipe(fd2);
-			while (!body.empty())
-			{
-				size_t added = body.copy(buf, BUFFER_SIZE);
-				size_t ret = write(fd2[1], buf, added);
-				body = body.substr(ret);
-				memset(&buf, 0, added);
-			}
-			memset(&buf, 0, BUFFER_SIZE);
-			close(fd2[1]);
-			dup2(fd2[0], STDIN);
-			close(fd2[0]);
-		}
-		//std::cout << "\n\nAVANT\n" << std::endl;
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);
@@ -233,7 +229,6 @@ int		CGI::execute( Client & cli ){
 		exit(SUCCESS);
 	}
 	waitpid(pid, &child_stat, 0);
-	//std::cout << "\n\nAPRES\n" << std::endl;
 	close(fd[1]);
 	std::string response = concatenateResponse(fd[0]);
 	cli.getRes().treatCGI(response);
