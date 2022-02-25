@@ -66,7 +66,12 @@ class Client
 		error_type		_errors;
 		std::string		_hostname;
 		std::string		_extension;
+
+		//GUIGS PATCH
+		int				_exec_type;
 		bool			_file_complete;
+		FILE *			_tmp_file;
+		int				_upload_fd;
 
 	public:
 		Client( void );
@@ -76,6 +81,7 @@ class Client
 			
 		Client &		operator=( Client const & rhs );
 
+		int				PreExecution(void);
 		int				execution( Server const & serv, Port & port );
 
 		int 			receive( void );
@@ -91,8 +97,6 @@ class Client
 		ws::Request &	getReq( void );
 		ws::Response &	getRes( void );
 		std::string		getFilePath( void ) const;
-		bool			getFileFlag(void) const;
-		void			setFileFlag(bool);
 		std::string		getIp( void ) const;
 		std::string		getPort( void ) const;
 		map_configs		getConfig( void ) const;
@@ -100,6 +104,14 @@ class Client
 		std::string		getHostname( void ) const;
 		std::string		getLocalHostname( void) const ;
 		std::string const & getExtension( void ) const;
+
+		//GUIGs PATCH
+		bool			getFileFlag(void) const;
+		void			setFileFlag(bool);
+		FILE *			getTmpFile( void ) const;
+		int				getUploadFd(void ) const;
+		int				getExecType(void ) const;
+
 
 };
 

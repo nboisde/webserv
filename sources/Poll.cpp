@@ -75,8 +75,7 @@ void	Server::launchServer( void )
 					if ( ret == WRITING)
 					{
 						(*ct).execution(*this, *pt);
-                        if ((*ct).getFileFlag())
-						    (findFds((*ct).getFd())).events = POLLOUT;
+                        (findFds((*ct).getFd())).events = POLLOUT;
 					}
 					else if (ret == ERROR)
 					{

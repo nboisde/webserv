@@ -22,7 +22,10 @@ _config(),
 _errors(),
 _hostname(""),
 _extension(""),
-_file_complete(true)
+_exec_type(0),
+_file_complete(true),
+_tmp_file(NULL),
+_upload_fd(-1)
 {}
 
 Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : 
@@ -37,7 +40,10 @@ _config(),
 _errors(),
 _hostname(""),
 _extension(""),
-_file_complete(true)
+_exec_type(0),
+_file_complete(true),
+_tmp_file(NULL),
+_upload_fd(-1)
 {
 	_fd = fd;
 	_status = OK;
@@ -73,7 +79,12 @@ Client &	Client::operator=( Client const & rhs )
 		this->_extension = rhs._extension;
 		this->_url = rhs._url;
 		this->_root = rhs._root;
+
+		//GUIGS POLLPATCH
 		this->_file_complete = rhs.getFileFlag();
+		this->_tmp_file = rhs.getTmpFile();
+		this->_exec_type = rhs.getExecType();
+		this->_upload_fd = rhs.getUploadFd();
 
 	}
 	return *this;
@@ -461,16 +472,10 @@ void	Client::setPath( void )
 int Client::execution( Server const & serv, Port & port)
 {
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
-
 	saveLogs();
 	setPath();
 	setRoute();
-
-	// std::cout << DEV << "FILE PATH = " << _file_path << std::endl;
-	// if (_route)
-	// 	std::cout << "ROUTE = " << _route->route << RESET << std::endl;
-	// else
-	// 	std::cout << "ROUTE = EMPTY" << RESET << std::endl;
+	
 	int ret = setExecution();
 	if (ret == R_EXT)
 		executeExtension(serv, port);
@@ -505,6 +510,28 @@ int	Client::setExecution( void )
 		return ret;
 	return R_HTML;
 
+}
+
+int	Client::PreExecution(void)
+{
+	std::map<std::string, std::string> header = _req.getHead();
+	if (header["method"] == "POST")
+	{
+		std::string body = _req.getBody();
+		if (!body.empty())
+		{
+			_file_complete = false;
+			char buf[BUFFER_SIZE];
+			memset(&buf, 0, BUFFER_SIZE);
+			size_t added = body.copy(buf, BUFFER_SIZE);
+			size_t ret = fwrite(buf, sizeof(char), added, _tmp_file);
+			body = body.substr(ret);
+			return WRITING;
+		}
+		else
+			_file_complete = true;
+	}
+	return (1);
 }
 
 int Client::executeExtension( Server const & serv, Port & port)
@@ -597,8 +624,6 @@ int									Client::getFd(void) const { return _fd; }
 Request &							Client::getReq( void ) { return _req; }
 Request								Client::getReq( void ) const { return _req; }
 Response &							Client::getRes( void ) { return _res; }
-bool								Client::getFileFlag(void) const {return _file_complete;}
-void								Client::setFileFlag(bool new_bool) {_file_complete = new_bool;}
 std::string							Client::getFilePath( void ) const { return _file_path; }
 std::string							Client::getIp( void ) const { return _ip; }
 std::string							Client::getPort( void ) const { return _port; }
@@ -607,4 +632,11 @@ map_configs							Client::getConfig( void ) const { return _config; }
 map_configs const & 				Client::getConfig( void ) { return _config; }
 std::string							Client::getHostname( void ) const { return _hostname; }
 std::string const & 				Client::getExtension( void ) const {return _extension;}
+
+//GUIGS PATCH
+bool								Client::getFileFlag(void) const {return _file_complete;}
+void								Client::setFileFlag(bool new_bool) {_file_complete = new_bool;}
+int									Client::getExecType( void ) const {return _exec_type;}
+FILE*								Client::getTmpFile( void) const {return _tmp_file;}
+int									Client::getUploadFd( void ) const { return _upload_fd;}
 }
