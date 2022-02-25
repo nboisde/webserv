@@ -2,7 +2,7 @@
 NAME				= webserver
 CC					= clang++
 RM					= rm -rf
-CFLAGS				= -Wall -Werror -Wextra -std=c++98 #-g3 -fsanitize=address
+CFLAGS				= -Wall -Werror -Wextra -std=c++98
 IFLAGS				= -I${INC_DIR}
 SRCS_DIR			= sources
 INC_DIR				= includes
@@ -40,4 +40,4 @@ re:					fclean all
 
 .SUFFIXES:			.cpp .o .hpp
 .PHONY:				all clean fclean re
-
+

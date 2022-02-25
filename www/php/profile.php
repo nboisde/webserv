@@ -13,9 +13,15 @@
 		<img src="/imgs/cute.png">
 	</label>
 	<form action="action.php" method="post">
-		<p>FIRST NAME <?php echo htmlspecialchars($_POST['firstname']);?></p>
-		<p>LAST NAME <?php echo htmlspecialchars($_POST['lastname']); ?></p>
-		<p>LOGIN <?php echo htmlspecialchars($_POST['login']);?></p>
+		<p>FIRST NAME <?php if (isset($_POST['firstname'])){
+			echo htmlspecialchars($_POST['firstname']);
+			}?></p>
+		<p>LAST NAME <?php if (isset($_POST['lastname'])){
+			echo htmlspecialchars($_POST['lastname']);
+			} ?></p>
+		<p>LOGIN <?php if (isset($_POST['login'])){
+			echo htmlspecialchars($_POST['login']);
+			}?></p>
 	</form>
 	<div>
 		<a href="/php/post.php" class="button">EDIT</a>

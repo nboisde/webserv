@@ -196,8 +196,8 @@ void	Server::closeConnection(it_client & ct, it_port & pt)
 	findFds(tempo).revents = 0;
 	findFds(tempo).fd = -1;
 	((*pt).getClients()).erase(ct);
-	//(*pt).removeClient(tempo);
-	close(tempo);
+	if (tempo >= 0)
+		close(tempo);
 	_clean_fds = 1;
 }
 

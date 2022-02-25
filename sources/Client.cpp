@@ -10,21 +10,53 @@ namespace ws
 /*
 ** ------------------------------- CONSTRUCTOR / DESTRUCTOR--------------------
 */ 
-Client::Client( void ) {}
+Client::Client( void ) :
+_fd(0),
+_status(0),
+_ip(""),
+_port(""),
+_req(),
+_res(),
+_file_path(""),
+_route(NULL),
+_config(),
+_errors(),
+_hostname(""),
+_extension("")
+{}
 
-Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : _fd(fd), _status(OK), _route(NULL), _config(conf)
+Client::Client( int fd, struct sockaddr_in *cli_addr, map_configs conf ) : 
+_fd(0),
+_status(0),
+_ip(""),
+_port(""),
+_req(),
+_res(),
+_file_path(""),
+_route(NULL),
+_config(),
+_errors(),
+_hostname(""),
+_extension("")
 {
+	_fd = fd;
+	_status = OK;
 	_ip = inet_ntoa(cli_addr->sin_addr);
 	std::stringstream port;
 	port << ntohs(cli_addr->sin_port);
 	_port += port.str();
+	_route = NULL;
+	_config = conf;
 }
 
 Client::Client( Client const & src ) { *this = src; }
 Client::~Client()
 { 
 	if (_route)
+	{
 		delete _route;
+	}
+	_route = NULL;
 }
 
 /*
@@ -37,12 +69,17 @@ Client &	Client::operator=( Client const & rhs )
 	{
 		this->_fd = rhs.getFd();
 		this->_status = rhs.getStatus();
+		this->_ip = rhs.getIp();
+		this->_port = rhs.getPort();
 		this->_req = rhs.getReq();
 		this->_res = rhs.getRes();
 		this->_file_path = rhs.getFilePath();
-		this->_ip = rhs.getIp();
-		this->_port = rhs.getPort();
+		this->_route = rhs._route;
 		this->_config = rhs.getConfig();
+		this->_errors = rhs._errors;
+		this->_hostname = rhs._hostname;
+		this->_extension = rhs._extension;
+
 	}
 	return *this;
 }
@@ -238,6 +275,10 @@ void 	Client::setRoute( void )
 	std::map<std::string, Route>::iterator	it = location._locations.begin();
 	std::map<std::string, Route>::iterator	ite = location._locations.end();
 
+	if (_route)
+		delete _route;
+	_route = NULL;
+
 	for (; it != ite; it++)
 	{
 		int ret = 0;
@@ -321,16 +362,18 @@ int	Client::checkAutoindex( void )
 {
 	if (!isURLDirectory())
 		return 0;
-	else if (_route->index != "")
+	else if (_route && _route->index != "")
 	{
+
 		std::string index = _config[_hostname]["root"]._value + _route->index;
 		_file_path = index;
 		std::cout << GREEN << _file_path << RESET << std::endl;
-		
+		return 0;
 	}
-	else if (_route->autoindex == "on")
+	else if (_route && _route->autoindex == "on")
 		return R_AUTO;
-	return 0;
+	_status = FORBIDDEN;
+	return R_ERR;
 }
 
 int	Client::checkUpload( void )
@@ -352,7 +395,7 @@ int	Client::checkPath( void )
 	int fd = ::open(_file_path.c_str(), O_RDONLY);
 	if (fd < 0)
 	{
-		_status = BAD_REQUEST;
+		_status = NOT_FOUND;
 		return 0;
 	}
 	close(fd);
@@ -374,7 +417,8 @@ std::string Client::getLocalHostname( void ) const
 	//Copy the interface name in the ifreq structure
 	strncpy(ifr.ifr_name , iface , IFNAMSIZ-1);
 	ioctl(fd, SIOCGIFADDR, &ifr);
-	close(fd);
+	if (fd >= 0)
+		close(fd);
     std::string local_host_name = inet_ntoa(( (struct sockaddr_in *)&ifr.ifr_addr )->sin_addr);
 	return local_host_name;
 }
@@ -387,7 +431,6 @@ int Client::isURLDirectory( void )
 		close(fd);
 		return (1);
 	}
-	close(fd);
 	return (0);
 }
 
@@ -396,14 +439,18 @@ int Client::executeAutoin( void )
 	std::string loc = _file_path;
 
 	listdir ld;
-	std::cout << PURPLE << _route->index << RESET << std::endl;
 
-	_res.setBody(ld.generateAutoindex(_config[_hostname]["root"]._value + _route->route, _route->route));
-	_file_path = _config[_hostname]["root"]._value + _route->route;
-	_res.setContentType(_file_path);
-	_res.setContentDisposition(_file_path);
-	_res.response(_status);
-	return SUCCESS;
+	if (_route)
+	{
+		_file_path = _config[_hostname]["root"]._value + _route->route;
+		_res.setBody(ld.generateAutoindex(_file_path, _route->route));
+		_res.setContentType(_file_path);
+		_res.setContentDisposition(_file_path);
+		_res.response(_status);
+		return SUCCESS;
+	}
+	_status = NOT_FOUND;
+	return 0;
 }
 
 void	Client::setPath( void )
@@ -421,7 +468,7 @@ void	Client::setPath( void )
 int Client::execution( Server const & serv, Port & port)
 {
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
-	_route = NULL;
+
 	saveLogs();
 	setPath();
 	setRoute();

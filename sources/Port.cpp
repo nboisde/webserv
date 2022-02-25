@@ -54,7 +54,8 @@ int		Port::launchPort( void )
 	if ((setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on))) < 0)
 	{
 		perror("In setsockopt: ");
-		close(_fd);
+		if (_fd >= 0)
+			close(_fd);
 		return ERROR;
 	}
 	if ((fcntl(_fd, F_SETFL, O_NONBLOCK)) < 0)
@@ -79,7 +80,8 @@ int	Port::bind( void )
 	if (::bind(_fd, (struct sockaddr *)&_port_address, sizeof(_port_address)) < 0)
 	{
 		perror("In bind");
-		close(_fd);
+		if (_fd >= 0)
+			close(_fd);
 		return (ERROR);
 	}
 	return SUCCESS;
@@ -126,7 +128,8 @@ void	Port::removeClient( int fd )
 	{
 		if (fd == (*it).getFd())
 		{
-			close(fd);
+			if (fd >= 0)
+				close(fd);
 			//it = _clients.erase(it);
 			return;
 		}
