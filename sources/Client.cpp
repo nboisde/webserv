@@ -239,7 +239,6 @@ int Client::receive( void )
 
 void Client::bridgeParsingRequest( void )
 {
-	std::cout << "ici" << std::endl;
 	if (static_cast<size_t>(_req.getBody().length()) > _config[_hostname]["client_max_body_size"]._max_body_size
 	|| static_cast<size_t>(_req.getContentLength()) > _config[_hostname]["client_max_body_size"]._max_body_size)
 		_status = REQUEST_ENTITY_TOO_LARGE;
@@ -328,13 +327,12 @@ int Client::checkRedirection( void )
 	int	pos = _file_path.find(_route->route);
 	if (pos >= 0)
 	{
-		std::string new_url = _file_path.substr(0, pos);
-		new_url += redirection;
-		new_url += _file_path.substr(pos + _route->route.size());
+		std::string new_url = redirection + _file_path.substr(pos + _route->route.size());
 		_file_path = new_url;
-		return (SUCCESS);
+		std::cout << BLUE << "NEW FILE " << _file_path << RESET << std::endl;
+		return (R_REDIR);
 	} 
-	return R_REDIR;
+	return 0;
 }
 
 int Client::checkMethod( void )
