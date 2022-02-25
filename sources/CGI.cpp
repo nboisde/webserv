@@ -199,9 +199,7 @@ int		CGI::execute( Client & cli ){
 	pipe(fd);
 	int child_stat;
 
-
 	pid_t pid = fork();
-	
 	if (pid == 0)
 	{
 		if (_header["method"] == "POST")
@@ -222,6 +220,8 @@ int		CGI::execute( Client & cli ){
 			close(fd2[1]);
 			dup2(fd2[0], STDIN);
 			close(fd2[0]);
+			//UNCOMMENT THAT PART MY MAN
+			//dup2(fileno(cli.getTmpFile()), STDIN);
 		}
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
