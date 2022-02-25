@@ -6,7 +6,7 @@ namespace ws{
 */
 
 Server::Server( void ) {}
-Server::Server( std::string ip) : _server_ip(ip) {}
+Server::Server( std::string ip) : _server_ip(ip), _files_completion(true) {}
 Server::Server( const Server & src ) { *this = src; }
 Server::~Server( void ) { _ports.clear(); }
 
@@ -22,13 +22,14 @@ Server &				Server::operator=( Server const & rhs )
 		this->_ports = rhs.getPorts();
 		this->_fds = rhs.getFds();
 		this->_clean_fds = rhs.getCleanFds();
+		this->_files_completion = rhs.getFileFlag();
 	}
 	return *this;
 }
 
 std::ostream &			operator<<( std::ostream & o, Server const & i )
 {
-	o << "Server IP = " << i.getIp() << std::endl;
+	o << i.getIp() << std::endl;
 	return o;
 }
 
@@ -36,159 +37,6 @@ std::ostream &			operator<<( std::ostream & o, Server const & i )
 /*
 ** --------------------------------- METHODS ----------------------------------
 */
-
-static char *trim(char *str)
-{
-	char *s = str;
-	int i = 0;
-	int end = strlen(s);
-	while (isspace(*s))
-	{
-		i++;
-		s++;
-	}
-	if (i == end)
-		return NULL;
-	end--;
-	while (isspace(s[end]))
-		end--;
-	if (end == -1)
-		return NULL;
-	else
-		s[end + 1] = '\0';
-    return (s); 
-}
-
-static int	monitor_stdin( void )
-{
-	int exit_status = 0;
-	FILE * stream = fdopen(dup(STDIN), "r");
-	char *line = NULL;
-	size_t n;
-	//std::cout << "MONITORING" << std::endl;
-	if (stream == NULL)
-	{	
-		perror("fopen");
-		return (1);
-	}
-	ssize_t ret = getline(&line, &n, stream);
-	fclose(stream);
-	if (ret == -1 || line == NULL || trim(line) == NULL)
-	{
-		if (errno && errno != EAGAIN)
-			perror("getline");
-		exit_status = 1;
-	}
-	if (!exit_status && !(strcmp(trim(line), "exit")))
-		exit_status = 0;
-	else
-		exit_status = 1;
-	if (line)
-		free(line);
-	return (exit_status);
-}
-
-void	Server::launchServer( void )
-{
-	addToPolling(STDIN);
-	for (std::vector<Port>::iterator it = _ports.begin(); it != _ports.end();)
-	{
-		if ((*it).launchPort() > 0)
-		{
-			addToPolling((*it).getFd());
-			it++;
-		}
-		else
-			_ports.erase(it);
-	}
-	if (!_ports.size())
-		exit(1);
-	while (true)
-	{
-		_clean_fds = 0;
-		setRevents();
-		if (int ret = polling() <= 0)
-			break;
-		if (findFds(STDIN).fd == 0 && (findFds(STDIN).revents & POLLIN) && !(monitor_stdin()))
-				return ;
-		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
-		{
-			int fd = 0;
-			while ((fd = (*pt).accepting()) != -1)
-				addToPolling(fd);
-		}
-		for (it_port pt = _ports.begin(); pt != _ports.end(); pt++)
-		{
-			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
-			{
-				//std::cout << "REVENTS = " << findFds((*ct).getFd()).revents << std::endl;
-				if ((findFds((*ct).getFd()).revents) == 0)
-				{
-					ct++;
-					continue;
-				}
-				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLERR)))
-				{
-					std::cout << RED<< "Client socket fd : " << findFds((*ct).getFd()).fd << " raised an error." << std::endl;
- 					closeConnection(ct, pt);
-				}
-#ifdef __linux__
-				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLRDHUP)))
-#else
-				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLHUP)))
-#endif
-				{
-					std::cout << LIGHTBLUE << "Client " << findFds((*ct).getFd()).fd << " closed the connection." << RESET << std::endl;
- 					closeConnection(ct, pt);
-				}
-				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
-				{
-					int ret = (*ct).receive();
-
-					if ( ret == WRITING)
-					{
-						(findFds((*ct).getFd())).events = POLLOUT;
-						(*ct).execution(*this, *pt);
-					}
-					else if (ret == ERROR)
-					{
-						//ERROR//
-					}
-					ct++;
-				}
-				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
-				{
-					int ret = (*ct).send();
-					if (ret == CLOSING)
-					{
-						if ((*ct).getReq().getConnection() == CLOSE)
-						{
-							std::cout << LIGHTBLUE << "Client " << findFds((*ct).getFd()).fd << " closed the connection." << RESET << std::endl;
- 							closeConnection(ct, pt);
-						}
-						else
-						{
-							(*ct).getReq().resetValues();
-							findFds((*ct).getFd()).revents = 0;
-# ifdef __linux__
-							findFds((*ct).getFd()).events = POLLIN | POLLRDHUP | POLLERR;
-# else
-							findFds((*ct).getFd()).events = POLLIN | POLLHUP | POLLERR;
-#endif
-						}
-					}
-					else
-						ct++;
-					
-				}
-				else
-					ct++;
-			}
-		}
-		if (_clean_fds)
-			cleanFds();
-	}
-}
 
 void	Server::closeConnection(it_client & ct, it_port & pt)
 {
@@ -264,6 +112,8 @@ void		Server::setRevents( void )
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
+bool				Server::getFileFlag(void) const {return _files_completion;}
+void				Server::setFileFlag(bool new_bool) {_files_completion = new_bool;}
 bool				Server::getCleanFds( void ) const { return (this->_clean_fds); }
 std::string			Server::getIp( void ) const { return (this->_server_ip); }
 std::vector<Port>	Server::getPorts( void ) const { return (this->_ports); }

@@ -66,7 +66,7 @@ class Client
 		error_type		_errors;
 		std::string		_hostname;
 		std::string		_extension;
-
+		bool			_file_complete;
 
 	public:
 		Client( void );
@@ -91,6 +91,8 @@ class Client
 		ws::Request &	getReq( void );
 		ws::Response &	getRes( void );
 		std::string		getFilePath( void ) const;
+		bool			getFileFlag(void) const;
+		void			setFileFlag(bool);
 		std::string		getIp( void ) const;
 		std::string		getPort( void ) const;
 		map_configs		getConfig( void ) const;

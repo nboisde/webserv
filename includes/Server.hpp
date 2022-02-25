@@ -32,20 +32,26 @@ class Server
 		void						closeConnection(it_client & ct, it_port & pt);
 		void						launchServer( void );
 		int							stopServer( void );
+		void    					initializeSockets(void);
+		void    					acceptConnections(void);
 
 		std::string					getIp( void ) const;
 		std::vector<Port>			getPorts( void ) const;
 		bool						getCleanFds( void ) const;
 		std::vector<Port>&			getRefPorts( void );
 		std::vector<struct pollfd>	getFds( void ) const;
+		bool						getFileFlag(void) const;
 		void						setIp( std::string new_ip );
 		void						setPorts( std::vector<Port> new_ports);
 		void						setFds( std::vector<struct pollfd> fds);
+		void						setFileFlag(bool);
+	
 	protected:
 		bool						_clean_fds;
 		std::string					_server_ip;
 		std::vector<Port>			_ports;
 		std::vector<struct pollfd>	_fds;
+		bool						_files_completion;
 
 };
 }
