@@ -22,7 +22,7 @@ void		listdir::listFiles(std::string path, std::string loc){
 				continue ;
 			if (f->d_type == DT_DIR)
 			{
-				_dirs.push_back(loc + f->d_name);
+				_dirs.push_back(loc + "/" + f->d_name);
 				std::cout << f->d_name << std::endl;
 				std::cout << path + "/" + f->d_name << std::endl;
 				listFiles(path + "/" + f->d_name, loc);
@@ -46,6 +46,8 @@ std::string		listdir::resolvePath( std::string path )
 	std::string new_path = path;
 	return new_path;
 }
+
+// Ajouter le titre du directory.
 
 std::string		listdir::generateHTML( void )
 {
