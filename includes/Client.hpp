@@ -59,6 +59,8 @@ class Client
 		ws::Request		_req;
 		ws::Response	_res;
 		std::string		_file_path;
+		std::string		_url;
+		std::string		_root;
 		Route			_route;
 		map_configs		_config;
 		error_type		_errors;
