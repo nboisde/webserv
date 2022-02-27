@@ -18,7 +18,6 @@ _port(""),
 _req(),
 _res(),
 _file_path(""),
-_route(NULL),
 _config(),
 _errors(),
 _hostname(""),
@@ -33,7 +32,6 @@ _port(""),
 _req(),
 _res(),
 _file_path(""),
-_route(NULL),
 _config(),
 _errors(),
 _hostname(""),
@@ -45,19 +43,11 @@ _extension("")
 	std::stringstream port;
 	port << ntohs(cli_addr->sin_port);
 	_port += port.str();
-	_route = NULL;
 	_config = conf;
 }
 
 Client::Client( Client const & src ) { *this = src; }
-Client::~Client()
-{ 
-	if (_route)
-	{
-		delete _route;
-	}
-	_route = NULL;
-}
+Client::~Client() {}
 
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
@@ -127,8 +117,8 @@ int Client::uploadFiles( std::string upload_path)
 		std::string f_content = tmp.substr(0, bd);
 		if (save == 1)
 		{
-			int pos = _file_path.find(_route->route);
-			std::string path = _file_path.substr(0, pos + _route->route.size()) + upload_path;
+			int pos = _file_path.find(_route.route);
+			std::string path = _file_path.substr(0, pos + _route.route.size()) + upload_path;
 			std::cout << "UPLOAD PATH " << path << std::endl;
 			if (!strIsPrintable(f_name))
 			{
@@ -276,19 +266,16 @@ void 	Client::setRoute( void )
 	std::map<std::string, Route>::iterator	it = location._locations.begin();
 	std::map<std::string, Route>::iterator	ite = location._locations.end();
 
-	if (_route)
-		delete _route;
-	_route = NULL;
-
 	for (; it != ite; it++)
 	{
 		int ret = 0;
 		if ((ret = _file_path.find(it->first)) >= 0)
 		{
-			_route = new Route(it->second);
+			_route = Route(it->second);
 			return;
 		}
 	}
+	_route = Route();
 }
 
 int	Client::checkCGI( void )
@@ -324,15 +311,15 @@ int	Client::checkCGI( void )
 
 int Client::checkRedirection( void )
 {
-	if (!_route)
+	if (_route.route == "")
 		return (0);
-	std::string redirection = _route->redirection;
+	std::string redirection = _route.redirection;
 	if (redirection == "")
 		return (0);
-	int	pos = _file_path.find(_route->route);
+	int	pos = _file_path.find(_route.route);
 	if (pos >= 0)
 	{
-		std::string new_url = redirection + _file_path.substr(pos + _route->route.size());
+		std::string new_url = redirection + _file_path.substr(pos + _route.route.size());
 		_file_path = new_url;
 		std::cout << BLUE << "NEW FILE " << _file_path << RESET << std::endl;
 		return (R_REDIR);
@@ -344,10 +331,10 @@ int Client::checkMethod( void )
 {
 	std::string method = _req.getHead()["method"];
 
-	if (_route)
+	if (_route.route != "")
 	{
-		std::vector<std::string>::iterator it = _route->methods.begin();
-		std::vector<std::string>::iterator ite = _route->methods.end();
+		std::vector<std::string>::iterator it = _route.methods.begin();
+		std::vector<std::string>::iterator ite = _route.methods.end();
 		for (; it != ite; it++)
 			if (method == *it)
 				return (SUCCESS);
@@ -365,13 +352,14 @@ int	Client::checkAutoindex( void )
 {
 	if (!isURLDirectory())
 		return 0;
-	else if (_route && _route->index != "")
+	else if (_route.route != "" && _route.index != "")
 	{
-		std::string index = _config[_hostname]["root"]._value + _route->index;
+
+		std::string index = _config[_hostname]["root"]._value + _route.index;
 		_file_path = index;
 		return 0;
 	}
-	else if (_route && _route->autoindex == "on")
+	else if (_route.route != "" && _route.autoindex == "on")
 		return R_AUTO;
 	_status = FORBIDDEN;
 	return R_ERR;
@@ -381,8 +369,8 @@ int	Client::checkUpload( void )
 {
 	if (_req.getMultipart() == 1)
 	{	
-		if (_route && _route->upload != "")
-			uploadFiles(_route->upload);
+		if (_route.route != "" && _route.upload != "")
+			uploadFiles(_route.upload);
 		else if (_config[_hostname]["upload"]._value != "")
 			uploadFiles(_config[_hostname]["upload"]._value);
 		else
@@ -441,10 +429,10 @@ int Client::executeAutoin( void )
 
 	listdir ld;
 
-	if (_route)
+	if (_route.route != "")
 	{
-		//_file_path = _config[_hostname]["root"]._value + _route->route;
-		_res.setBody(ld.generateAutoindex(_file_path, _route->route));
+		_file_path = _config[_hostname]["root"]._value + _route.route;
+		_res.setBody(ld.generateAutoindex(_file_path, _route.route));
 		_res.setContentType(_file_path);
 		_res.setContentDisposition(_file_path);
 		_res.response(_status);
@@ -476,8 +464,8 @@ int Client::execution( Server const & serv, Port & port)
 	setRoute();
 
 	std::cout << DEV << "FILE PATH = " << _file_path << std::endl;
-	if (_route)
-		std::cout << "ROUTE = " << _route->route << RESET << std::endl;
+	if (_route.route != "")
+		std::cout << "ROUTE = " << _route.route << RESET << std::endl;
 	else
 		std::cout << "ROUTE = EMPTY" << RESET << std::endl;
 	int ret = setExecution();

@@ -61,7 +61,7 @@ class Client
 		std::string		_file_path;
 		std::string		_url;
 		std::string		_root;
-		Route *			_route;
+		Route			_route;
 		map_configs		_config;
 		error_type		_errors;
 		std::string		_hostname;
