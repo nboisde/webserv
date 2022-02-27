@@ -22,7 +22,6 @@ _config(),
 _errors(),
 _hostname(""),
 _extension(""),
-_exec_type(0),
 _file_complete(true),
 _tmp_file(NULL),
 _upload_fd(-1)
@@ -40,7 +39,6 @@ _config(),
 _errors(),
 _hostname(""),
 _extension(""),
-_exec_type(0),
 _file_complete(true),
 _tmp_file(NULL),
 _upload_fd(-1)
@@ -83,7 +81,6 @@ Client &	Client::operator=( Client const & rhs )
 		//GUIGS POLLPATCH
 		this->_file_complete = rhs.getFileFlag();
 		this->_tmp_file = rhs.getTmpFile();
-		this->_exec_type = rhs.getExecType();
 		this->_upload_fd = rhs.getUploadFd();
 
 	}
@@ -209,12 +206,14 @@ int Client::receive( void )
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
-	if ( ret < 0 )
+	if ( ret < 0 && _file_complete)
 	{
 		perror("\nIn recv");
 		_status = INTERNAL_SERVER_ERROR;
 		return WRITING;
 	}
+	if (ret < 0 && !_file_complete)
+		return WRITING;
 	std::string tmp(buffer, ret);
 	int req = _req.concatenateRequest(tmp);
 	if (req == -1 && _req.findContinue() == 0)
@@ -469,24 +468,73 @@ void	Client::setPath( void )
 		_file_path = _file_path.substr(0, query);
 }
 
-int Client::execution( Server const & serv, Port & port)
+bool Client::TmpFileCompletion(Server & serv)
+{
+	std::map<std::string, std::string> header = _req.getHead();
+	if (header["method"] == "POST")
+	{
+		//NEXT CHECK IF FD ALREADY EXIT, IF NOT, CREATE AND ADD TO POLL WITH POLLOUT FLAG
+		if (_tmp_file == NULL)
+		{
+			_tmp_file = tmpfile();
+			serv.addToPolling(fileno(_tmp_file));
+			serv.findFds(fileno(_tmp_file)).events = POLLOUT;
+			return false;
+		}
+		else if (serv.findFds(fileno(_tmp_file)).revents & POLLOUT)
+		{
+			std::string body = _req.getBody();
+			if (!body.empty())
+			{
+				char buf[BUFFER_SIZE];
+				memset(&buf, 0, BUFFER_SIZE);
+				size_t added = body.copy(buf, BUFFER_SIZE);
+				size_t ret = fwrite(buf, sizeof(char), added, _tmp_file);
+				_req.setBody(body.substr(ret));
+				return false;
+			}
+			else
+			{
+				rewind(_tmp_file);
+				serv.setCleanFds(true);
+				serv.findFds(fileno(_tmp_file)).fd = -1;
+				return true;
+			}
+		}
+		else	
+			return false;
+	}
+	else
+		return true;
+}
+
+int Client::execution( Server & serv, Port & port)
 {
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
 	saveLogs();
 	setPath();
 	setRoute();
 	
-	int ret = setExecution();
-	if (ret == R_EXT)
+	int exec_type = setExecution();
+	if (exec_type == R_EXT)
+	{
+		//CHECK IF TMP_FILE IS NEEDED, AND MONITOR IT WITH POLL IF SO
+		if (!TmpFileCompletion(serv))
+		{
+			_file_complete = false;
+			return SUCCESS;
+		}
 		executeExtension(serv, port);
-	else if (ret == R_AUTO)
+	}
+	else if (exec_type == R_AUTO)
 		executeAutoin();
-	else if (ret == R_HTML)
+	else if (exec_type == R_HTML)
 		executeHtml();
-	else if (ret == R_REDIR)
+	else if (exec_type == R_REDIR)
 		executeRedir();
 	else
 		executeError();
+	_file_complete = true;
 	return SUCCESS;
 }
 
@@ -512,29 +560,8 @@ int	Client::setExecution( void )
 
 }
 
-int	Client::PreExecution(void)
-{
-	std::map<std::string, std::string> header = _req.getHead();
-	if (header["method"] == "POST")
-	{
-		std::string body = _req.getBody();
-		if (!body.empty())
-		{
-			_file_complete = false;
-			char buf[BUFFER_SIZE];
-			memset(&buf, 0, BUFFER_SIZE);
-			size_t added = body.copy(buf, BUFFER_SIZE);
-			size_t ret = fwrite(buf, sizeof(char), added, _tmp_file);
-			body = body.substr(ret);
-			return WRITING;
-		}
-		else
-			_file_complete = true;
-	}
-	return (1);
-}
 
-int Client::executeExtension( Server const & serv, Port & port)
+int Client::executeExtension( Server & serv, Port & port)
 {
 	CGI cgi(*this, port, serv);
 	cgi.execute(*this);
@@ -636,7 +663,6 @@ std::string const & 				Client::getExtension( void ) const {return _extension;}
 //GUIGS PATCH
 bool								Client::getFileFlag(void) const {return _file_complete;}
 void								Client::setFileFlag(bool new_bool) {_file_complete = new_bool;}
-int									Client::getExecType( void ) const {return _exec_type;}
 FILE*								Client::getTmpFile( void) const {return _tmp_file;}
 int									Client::getUploadFd( void ) const { return _upload_fd;}
 }

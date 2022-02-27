@@ -107,7 +107,6 @@ int Request::analyseURL(void)
 	//std::string url_try = fl.substr(i, fl.length() - i);
 	if (fl[i] != '/')
 	{
-		std::cout << DEV << "ici" << std::endl;
 		return 0;
 	}
 	while (fl[i] && fl[i] != ' ')
@@ -704,6 +703,8 @@ int										Request::getBodySizeReceived(void) const { return _body_len_receive
 int										Request::getHeaderSize(void) const { return _header_size; }
 std::string								Request::getHeader(void) const { return _header; }
 std::string								Request::getBody(void) const { return _body; }
+std::string	&							Request::getBody(void) { return _body;}
+void									Request::setBody(std::string new_body) {_body = new_body;}
 int										Request::getState(void) const { return _state; }
 std::map<std::string, std::string>		Request::getHead( void ) const { return _head; }
 std::map<std::string, std::string> &	Request::getHead( void ) { return _head; }

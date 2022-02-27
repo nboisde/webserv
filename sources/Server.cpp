@@ -6,7 +6,7 @@ namespace ws{
 */
 
 Server::Server( void ) {}
-Server::Server( std::string ip) : _server_ip(ip), _files_completion(true) {}
+Server::Server( std::string ip) : _server_ip(ip){}
 Server::Server( const Server & src ) { *this = src; }
 Server::~Server( void ) { _ports.clear(); }
 
@@ -22,7 +22,6 @@ Server &				Server::operator=( Server const & rhs )
 		this->_ports = rhs.getPorts();
 		this->_fds = rhs.getFds();
 		this->_clean_fds = rhs.getCleanFds();
-		this->_files_completion = rhs.getFileFlag();
 	}
 	return *this;
 }
@@ -112,8 +111,6 @@ void		Server::setRevents( void )
 ** --------------------------------- ACCESSOR ---------------------------------
 */
 
-bool				Server::getFileFlag(void) const {return _files_completion;}
-void				Server::setFileFlag(bool new_bool) {_files_completion = new_bool;}
 bool				Server::getCleanFds( void ) const { return (this->_clean_fds); }
 std::string			Server::getIp( void ) const { return (this->_server_ip); }
 std::vector<Port>	Server::getPorts( void ) const { return (this->_ports); }
@@ -121,5 +118,6 @@ std::vector<struct pollfd>	Server::getFds( void ) const { return (this->_fds); }
 std::vector<Port>&	Server::getRefPorts( void ) {return this->_ports;}
 void				Server::setIp( std::string new_ip ) { this->_server_ip = new_ip; }
 void				Server::setPorts( std::vector<Port> new_ports) { this->_ports = new_ports; }
+void				Server::setCleanFds(bool bl){ this->_clean_fds = bl;}
 }
 /* ************************************************************************** */

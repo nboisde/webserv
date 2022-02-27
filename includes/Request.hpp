@@ -45,7 +45,9 @@ class Request
 		int				getBodySizeReceived(void) const;
 		int				getHeaderSize(void) const;
 		std::string		getHeader(void) const;
+		std::string	&	getBody(void);
 		std::string		getBody(void) const;
+		void			setBody(std::string);
 		int				getState( void ) const;
 		head_type		getHead( void ) const;
 		head_type &		getHead( void );

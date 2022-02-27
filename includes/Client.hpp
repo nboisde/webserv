@@ -38,7 +38,7 @@ class Client
 		int				checkMethod( void );
 		int				checkExtension( std::string & root, std::string & url );
 		
-		int				executeExtension( Server const & serv, Port & port );
+		int				executeExtension( Server & serv, Port & port );
 		int				executeAutoin( void );
 		void			executeRedir( void );
 		void			executeHtml( void );
@@ -68,7 +68,6 @@ class Client
 		std::string		_extension;
 
 		//GUIGS PATCH
-		int				_exec_type;
 		bool			_file_complete;
 		FILE *			_tmp_file;
 		int				_upload_fd;
@@ -81,8 +80,8 @@ class Client
 			
 		Client &		operator=( Client const & rhs );
 
-		int				PreExecution(void);
-		int				execution( Server const & serv, Port & port );
+		bool 			TmpFileCompletion(Server & serv);
+		int				execution( Server & serv, Port & port );
 
 		int 			receive( void );
 		int				send( void );
@@ -110,8 +109,6 @@ class Client
 		void			setFileFlag(bool);
 		FILE *			getTmpFile( void ) const;
 		int				getUploadFd(void ) const;
-		int				getExecType(void ) const;
-
 
 };
 

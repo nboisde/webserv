@@ -45,13 +45,13 @@ class Server
 		void						setPorts( std::vector<Port> new_ports);
 		void						setFds( std::vector<struct pollfd> fds);
 		void						setFileFlag(bool);
-	
+		void						setCleanFds(bool);
+
 	protected:
 		bool						_clean_fds;
 		std::string					_server_ip;
 		std::vector<Port>			_ports;
 		std::vector<struct pollfd>	_fds;
-		bool						_files_completion;
 
 };
 }
