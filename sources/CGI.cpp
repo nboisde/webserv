@@ -13,8 +13,6 @@ CGI::CGI( Client const & cli , Port const & port, Server const & serv) : _arg(NU
 	std::string bin_path = cli.getConfig()[cli.getHostname()]["cgi"]._list[cli.getExtension()];
 	_extension = cli.getExtension();
 	_bin_location = bin_path;
-	std::cout << DEV << "EXTENSION = " << _extension << RESET << std::endl;
-	std::cout << DEV << "BIN_LOC = " << _bin_location << RESET << std::endl;
 	this->_header = cli.getReq().getHead();
 	init_conversion( cli, port, serv );
 	generate_env();
@@ -54,15 +52,9 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	std::string root("");
 	root += port.getConfig()[cli.getHostname()]["root"]._value;
 	std::string uri_query = _header["url"];
-	std::cout << "cgi root" << root << std::endl;
-	std::cout << "uri_query: "<< uri_query << std::endl;
+
 	std::string url = cli.getFilePath();
 	size_t		pos = url.find(root) + root.size();
-	std::cout << pos << std::endl;
-
-	std::cout << "URL : [" << url << "]" << std::endl;
-	std::cout << "ex : [" << _extension << "]" << std::endl;
-	std::cout << "root : [" << root << "]" << std::endl;
 
 	_conversion.insert(pair("DOCUMENT_ROOT", root));
 	_conversion.insert(pair("DOCUMENT_URI", url.substr(pos, url.find(_extension) + _extension.size() - pos)));
@@ -70,7 +62,6 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	_conversion.insert(pair("SCRIPT_NAME", url.substr(pos, url.find(_extension) + _extension.size() - pos)));
 	_conversion.insert(pair("PHP_SELF", url.substr(pos, url.find(_extension) + _extension.size() - pos)));	
 	_conversion.insert(pair("REQUEST_URI", uri_query));
-	std::cout << "ok ?" << std::endl;
 	std::string query;
 	if (uri_query.find(".php?") != std::string::npos)
 		query = uri_query.substr(uri_query.find(".php?") + 5);
@@ -203,26 +194,7 @@ int		CGI::execute( Client & cli ){
 	if (pid == 0)
 	{
 		if (_header["method"] == "POST")
-		{
-			std::string body = cli.getReq().getBody();
-			char buf[BUFFER_SIZE];
-			memset(&buf, 0, BUFFER_SIZE);
-			int fd2[2];
-			pipe(fd2);
-			while (!body.empty())
-			{
-				size_t added = body.copy(buf, BUFFER_SIZE);
-				size_t ret = write(fd2[1], buf, added);
-				body = body.substr(ret);
-				memset(&buf, 0, added);
-			}
-			memset(&buf, 0, BUFFER_SIZE);
-			close(fd2[1]);
-			dup2(fd2[0], STDIN);
-			close(fd2[0]);
-			//UNCOMMENT THAT PART MY MAN
-			//dup2(fileno(cli.getTmpFile()), STDIN);
-		}
+			dup2(fileno(cli.getTmpFile()), STDIN);
 		dup2(fd[1], STDOUT);
 		close(fd[0]);
 		close(fd[1]);

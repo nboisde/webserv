@@ -32,14 +32,14 @@ void	Server::launchServer( void )
 {
     //createSocket and initialize them
     initializeSockets();
+
     //launch polling and monitoring of sockets
 	while (true)
 	{
 		_clean_fds = 0;
 		setRevents();
 		if (polling() <= 0)
-			break;
- 
+			break; 
         //accept incoming connections, and add them to polling list
 		acceptConnections();
 
@@ -49,8 +49,10 @@ void	Server::launchServer( void )
             //ITER ON ALL SOCKETS/CLIENTS
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
+				if(!ct->getFileFlag())
+					goto pending;
 				if ((findFds((*ct).getFd()).revents) == 0)
-				{
+				{ 
 					ct++;
 					continue;
 				}
@@ -70,12 +72,17 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
+					pending:
 					int ret = (*ct).receive();
-
 					if ( ret == WRITING)
 					{
-						(*ct).execution(*this, *pt);
-                        (findFds((*ct).getFd())).events = POLLOUT;
+						//WILL ENTER AS MANY TIME NEEDED TO COMPLETE FILE WRITING
+						ct->execution(*this, *pt);
+
+						//IF FILE COMPLETION, SETTING FLAG 
+						bool	file_completion = ct->getFileFlag();
+						if (file_completion)
+							(findFds((*ct).getFd())).events = POLLOUT;
 					}
 					else if (ret == ERROR)
 					{
