@@ -349,16 +349,30 @@ int Client::checkMethod( void )
 		std::vector<std::string>::iterator it = _route.methods.begin();
 		std::vector<std::string>::iterator ite = _route.methods.end();
 		for (; it != ite; it++)
+		{
 			if (method == *it)
-				return (SUCCESS);
+			{
+				if (method == "DELETE")
+					return R_DELETE;
+				else
+					return (0);
+			}
+		}
 	}
 	std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin();
 	std::vector<std::string>::iterator ite = _config[_hostname]["method"]._methods.end();
 	for (; it != ite; it++)
+	{
 		if (method == *it)
-			return (SUCCESS);
+		{
+			if (method == "DELETE")
+				return R_DELETE;
+			else
+				return (0);
+		}
+	}
 	_status = NOT_ALLOWED;
-	return (0);
+	return (R_ERR);
 }
 
 int	Client::checkAutoindex( void )
@@ -511,6 +525,39 @@ bool Client::TmpFileCompletion(Server & serv)
 		return true;
 }
 
+int	Client::delete_ressource( void )
+{
+	std::cout << "FILE_PATH IM GOING TO DELETE = " << _file_path << std::endl;
+	
+	//CHECKING IF IS FILE: IF NOT, OUT
+	if (!isfile(_file_path))	
+		return ERROR;
+
+	//RESOLVED_PATH (no symlynk or ./ or ../)
+	char * tmp = NULL;
+	tmp = realpath(_file_path.c_str(), NULL);	
+	std::string real_path(tmp);
+	free(tmp);
+	real_path = real_path.substr(0, real_path.find_last_of("/"));
+	std::cout << "PATH_CHECK =" << real_path << std::endl;
+	
+	std::map<std::string, Route> ml = _config[_hostname]["location"]._locations;
+	tmp = realpath(_config[_hostname]["root"]._value.c_str(), NULL);
+	std::string authorized_path(tmp);
+	free(tmp);
+	authorized_path += "/deletable";
+	//authorized_path += ml.find("upload")->second;
+	std::cout << "AUTHORIZED_PATH =" << authorized_path << std::endl;
+	if (real_path != authorized_path)
+		return ERROR;
+	if (!remove(_file_path.c_str()))
+	{
+		_res.response(OK);
+		return SUCCESS;
+	}
+	else
+		return (executeError());
+}
 
 int Client::execution( Server & serv, Port & port)
 {
@@ -548,6 +595,8 @@ int Client::execution( Server & serv, Port & port)
 		executeHtml();
 	else if (exec_type == R_REDIR)
 		executeRedir();
+	else if (exec_type == R_DELETE)
+		delete_ressource();
 	else
 		executeError();
 	_file_complete = true;
@@ -562,8 +611,8 @@ int	Client::setExecution( void )
 		return R_ERR;
 	if ((ret = checkRedirection()))
 		return ret;
-	if (!checkMethod())
-		return R_ERR;
+	if ((ret = checkMethod()))
+		return ret;
 	if ((ret = checkAutoindex()))
 	 	return ret;
 	if (!checkPath())
