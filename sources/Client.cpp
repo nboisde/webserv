@@ -530,8 +530,11 @@ int	Client::delete_ressource( void )
 	std::cout << "FILE_PATH IM GOING TO DELETE = " << _file_path << std::endl;
 	
 	//CHECKING IF IS FILE: IF NOT, OUT
-	if (!isfile(_file_path))	
-		return ERROR;
+	if (!isfile(_file_path))
+	{
+		_status = NOT_ALLOWED;
+		return (executeError());
+	}
 
 	//RESOLVED_PATH (no symlynk or ./ or ../)
 	char * tmp = NULL;
