@@ -61,6 +61,7 @@
 # define CGI_FLAG 42
 # define CONTINUE 100
 # define OK 200
+# define NO_CONTENT 202
 # define MULTIPLE_CHOICE 300
 # define MOVED_PERMANETLY 301
 # define BAD_REQUEST 400
