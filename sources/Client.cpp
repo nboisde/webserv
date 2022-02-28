@@ -536,30 +536,16 @@ int	Client::delete_ressource( void )
 		return (executeError());
 	}
 
-	//RESOLVED_PATH (no symlynk or ./ or ../)
-	char * tmp = NULL;
-	tmp = realpath(_file_path.c_str(), NULL);	
-	std::string real_path(tmp);
-	free(tmp);
-	real_path = real_path.substr(0, real_path.find_last_of("/"));
-	std::cout << "PATH_CHECK =" << real_path << std::endl;
-	
-	std::map<std::string, Route> ml = _config[_hostname]["location"]._locations;
-	tmp = realpath(_config[_hostname]["root"]._value.c_str(), NULL);
-	std::string authorized_path(tmp);
-	free(tmp);
-	authorized_path += "/deletable";
-	//authorized_path += ml.find("upload")->second;
-	std::cout << "AUTHORIZED_PATH =" << authorized_path << std::endl;
-	if (real_path != authorized_path)
-		return ERROR;
 	if (!remove(_file_path.c_str()))
 	{
-		_res.response(OK);
+		_res.response(NO_CONTENT);
 		return SUCCESS;
 	}
 	else
+	{
+		_status = INTERNAL_SERVER_ERROR;
 		return (executeError());
+	}
 }
 
 int Client::execution( Server & serv, Port & port)
