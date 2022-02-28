@@ -130,7 +130,6 @@ int Client::uploadFiles( std::string upload_path)
 		{
 			int pos = _file_path.find(_route.route);
 			std::string path = _file_path.substr(0, pos + _route.route.size()) + upload_path;
-			std::cout << "UPLOAD PATH " << path << std::endl;
 			if (!strIsPrintable(f_name))
 			{
 				int ex = f_name.find(".");
@@ -145,7 +144,6 @@ int Client::uploadFiles( std::string upload_path)
 			if (path.length() != 0)
                 f_name = path + "/" + f_name;
 			
-			std::cout << DEV << f_name << RESET << std::endl;
             std::fstream fs;
             fs.open(f_name.c_str(), std::fstream::out);
             fs << f_content;
@@ -203,17 +201,16 @@ int Client::receive( void )
 {
 	char	buffer[BUFFER_SIZE];
 
-	for (size_t i = 0; i < BUFFER_SIZE; i++)
-		buffer[i] = 0;
+	memset(buffer, 0, BUFFER_SIZE);
+	if (!_file_complete)
+		return WRITING;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
-	if ( ret < 0 && _file_complete)
+	if ( ret < 0)
 	{
 		perror("\nIn recv");
 		_status = INTERNAL_SERVER_ERROR;
 		return WRITING;
 	}
-	if (ret < 0 && !_file_complete)
-		return WRITING;
 	std::string tmp(buffer, ret);
 	int req = _req.concatenateRequest(tmp);
 	if (req == -1 && _req.findContinue() == 0)
@@ -293,14 +290,8 @@ void 	Client::setRoute( void )
 
 int	Client::checkCGI( void )
 {
-
-	std::cout << YELLOW <<_file_path << RESET << std::endl; 
-
 	size_t		pos = _file_path.find(".");
 
-	std::cout << _file_path << std::endl;
-	std::cout << static_cast<size_t>(-1);
-	std::cout << "POS: " << pos << std::endl;
 	if (pos == static_cast<size_t>(-1))
 		return 0;
 	size_t i = _file_path.size() - 1;
@@ -501,16 +492,18 @@ bool Client::TmpFileCompletion(Server & serv)
 				return true;
 			}
 		}
-		else	
+		else
 			return false;
 	}
 	else
 		return true;
 }
 
+
 int Client::execution( Server & serv, Port & port)
 {
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
+
 	saveLogs();
 	setPath();
 	setRoute();
