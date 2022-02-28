@@ -46,7 +46,8 @@ class Client
 		int				delete_ressource( void );
 		error_type		init_responseMap( void );
 		int				uploadAuthorized( void );
-		int				uploadFiles( void );
+		int				uploadFiles( std::string upload_path );
+		bool			uploadFiles2( Server & serv );
 		int				isURLDirectory( void );
 		int				directoryProcessing( std::string url );
 

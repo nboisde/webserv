@@ -13,6 +13,7 @@
             <div class="upload">
                 <form action="http://localhost:8080" method="post" enctype="multipart/form-data">
                     <input type="file" name="file1">
+                    <!-- <input type="file" name="file2"> -->
                     <p><button class="styled" type="submit">Submit</button></p>
                 </form>
             </div>

@@ -108,15 +108,8 @@ Client &	Client::operator=( Client const & rhs )
 #include <sys/stat.h>
 
 // SI FORMULAIRE GERE PAR CGI, EDITER _HEAD...
-int Client::uploadFiles( void )
+int Client::uploadFiles( std::string upload_path )
 {
-	//SET UP DE LA ROUTE DU FICHIER
-	std::string upload_path = "";
-	if (_route.route != "" && _route.upload != "")
-		upload_path = _route.upload;
-	else if (_config[_hostname]["upload"]._value != "")
-		upload_path = _config[_hostname]["upload"]._value;
-
 	std::string data = _req.getBody();
 	std::string file;
 	
@@ -180,6 +173,86 @@ int Client::uploadFiles( void )
 		data = tmp.substr(forward, tmp.length() - forward);
 	}
 	return SUCCESS;
+}
+
+bool Client::uploadFiles2(Server & serv)
+{
+	//SET UP DE LA ROUTE DU FICHIER
+	std::string upload_path = "";
+	if (_route.route != "" && _route.upload != "")
+		upload_path =  _config[_hostname]["root"]._value + _route.route + _route.upload;
+	else if (_config[_hostname]["upload"]._value != "")
+		upload_path =  _config[_hostname]["root"]._value + "/" + _config[_hostname]["upload"]._value;
+
+	std::cout << upload_path << std::endl;
+	std::cout << _file_path << std::endl;
+	std::cout << _config[_hostname]["root"]._value << std::endl;
+
+	std::string body = _req.getBody();
+	std::cout << _req.getBoundary() << std::endl;
+	if (!body.empty())
+	{
+		if (_upload_fd == -1)
+		{
+			size_t i_content = body.find("\r\n\r\n");
+			//std::cout << i_content << std::endl;
+			std::string header;
+			if (i_content == static_cast<size_t>(-1))
+				header = body;
+			else
+				header = body.substr(body.find(_req.getBoundary()) + _req.getBoundary().length(), i_content - _req.getBoundary().length());
+			if (header == "--")
+				return true;
+			std::cout << "file header = " << header << std::endl;
+			size_t i_filename = header.find("filename") + 10;
+			std::string tmp_filename = header.substr(i_filename);
+			std::string filename = tmp_filename.substr(0, tmp_filename.find("\""));
+			_req.setBody(body.substr(body.find("\r\n\r\n") + 4));
+			body.clear();
+			body = _req.getBody();
+			std::string next_bound_end = "--" + _req.getBoundary() + "--";
+			size_t is_end = body.find(next_bound_end);
+			if (filename.length() == 0 && is_end == 0)
+				return true;
+			//std::cout << filename << std::endl;
+			// std::cout << "========================" << std::endl;
+			// std::cout << YELLOW << _req.getBody() << RESET << std::endl;
+			// std::cout << "========================" << std::endl;
+			//std::cout << body.find("\r\n\r\n") << std::endl;
+			std::string path = upload_path + "/" + filename;
+			std::cout << path << std::endl;
+			_upload_fd = ::open(path.c_str(), O_RDWR | O_CREAT);
+			// MAYBE A DEL SI WRITE CHANGE RIGHTS
+			chmod(path.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+			serv.addToPolling(_upload_fd);
+			serv.findFds(_upload_fd).events = POLLOUT;
+			return false;
+		}
+		else if (serv.findFds(_upload_fd).revents & POLLOUT) // && fichier pas a la fin..)
+		{
+			size_t end_file = body.find(_req.getBoundary());
+			std::cout << "ICI" << std::endl;
+			std::cout << end_file << std::endl;
+			serv.setCleanFds(true);
+			serv.findFds(_upload_fd).fd = -1;
+			return true;
+			//else
+			//return true;
+		}
+		else
+			return false;
+	}
+	return true;
+}
+
+int Client::uploadAuthorized( void )
+{
+	for (std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin(); it != _config[_hostname]["method"]._methods.end(); it++)
+	{
+		if ((*it) == "POST")
+			return 1;
+	}
+	return 0;
 }
 
 int	Client::setHostname( void )
@@ -555,8 +628,6 @@ int Client::execution( Server & serv, Port & port)
 	saveLogs();
 	setPath();
 	setRoute();
-
-	std::cout << _req.getHeader() << std::endl;
 	
 	int exec_type = setExecution();
 	if (exec_type == R_EXT)
@@ -569,15 +640,15 @@ int Client::execution( Server & serv, Port & port)
 		}
 		executeExtension(serv, port);
 	}
-	// else if (exec_type == R_UPLOAD)
-	// {
-	// 	if (!uploadFiles())
-	// 	{
-	// 		_file_complete = false;
-	// 		return SUCCESS;
-	// 	}
-	// 	_file_complete = true;
-	// }
+	else if (exec_type == R_UPLOAD)
+	{
+		if (!uploadFiles2(serv))
+		{
+			_file_complete = false;
+			return SUCCESS;
+		}
+		_file_complete = true;
+	}
 	else if (exec_type == R_AUTO)
 		executeAutoin();
 	else if (exec_type == R_HTML)
@@ -607,7 +678,7 @@ int	Client::setExecution( void )
 	if (!checkPath())
 		return R_ERR;
 	if ((ret = checkUpload()))
-	 	return ret;
+	  	return ret;
 	if ((ret = checkCGI()))
 		return ret;
 	return R_HTML;
