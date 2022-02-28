@@ -55,6 +55,23 @@ _upload_fd(-1)
 Client::Client( Client const & src ) { *this = src; }
 Client::~Client() {}
 
+void	Client::resetValues( void ){
+_status = 0;
+_ip.clear();
+_ip = "";
+_port.clear();
+_port = "";
+_file_path.clear();
+_file_path = "";
+_hostname.clear();
+_hostname = "";
+_extension.clear();
+_extension = "";
+_file_complete = true;
+_tmp_file = NULL;
+_upload_fd = -1;
+}
+
 /*
 ** --------------------------------- OVERLOAD ---------------------------------
 */
@@ -519,6 +536,8 @@ int Client::execution( Server & serv, Port & port)
 	saveLogs();
 	setPath();
 	setRoute();
+
+	std::cout << _req.getHeader() << std::endl;
 	
 	int exec_type = setExecution();
 	if (exec_type == R_EXT)

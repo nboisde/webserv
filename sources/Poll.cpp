@@ -103,6 +103,7 @@ void	Server::launchServer( void )
 						else
 						{
 							(*ct).getReq().resetValues();
+							(*ct).resetValues();
 							findFds((*ct).getFd()).revents = 0;
 # ifdef __linux__
 							findFds((*ct).getFd()).events = POLLIN | POLLRDHUP | POLLERR;
