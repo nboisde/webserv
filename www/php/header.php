@@ -14,10 +14,10 @@
     </div>
     <div class="right">
         <ul>
-            <li><a href="contact.php" class="btn">Contact</a></li>
-            <li><a href="about.php" class="btn">About</a></li>
-            <li><a href="profile.php" class="btn">Profile</a></li>
-            <li><a href="index.php" class="btn">Home</a></li>
+            <li><a href="/php/contact.php" class="btn">Contact</a></li>
+            <li><a href="/php/about.php" class="btn">About</a></li>
+            <li><a href="/php/profile.php" class="btn">Profile</a></li>
+            <li><a href="/php/index.php" class="btn">Home</a></li>
         </ul>
     </div>
 </header>

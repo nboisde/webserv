@@ -91,8 +91,15 @@ Client &	Client::operator=( Client const & rhs )
 #include <sys/stat.h>
 
 // SI FORMULAIRE GERE PAR CGI, EDITER _HEAD...
-int Client::uploadFiles( std::string upload_path)
+int Client::uploadFiles( void )
 {
+	//SET UP DE LA ROUTE DU FICHIER
+	std::string upload_path = "";
+	if (_route.route != "" && _route.upload != "")
+		upload_path = _route.upload;
+	else if (_config[_hostname]["upload"]._value != "")
+		upload_path = _config[_hostname]["upload"]._value;
+
 	std::string data = _req.getBody();
 	std::string file;
 	
@@ -371,12 +378,17 @@ int	Client::checkAutoindex( void )
 
 int	Client::checkUpload( void )
 {
-	if (_req.getMultipart() == 1)
-	{	
+	if (_req.getMultipart() == 1) // ADD METHOD = POST
+	{
+		// if (_route.route != "" && _route.upload != "")
+		// 	uploadFiles(_route.upload);
+		// else if (_config[_hostname]["upload"]._value != "")
+		// 	uploadFiles(_config[_hostname]["upload"]._value);
+		// else
 		if (_route.route != "" && _route.upload != "")
-			uploadFiles(_route.upload);
+			return R_UPLOAD;
 		else if (_config[_hostname]["upload"]._value != "")
-			uploadFiles(_config[_hostname]["upload"]._value);
+			return R_UPLOAD;
 		else
 			return R_ERR;
 	}
@@ -519,6 +531,15 @@ int Client::execution( Server & serv, Port & port)
 		}
 		executeExtension(serv, port);
 	}
+	// else if (exec_type == R_UPLOAD)
+	// {
+	// 	if (!uploadFiles())
+	// 	{
+	// 		_file_complete = false;
+	// 		return SUCCESS;
+	// 	}
+	// 	_file_complete = true;
+	// }
 	else if (exec_type == R_AUTO)
 		executeAutoin();
 	else if (exec_type == R_HTML)
@@ -558,6 +579,8 @@ int Client::executeExtension( Server & serv, Port & port)
 {
 	CGI cgi(*this, port, serv);
 	cgi.execute(*this);
+	if (_tmp_file)
+		fclose(_tmp_file);
 	return SUCCESS;
 }
 

@@ -46,7 +46,7 @@ class Client
 	
 		error_type		init_responseMap( void );
 		int				uploadAuthorized( void );
-		int				uploadFiles( std::string upload_path );
+		int				uploadFiles( void );
 		int				isURLDirectory( void );
 		int				directoryProcessing( std::string url );
 
