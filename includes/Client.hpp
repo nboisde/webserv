@@ -1,4 +1,4 @@
-#ifndef __CLIENT_HPP__
+	#ifndef __CLIENT_HPP__
 # define __CLIENT_HPP__
 
 # include "webserv.hpp"
@@ -49,7 +49,6 @@ class Client
 		int				uploadFiles( void );
 		int				isURLDirectory( void );
 		int				directoryProcessing( std::string url );
-
 
 	protected:
 		int				_fd;
@@ -109,6 +108,7 @@ class Client
 		void			setFileFlag(bool);
 		FILE *			getTmpFile( void ) const;
 		int				getUploadFd(void ) const;
+		void			resetValues( void );
 
 };
 
