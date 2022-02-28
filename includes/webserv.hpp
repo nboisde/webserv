@@ -35,6 +35,7 @@
 # define R_AUTO 4
 # define R_REDIR 5
 # define R_UPLOAD 6
+# define R_DELETE 7
 
 // CLIENT STATUS
 # define CLOSING 0
