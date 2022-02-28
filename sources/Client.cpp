@@ -230,12 +230,28 @@ bool Client::uploadFiles2(Server & serv)
 		}
 		else if (serv.findFds(_upload_fd).revents & POLLOUT) // && fichier pas a la fin..)
 		{
-			size_t end_file = body.find(_req.getBoundary());
-			std::cout << "ICI" << std::endl;
-			std::cout << end_file << std::endl;
+			std::string delim = "--" + _req.getBoundary();
+			size_t end_file = body.find(delim);
+			if (end_file > 0)
+			{
+				if (end_file > BUFFER_SIZE)
+				{
+					write(_upload_fd, body.c_str(), BUFFER_SIZE);
+					_req.setBody(body.substr(BUFFER_SIZE));
+				}
+				else
+				{
+					write(_upload_fd, body.c_str(), end_file);
+					_req.setBody(body.substr(end_file));
+				}
+				return false;
+			}
+			else
+			{
 			serv.setCleanFds(true);
 			serv.findFds(_upload_fd).fd = -1;
 			return true;
+			}
 			//else
 			//return true;
 		}
