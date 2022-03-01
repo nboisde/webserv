@@ -272,7 +272,7 @@ int Client::send( void )
 	if (ret < 0)
 	{
 		perror(" send() failed");
-		return (ERROR);
+		return CLOSING;
 	}
 	else if (ret < BUFFER_SIZE)
 		return CLOSING;
