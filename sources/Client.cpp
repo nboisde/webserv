@@ -182,16 +182,6 @@ int Client::uploadFiles( void )
 	return SUCCESS;
 }
 
-int Client::uploadAuthorized( void )
-{
-	for (std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin(); it != _config[_hostname]["method"]._methods.end(); it++)
-	{
-		if ((*it) == "POST")
-			return 1;
-	}
-	return 0;
-}
-
 int	Client::setHostname( void )
 {
 	std::string tmp2 = _req.getHead()["host"];
@@ -200,8 +190,9 @@ int	Client::setHostname( void )
 		_hostname = tmp2.substr(0, pos);
 	else
 		_hostname = tmp2;
-	map_configs::iterator it = _config.end();
-	if (_config.find(_hostname) == it && _hostname != LOCALHOST)
+	map_configs::iterator it = _config.find(_hostname);
+	map_configs::iterator ite = _config.end();
+	if (it == ite && _hostname != LOCALHOST)
 	{
 		if (_hostname == "127.0.0.1" || _hostname == getLocalHostname())
 			_hostname = LOCALHOST;
@@ -210,14 +201,11 @@ int	Client::setHostname( void )
 			_status = BAD_REQUEST;
 			return WRITING;
 		}
-			it--;
-			_hostname = it->second["server_name"]._value;
 	}
-	if (_hostname == LOCALHOST)
-	{
-		it--;
+	else if (it != ite)
 		_hostname = it->second["server_name"]._value;
-	}
+	if (_hostname == LOCALHOST)
+		_hostname = _config.begin()->second["server_name"]._value;
 	return (0);
 }
 
@@ -243,17 +231,15 @@ int Client::receive( void )
 		_status = _req.getStatus();
 		return WRITING;
 	}
-	if (req == SUCCESS)// && _req.getContinue() == 0)
+	if (req == SUCCESS)
 	{
 		int head_err = _req.fillHeaderAndBody();
 		if (setHostname())
 			return WRITING;
-		_req.setUploadAuthorized(this->uploadAuthorized());
 		_req.setContinue(0);
 		if (head_err == ERROR)
 		{
 			std::cout << RED << "400 bad request (Header reception 2)" << RESET << std::endl;
-			//_status = BAD_REQUEST;
 			_status = _req.getStatus();
 			return WRITING;
 		}
@@ -328,7 +314,6 @@ int	Client::checkCGI( void )
 	std::map<std::string, std::string>::const_iterator map_it = extensions.begin();
 	std::map<std::string, std::string>::const_iterator map_end = extensions.end();
 
-
 	for (;map_it != map_end; map_it++)
 	{
 		if (_extension == map_it->first)
@@ -382,7 +367,6 @@ int	Client::checkAutoindex( void )
 		return 0;
 	else if (_route.route != "" && _route.index != "")
 	{
-
 		std::string index = _config[_hostname]["root"]._value + _route.index;
 		_file_path = index;
 		return 0;
@@ -458,9 +442,8 @@ int Client::isURLDirectory( void )
 
 int Client::executeAutoin( void )
 {
-	std::string loc = _file_path;
-
-	listdir ld;
+	std::string	loc = _file_path;
+	listdir 	ld;
 
 	if (_route.route != "")
 	{

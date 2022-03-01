@@ -23,9 +23,6 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 {
 	typedef std::pair<std::string, std::string>	pair;
 	typedef std::map<std::string, std::string>::iterator map_iterator;
-	
-
-
 
 	map_iterator ite = _header.end();
 
