@@ -84,7 +84,7 @@ void	Server::launchServer( void )
 					if ( ret == WRITING)
 					{
 						//WILL ENTER AS MANY TIME NEEDED TO COMPLETE FILE WRITING
-						int couc = ct->execution(*this, *pt);
+						ct->execution(*this, *pt);
 
 						//IF FILE COMPLETION, SETTING FLAG 
 						bool	file_completion = ct->getFileFlag();
