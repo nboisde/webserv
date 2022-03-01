@@ -11,9 +11,10 @@
             
             <h1>Upload your file</h1>
             <div class="upload">
-                <form action="http://localhost:8080" method="post" enctype="multipart/form-data">
+                <form action="http://localhost:8080/php/contact.php" method="post" enctype="multipart/form-data">
                     <input type="file" name="file1">
-                    <!-- <input type="file" name="file2"> -->
+                    <input type="file" name="file2">
+                    <!-- <input type="file" name="file3"> -->
                     <p><button class="styled" type="submit">Submit</button></p>
                 </form>
             </div>

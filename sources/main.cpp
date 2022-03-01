@@ -1,6 +1,7 @@
 #include "webserv.hpp"
 #include "Server.hpp"
 #include "Parser.hpp"
+#include "Client.hpp"
 
 int	main(int ac, char **av)
 {

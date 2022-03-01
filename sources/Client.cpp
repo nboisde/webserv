@@ -192,8 +192,10 @@ bool Client::uploadFiles2(Server & serv)
 	std::cout << _req.getBoundary() << std::endl;
 	if (!body.empty())
 	{
+		std::cout << "BODY not EMPTY" << std::endl;
 		if (_upload_fd == -1)
 		{
+			std::cout << "UPLDFD ??" << std::endl;
 			size_t i_content = body.find("\r\n\r\n");
 			//std::cout << i_content << std::endl;
 			std::string header;
@@ -202,8 +204,11 @@ bool Client::uploadFiles2(Server & serv)
 			else
 				header = body.substr(body.find(_req.getBoundary()) + _req.getBoundary().length(), i_content - _req.getBoundary().length());
 			if (header == "--")
+			{
+				std::cout << 0 << std::endl;
 				return true;
-			std::cout << "file header = " << header << std::endl;
+			}
+			//std::cout << "file header = " << header << std::endl;
 			size_t i_filename = header.find("filename") + 10;
 			std::string tmp_filename = header.substr(i_filename);
 			std::string filename = tmp_filename.substr(0, tmp_filename.find("\""));
@@ -213,14 +218,17 @@ bool Client::uploadFiles2(Server & serv)
 			std::string next_bound_end = "--" + _req.getBoundary() + "--";
 			size_t is_end = body.find(next_bound_end);
 			if (filename.length() == 0 && is_end == 0)
+			{
+				std::cout << "MEEEEEEEEEERDE" << std::endl;
 				return true;
+			}
 			//std::cout << filename << std::endl;
 			// std::cout << "========================" << std::endl;
 			// std::cout << YELLOW << _req.getBody() << RESET << std::endl;
 			// std::cout << "========================" << std::endl;
 			//std::cout << body.find("\r\n\r\n") << std::endl;
 			std::string path = upload_path + "/" + filename;
-			std::cout << path << std::endl;
+			//std::cout << path << std::endl;
 			_upload_fd = ::open(path.c_str(), O_RDWR | O_CREAT);
 			// MAYBE A DEL SI WRITE CHANGE RIGHTS
 			chmod(path.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
@@ -244,20 +252,54 @@ bool Client::uploadFiles2(Server & serv)
 					write(_upload_fd, body.c_str(), end_file);
 					_req.setBody(body.substr(end_file));
 				}
+				std::cout << "IS THIS FALSE FALSEEEEEEEE MERDUM" << std::endl;
 				return false;
 			}
 			else
 			{
-			serv.setCleanFds(true);
-			serv.findFds(_upload_fd).fd = -1;
-			return true;
+				std::cout << "ICI !!!!" << std::endl;
+				//std::string tmp = _req.getBody().substr(end_file, std::string::npos);
+				serv.setCleanFds(true);
+				//close(_upload_fd);
+				serv.findFds(_upload_fd).fd = -1;
+				if(_upload_fd)
+				{
+					close(_upload_fd);
+					_upload_fd = -1;
+				}
+				//std::cout << tmp << std::endl;
+				//if (tmp == "--")
+				std::string bdy_end = "--" + _req.getBoundary() + "--";
+				std::string tmp = _req.getBody();
+				size_t upld_end = tmp.find(bdy_end);
+				//std::cout << tmp << std::endl;
+				if (upld_end == 0)
+				{
+					std::cout << DEV << "ON EST LAAAAAAA HEIN !!!!!" << RESET << std::endl;
+					std::cout << tmp << std::endl;
+					std::cout << _req.getBody() << std::endl;
+					//std::cout << _req.setBody("")
+					tmp.clear();
+					tmp = "";
+					std::cout << "2" << std::endl;
+					return true;
+				}
+				else
+				{
+					std::cout << DEV << "UPLD FICHIER N" << RESET << std::endl;
+					return false;
+				}
 			}
 			//else
 			//return true;
 		}
 		else
-			return false;
+		{
+			std::cout << "3" << std::endl;
+			return true;
+		}
 	}
+	std::cout << "4" << std::endl;
 	return true;
 }
 
@@ -637,6 +679,7 @@ int	Client::delete_ressource( void )
 	}
 }
 
+
 int Client::execution( Server & serv, Port & port)
 {
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
@@ -646,6 +689,7 @@ int Client::execution( Server & serv, Port & port)
 	setRoute();
 	
 	int exec_type = setExecution();
+	std::cout << "SET_EXEC = " << exec_type << std::endl;
 	if (exec_type == R_EXT)
 	{
 		//CHECK IF TMP_FILE IS NEEDED, AND MONITOR IT WITH POLL IF SO
@@ -663,6 +707,12 @@ int Client::execution( Server & serv, Port & port)
 			_file_complete = false;
 			return SUCCESS;
 		}
+		
+		std::cout << "FERMETURE DU FD BOYAA" << std::endl;
+		std::cout << _file_path << std::endl;
+		std::cout << _req.getHead()["url"] << std::endl;
+		_file_path = _req.getHead()["url"];
+		executeRedir();
 		_file_complete = true;
 	}
 	else if (exec_type == R_AUTO)

@@ -49,8 +49,13 @@ void	Server::launchServer( void )
             //ITER ON ALL SOCKETS/CLIENTS
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
+				std::cout << "POLL LOOP" << std::endl;
+				std::cout << "GET FILE FLAG: " << ct->getFileFlag() << std::endl;
 				if(!ct->getFileFlag())
+				{
+					std::cout << "PENDIIIIIIIING" << std::endl;
 					goto pending;
+				}
 				if ((findFds((*ct).getFd()).revents) == 0)
 				{ 
 					ct++;
@@ -73,16 +78,23 @@ void	Server::launchServer( void )
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
 					pending:
+					std::cout << "OK" << std::endl;
 					int ret = (*ct).receive();
+					std::cout << "BRAVO " << ret << std::endl;
 					if ( ret == WRITING)
 					{
 						//WILL ENTER AS MANY TIME NEEDED TO COMPLETE FILE WRITING
-						ct->execution(*this, *pt);
+						int couc = ct->execution(*this, *pt);
+						std::cout << "BORDEL !!!!!!!!" << std::endl;
+						std::cout << couc << std::endl;
 
 						//IF FILE COMPLETION, SETTING FLAG 
 						bool	file_completion = ct->getFileFlag();
 						if (file_completion)
+						{
+							std::cout << YELLOW << "JAMAIS 2 FOIS" << RESET << std::endl;
 							(findFds((*ct).getFd())).events = POLLOUT;
+						}
 					}
 					else if (ret == ERROR)
 					{
