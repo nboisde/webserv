@@ -104,6 +104,33 @@ Client &	Client::operator=( Client const & rhs )
 	return *this;
 }
 
+// I'LL NEED THAT SHIT TOMORROW TO DEBUG A CASE !!!! if upload path don't exist webserv hang forever...
+
+// std::string Client::uploadPath( void )
+// {
+// 	std::map<std::string, std::string> ml = _config["location"]._locations;
+// 	std::string s = "";
+// 	if (ml.find("upload") == ml.end())
+// 		return s;
+// 	struct stat info;
+// 	if (stat( ml["upload"].c_str(), &info) != 0)
+// 	{
+// 		std::cout << RED << "upload directory dosn't exists" << RESET << std::endl;
+// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+// 	}
+// 	else if (info.st_mode & S_IFDIR)
+// 	{
+// 		s += ml["upload"];
+// 		s += '/';
+// 	}
+// 	else
+// 	{
+// 		std::cout << RED << "upload location in configuration is not a directory" << RESET << std::endl;
+// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+// 	}
+// 	std::cout << s << std::endl;
+// 	return s;
+// }
 
 // CHECK SI LE FILE N'EXISTE PAS ?????
 bool Client::uploadFiles(Server & serv)
