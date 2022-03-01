@@ -145,6 +145,15 @@ div.edit-picture label {
 	margin-top: -85px;
 }
 
+div.about {
+	justify-content: space-between;
+	display:flex;
+	margin: 5%;
+}
+
+div.about img {
+	border-radius: 50%;
+}
 /*-- FOOTER --*/
 footer {
 	left: 0;
