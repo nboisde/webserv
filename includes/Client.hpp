@@ -102,6 +102,8 @@ class Client
 		std::string		getHostname( void ) const;
 		std::string		getLocalHostname( void) const ;
 		std::string const & getExtension( void ) const;
+		std::string		getRoot( void ) const;
+		std::string		getUrl( void ) const;
 
 		//GUIGs PATCH
 		bool			getFileFlag(void) const;

@@ -826,6 +826,9 @@ map_configs							Client::getConfig( void ) const { return _config; }
 map_configs const & 				Client::getConfig( void ) { return _config; }
 std::string							Client::getHostname( void ) const { return _hostname; }
 std::string const & 				Client::getExtension( void ) const {return _extension;}
+std::string							Client::getRoot( void ) const { return _root;}
+std::string							Client::getUrl( void ) const { return _url;}
+
 
 //GUIGS PATCH
 bool								Client::getFileFlag(void) const {return _file_complete;}
