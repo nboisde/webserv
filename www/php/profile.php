@@ -1,5 +1,5 @@
 <head>
-<link rel="shortcut icon" type="image/x-icon" href="/imgs/favicon.ico"/>
+<link rel="shortcut icon" type="image/x-icon" href="/imgs/logo.png"/>
 	<title>Profile</title>
 	<link rel="stylesheet" href="/css/style.css">
 </head>
