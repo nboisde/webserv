@@ -104,78 +104,9 @@ Client &	Client::operator=( Client const & rhs )
 	return *this;
 }
 
-#include <sys/types.h>
-#include <sys/stat.h>
 
-// SI FORMULAIRE GERE PAR CGI, EDITER _HEAD...
-int Client::uploadFiles( std::string upload_path )
-{
-	std::string data = _req.getBody();
-	std::string file;
-	
-	while (!data.empty())
-	{
-		int save = 1;
-		int crlf = data.find("\r\n\r\n");
-		int f_index = data.find("filename") + 10;
-		if (f_index == -1)
-			return ERROR;
-		std::string f_name = "";
-		std::string extension = "";
-		while (data[f_index] != '\"')
-		{
-			f_name += data[f_index];
-			f_index++;
-		}
-		if (f_name.length() == 0)
-			save = 0;
-		std::string tmp;
-		if (crlf != -1)
-			tmp = data.substr(crlf + 4, data.length() - (crlf + 4));
-		else
-			tmp = data;
-		int bd = tmp.find(_req.getBoundary());
-		if (bd == -1)
-			break ;
-		else
-		{
-			while (tmp[bd] && tmp[bd] == '-')
-				bd--;
-		}
-		std::string f_content = tmp.substr(0, bd);
-		if (save == 1)
-		{
-			int pos = _file_path.find(_route.route);
-			std::string path = _file_path.substr(0, pos + _route.route.size()) + upload_path;
-			if (!strIsPrintable(f_name))
-			{
-				int ex = f_name.find(".");
-				if (ex == -1)
-					extension = f_name.substr(ex, f_name.length() - ex);
-				else
-					extension = f_name;
-				f_name.clear();
-				f_name = "file";
-				f_name += extension;
-			}	
-			if (path.length() != 0)
-                f_name = path + "/" + f_name;
-			
-            std::fstream fs;
-            fs.open(f_name.c_str(), std::fstream::out);
-            fs << f_content;
-            fs.close();
-            chmod(f_name.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-		}
-		int forward = tmp.find(_req.getBoundary()) + _req.getBoundary().length();
-		while (tmp[forward] && (tmp[forward] == '-' || tmp[forward] == '\r' || tmp[forward] == '\n'))
-			forward++;
-		data = tmp.substr(forward, tmp.length() - forward);
-	}
-	return SUCCESS;
-}
-
-bool Client::uploadFiles2(Server & serv)
+// CHECK SI LE FILE N'EXISTE PAS ?????
+bool Client::uploadFiles(Server & serv)
 {
 	//SET UP DE LA ROUTE DU FICHIER
 	std::string upload_path = "";
@@ -684,7 +615,7 @@ int Client::execution( Server & serv, Port & port)
 	}
 	else if (exec_type == R_UPLOAD)
 	{
-		if (!uploadFiles2(serv))
+		if (!uploadFiles(serv))
 		{
 			_file_complete = false;
 			return SUCCESS;
