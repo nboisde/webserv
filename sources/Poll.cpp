@@ -85,8 +85,6 @@ void	Server::launchServer( void )
 					{
 						//WILL ENTER AS MANY TIME NEEDED TO COMPLETE FILE WRITING
 						int couc = ct->execution(*this, *pt);
-						std::cout << "BORDEL !!!!!!!!" << std::endl;
-						std::cout << couc << std::endl;
 
 						//IF FILE COMPLETION, SETTING FLAG 
 						bool	file_completion = ct->getFileFlag();
