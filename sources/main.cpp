@@ -8,6 +8,7 @@ int	main(int ac, char **av)
 	std::ifstream f("./conf/title.txt");
 
 	std::signal(SIGINT, signalHandler);
+	std::signal(SIGPIPE, signalHandler);
 	std::signal(SIGQUIT, signalHandler);
 	if (ac != 2)
 	{
