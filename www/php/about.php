@@ -7,36 +7,23 @@
 		<?php include('header.php'); ?>
 	</header>
 		<h1>Who are we?</h1>
-		<table class="center">
-			<tr>
+		<div class="about">
+			<div>
 				<img src="/imgs/nboisde.jpeg" alt="Avatar">
-				<th></th>
+				<h2>Nicolas Boisde</h2>
+				<p>nboisde</p>
+			</div>
+			<div>
 				<img src="/imgs/gpetit.jpeg" alt="Avatar" >
-				<th></th>
-				<img src="/imgs/ndemont.jpeg" alt="Avatar">
-			</tr>
-			<tr>
-				<td>Nicolas</td>
-				<th></th>
-				<td>Guillaume</td>
-				<th></th>
-				<td>Nastasia</td>
-			</tr>
-			<tr>
-				<td>Boisde</td>
-				<th></th>
-				<td>Petit</td>
-				<th></th>
-				<td>Demont</td>
-			</tr>
-			<tr>
-				<td>nboisde</td>
-				<th></th>
-				<td>gpetit</td>
-				<th></th>
-				<td>ndemont</td>
-			</tr>
-		</table>
+				<h2>Guillaume Petit</h2>
+				<p>gpetit</p>
+			</div>
+			<div>
+				<img src="/imgs/ndemont.jpeg" alt="Avatar" >
+				<h2>Nastasia Demont</h2>
+				<p>ndemont</p>
+			</div>
+		</div>
 	</body>
 	<footer>
 	<?php include('footer.php');
