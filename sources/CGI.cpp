@@ -27,15 +27,9 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 	map_iterator ite = _header.end();
 
 	if (_header.find("content-length") != ite)
-	{
 		_conversion.insert(pair("CONTENT_LENGTH", _header["content-length"]));
-		_conversion.insert(pair("HTTP_CONTENT_LENGTH", _header["content-length"]));
-	}
 	if (_header.find("content-type") != ite)
-	{
 		_conversion.insert(pair("CONTENT_TYPE", _header["content-type"]));
-		_conversion.insert(pair("HTTP_CONTENT_TYPE", _header["content-type"]));
-	}
 	_conversion.insert(pair("SERVER_PROTOCOL", "HTTP/1.1"));
 	_conversion.insert(pair("GATEWAY_INTERFACE", "CGI/1.1"));
 	_conversion.insert(pair("SERVER_SOFTWARE", "webzerver/0.9"));
@@ -69,20 +63,18 @@ void	CGI::init_conversion( Client const & cli, Port const & port, Server const &
 		_conversion.insert(pair("REQUEST_METHOD", _header["method"]));
 
 	_conversion.insert(pair("HTTPS", ""));
-	if (_header.find("accept") != ite)
-		_conversion.insert(pair("HTTP_ACCEPT", _header["accept"]));
-	if (_header.find("accept-charset") != ite)
-		_conversion.insert(pair("HTTP_ACCEPT_CHARSET", _header["accept-charset"]));
-	if (_header.find("accept-encoding") != ite)
-		_conversion.insert(pair("HTTP_ACCEPT_ENCODING", _header["accept-encoding"]));
-	if (_header.find("accept-language") != ite)
-		_conversion.insert(pair("HTTP_ACCEPT_LANGUAGE", _header["accept-language"]));
-	if (_header.find("connection") != ite)
-		_conversion.insert(pair("HTTP_CONNECTION", _header["connection"]));
-	if (_header.find("host") != ite)
-		_conversion.insert(pair("HTTP_HOST", _header["host"]));
-	if (_header.find("user-agent") != ite)
-		_conversion.insert(pair("HTTP_USER_AGENT", _header["user-agent"]));
+	for (map_iterator it = _header.begin(); it != ite; it++)
+	{
+		std::string tmp ("HTTP_");
+		tmp += it->first;
+		for (int i = 0; tmp[i]; i++)
+		{
+			tmp[i] = toupper(tmp[i]);
+			if (tmp[i] == '-')
+				tmp[i] = '_';
+		}
+		_conversion.insert(pair(tmp, it->second));
+	}
 }
 
 CGI::CGI( void )
@@ -190,6 +182,10 @@ int		CGI::execute( Client & cli ){
 	pid_t pid = fork();
 	if (pid == 0)
 	{
+		for (int i = 0; _env[i]; i++)
+		{
+			std::cout << FIRE << _env[i] << RESET << std::endl;
+		}
 		if (_header["method"] == "POST")
 			dup2(fileno(cli.getTmpFile()), STDIN);
 		dup2(fd[1], STDOUT);
