@@ -184,53 +184,54 @@ bool Client::uploadFiles2(Server & serv)
 	else if (_config[_hostname]["upload"]._value != "")
 		upload_path =  _config[_hostname]["root"]._value + "/" + _config[_hostname]["upload"]._value;
 
-	// std::cout << upload_path << std::endl;
-	// std::cout << _file_path << std::endl;
-	// std::cout << _config[_hostname]["root"]._value << std::endl;
-
 	std::string body = _req.getBody();
-	// std::cout << _req.getBoundary() << std::endl;
 	next:
 	if (!body.empty())
 	{
-		// std::cout << "BODY not EMPTY" << std::endl;
 		if (_upload_fd == -1)
 		{
+			std::string cls = "--" + _req.getBoundary() + "--";
+			size_t end = body.find(cls);
+			if (end == 0)// || lilend == 0)
+				return true;
+			std::cout << body << std::endl;
 			size_t i_content = body.find("\r\n\r\n");
-			//std::cout << i_content << std::endl;
 			std::string header;
 			if (i_content == static_cast<size_t>(-1))
 				header = body;
 			else
 				header = body.substr(body.find(_req.getBoundary()) + _req.getBoundary().length(), i_content - _req.getBoundary().length());
 			if (header == "--")
-			{
-				std::cout << 0 << std::endl;
 				return true;
-			}
-			//std::cout << "file header = " << header << std::endl;
 			size_t i_filename = header.find("filename") + 10;
 			std::string tmp_filename = header.substr(i_filename);
 			std::string filename = tmp_filename.substr(0, tmp_filename.find("\""));
 			_req.setBody(body.substr(body.find("\r\n\r\n") + 4));
 			body.clear();
 			body = _req.getBody();
-			std::string next_bound_end = "--" + _req.getBoundary() + "--";
-			size_t is_end = body.find(next_bound_end);
+			size_t is_end = body.find(cls);
+			if (filename.length() == 0 && is_end != 0)
+			{
+				std::string bnd_dash = "--" + _req.getBoundary();
+				_req.setBody(body.substr(body.find(bnd_dash)));
+				body.clear();
+				body = _req.getBody();
+				size_t end2 = body.find(cls);
+				if (end2 == 0)
+				{
+					return true;
+				}
+				else
+				{
+					goto next;
+					return false;
+				}
+			}
 			if (filename.length() == 0 && is_end == 0)
 				return true;
-			//std::cout << filename << std::endl;
-			// std::cout << "========================" << std::endl;
-			// std::cout << YELLOW << _req.getBody() << RESET << std::endl;
-			// std::cout << "========================" << std::endl;
-			//std::cout << body.find("\r\n\r\n") << std::endl;
 			std::string path = upload_path + "/" + filename;
-			//std::cout << path << std::endl;
 			_upload_fd = ::open(path.c_str(), O_RDWR | O_CREAT);
-			// MAYBE A DEL SI WRITE CHANGE RIGHTS
-			chmod(path.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 			serv.addToPolling(_upload_fd);
-			// std::cout << RED << "ADDING TO POLLING FD NB = " << _upload_fd << RESET << std::endl;
 			serv.findFds(_upload_fd).events = POLLOUT;
 			return false;
 		}
@@ -258,33 +259,23 @@ bool Client::uploadFiles2(Server & serv)
 				//close(_upload_fd);
 				if(_upload_fd != -1)
 				{
-					std::cout << YELLOW << "CLOSING FD Nb = " << _upload_fd << RESET << std::endl;
 					serv.setCleanFds(true);
 					serv.findFds(_upload_fd).fd = -1;
 					close(_upload_fd);
 					_upload_fd = -1;
 					goto next;
 				}
-				//std::cout << tmp << std::endl;
-				//if (tmp == "--")
 				std::string bdy_end = "--" + _req.getBoundary() + "--";
 				std::string tmp = _req.getBody();
 				size_t upld_end = tmp.find(bdy_end);
-				//std::cout << tmp << std::endl;
 				if (upld_end == 0)
 				{
-					std::cout << tmp << std::endl;
-					std::cout << _req.getBody() << std::endl;
-					//std::cout << _req.setBody("")
 					tmp.clear();
 					tmp = "";
 					return true;
 				}
 				else
-				{
-					std::cout << DEV << "UPLD FICHIER N" << RESET << std::endl;
 					return false;
-				}
 			}
 			//else
 			//return true;
@@ -292,7 +283,6 @@ bool Client::uploadFiles2(Server & serv)
 		else
 			return true;
 	}
-	// std::cout << "BODY not EMPTY" << std::endl;
 	return true;
 }
 
