@@ -38,8 +38,10 @@ void	Server::launchServer( void )
 	{
 		_clean_fds = 0;
 		setRevents();
+
 		if (polling() <= 0)
 			break; 
+
         //accept incoming connections, and add them to polling list
 		acceptConnections();
 
@@ -49,8 +51,6 @@ void	Server::launchServer( void )
             //ITER ON ALL SOCKETS/CLIENTS
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
-				std::cout << "POLL LOOP" << std::endl;
-				std::cout << "GET FILE FLAG: " << ct->getFileFlag() << std::endl;
 				if(!ct->getFileFlag())
 				{
 					std::cout << "PENDIIIIIIIING" << std::endl;
@@ -102,6 +102,7 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
 				{
+					std::cout << DEV << "CACA\n" << RESET;
 					int ret = (*ct).send();
 					if (ret == CLOSING)
 					{
@@ -130,7 +131,10 @@ void	Server::launchServer( void )
 			}
 		}
 		if (_clean_fds)
+		{
+			std::cout << "PRETTY SURE I PASS HERE" << std::endl;
 			cleanFds();
+		}
 	}
 }
 }

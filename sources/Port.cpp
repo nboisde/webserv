@@ -63,6 +63,7 @@ int		Port::launchPort( void )
 		perror("In fcntl: ");
 		return ERROR;
 	}
+	std::cout << FIRE << "NON BLOCKING " << _fd << RESET << std::endl;
 	memset((char *)&_port_address, 0, sizeof(_port_address));
 	_port_address.sin_family = AF_INET;
 	_port_address.sin_addr.s_addr = htonl(INADDR_ANY);
