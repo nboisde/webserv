@@ -52,10 +52,7 @@ void	Server::launchServer( void )
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
 				if(!ct->getFileFlag())
-				{
-					std::cout << "PENDIIIIIIIING" << std::endl;
 					goto pending;
-				}
 				if ((findFds((*ct).getFd()).revents) == 0)
 				{ 
 					ct++;
@@ -78,9 +75,7 @@ void	Server::launchServer( void )
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLIN)))
 				{
 					pending:
-					std::cout << "OK" << std::endl;
 					int ret = (*ct).receive();
-					std::cout << "BRAVO " << ret << std::endl;
 					if ( ret == WRITING)
 					{
 						//WILL ENTER AS MANY TIME NEEDED TO COMPLETE FILE WRITING
@@ -89,10 +84,7 @@ void	Server::launchServer( void )
 						//IF FILE COMPLETION, SETTING FLAG 
 						bool	file_completion = ct->getFileFlag();
 						if (file_completion)
-						{
-							std::cout << YELLOW << "JAMAIS 2 FOIS" << RESET << std::endl;
 							(findFds((*ct).getFd())).events = POLLOUT;
-						}
 					}
 					else if (ret == ERROR)
 					{
@@ -102,7 +94,6 @@ void	Server::launchServer( void )
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
 				{
-					std::cout << DEV << "CACA\n" << RESET;
 					int ret = (*ct).send();
 					if (ret == CLOSING)
 					{
@@ -131,10 +122,7 @@ void	Server::launchServer( void )
 			}
 		}
 		if (_clean_fds)
-		{
-			std::cout << "PRETTY SURE I PASS HERE" << std::endl;
 			cleanFds();
-		}
 	}
 }
 }

@@ -194,7 +194,6 @@ bool Client::uploadFiles2(Server & serv)
 			size_t end = body.find(cls);
 			if (end == 0)// || lilend == 0)
 				return true;
-			std::cout << body << std::endl;
 			size_t i_content = body.find("\r\n\r\n");
 			std::string header;
 			if (i_content == static_cast<size_t>(-1))
@@ -231,6 +230,7 @@ bool Client::uploadFiles2(Server & serv)
 				return true;
 			std::string path = upload_path + "/" + filename;
 			_upload_fd = ::open(path.c_str(), O_RDWR | O_CREAT);
+			chmod(path.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 			serv.addToPolling(_upload_fd);
 			serv.findFds(_upload_fd).events = POLLOUT;
 			return false;
@@ -348,6 +348,7 @@ int Client::receive( void )
 	if (req == SUCCESS)
 	{
 		int head_err = _req.fillHeaderAndBody();
+		_req.cleanRawContent();
 		if (setHostname())
 			return WRITING;
 		_req.setContinue(0);
@@ -448,7 +449,6 @@ int Client::checkRedirection( void )
 	{
 		std::string new_url = redirection + _file_path.substr(pos + _route.route.size());
 		_file_path = new_url;
-		std::cout << BLUE << "NEW FILE " << _file_path << RESET << std::endl;
 		return (R_REDIR);
 	} 
 	return 0;
@@ -672,7 +672,6 @@ int Client::execution( Server & serv, Port & port)
 	setRoute();
 	
 	int exec_type = setExecution();
-	std::cout << "SET_EXEC = " << exec_type << std::endl;
 	if (exec_type == R_EXT)
 	{
 		//CHECK IF TMP_FILE IS NEEDED, AND MONITOR IT WITH POLL IF SO
@@ -690,10 +689,6 @@ int Client::execution( Server & serv, Port & port)
 			_file_complete = false;
 			return SUCCESS;
 		}
-		
-		std::cout << "FERMETURE DU FD BOYAA" << std::endl;
-		std::cout << _file_path << std::endl;
-		std::cout << _req.getHead()["url"] << std::endl;
 		_file_path = _req.getHead()["url"];
 		executeRedir();
 		_file_complete = true;
