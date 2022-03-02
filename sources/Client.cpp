@@ -399,13 +399,13 @@ int Client::checkRedirection( void )
 {
 	if (_route.route == "")
 		return (0);
-	std::string redirection = _route.redirection;
-	if (redirection == "")
+	std::string rewrite = _route.rewrite;
+	if (rewrite == "")
 		return (0);
 	int	pos = _file_path.find(_route.route);
 	if (pos >= 0)
 	{
-		std::string new_url = redirection + _file_path.substr(pos + _route.route.size());
+		std::string new_url = rewrite + _file_path.substr(pos + _route.route.size());
 		_file_path = new_url;
 		return (R_REDIR);
 	} 

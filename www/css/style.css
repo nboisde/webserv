@@ -46,6 +46,10 @@ div .button:hover {
 	cursor: pointer;
 }
 
+img.check {
+	width: 100px
+}
+
 label.profil {
 	display: inline-block;
 	position: relative;

@@ -338,10 +338,10 @@ int	Parser::checkRouteKeys( Route & route )
 {
 	int key;
 
-	if ((key = _content.find("redirection", _pos)) == _pos)
+	if ((key = _content.find("rewrite", _pos)) == _pos)
 	{
-		_pos += 11;
-		if (!(setRouteValues(&(route.redirection), 0)))
+		_pos += 7;
+		if (!(setRouteValues(&(route.rewrite), 0)))
 			return (0);
 	}
 	else if ((key = _content.find("autoindex", _pos)) == _pos)
