@@ -40,7 +40,7 @@ void	Server::launchServer( void )
 		setRevents();
 
 		if (polling() <= 0)
-			break; 
+			break;
 
         //accept incoming connections, and add them to polling list
 		acceptConnections();
@@ -52,10 +52,7 @@ void	Server::launchServer( void )
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
 				if(!ct->getFileFlag() || !ct->getCGIFlag())
-				{
-					std::cout << FIRE << "here" << RESET << std::endl;
 					goto pending;
-				}
 				if ((findFds((*ct).getFd()).revents) == 0)
 				{ 
 					ct++;
