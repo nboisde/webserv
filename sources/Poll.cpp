@@ -51,8 +51,11 @@ void	Server::launchServer( void )
             //ITER ON ALL SOCKETS/CLIENTS
 			for (it_client ct = (*pt).getClients().begin(); ct != (*pt).getClients().end();)
 			{
-				if(!ct->getFileFlag())
+				if(!ct->getFileFlag() || !ct->getCGIFlag())
+				{
+					std::cout << FIRE << "here" << RESET << std::endl;
 					goto pending;
+				}
 				if ((findFds((*ct).getFd()).revents) == 0)
 				{ 
 					ct++;
@@ -83,7 +86,8 @@ void	Server::launchServer( void )
 
 						//IF FILE COMPLETION, SETTING FLAG 
 						bool	file_completion = ct->getFileFlag();
-						if (file_completion)
+						bool	cgi_flag = ct->getCGIFlag();
+						if (file_completion && cgi_flag)
 							(findFds((*ct).getFd())).events = POLLOUT;
 					}
 					else if (ret == ERROR)

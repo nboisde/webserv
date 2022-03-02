@@ -192,30 +192,8 @@ int		CGI::execute( Client & cli ){
 	}
 	waitpid(pid, &child_stat, 0);
 	close(fd[1]);
-	std::string response = concatenateResponse(fd[0]);
-	cli.getRes().treatCGI(response);
-	cli.getRes().response(CGI_FLAG);
+	cli.setCGIFd(fd[1]);
 	return SUCCESS;
-}
-
-std::string	CGI::concatenateResponse(int fd)
-{
-	std::string response;
-	char *line = NULL;
-	size_t line_size = 0;
-	FILE * pipe_end = fdopen(fd, "r");
-
-	while (getline(&line, &line_size, pipe_end) != -1)
-	{
-		response += line;
-		if (line)
-			free(line);
-		line = NULL;
-	}
-	if (line)
-		free(line);
-	fclose(pipe_end);
-	return response;
 }
 
 /*
