@@ -38,8 +38,10 @@ void	Server::launchServer( void )
 	{
 		_clean_fds = 0;
 		setRevents();
+
 		if (polling() <= 0)
 			break; 
+
         //accept incoming connections, and add them to polling list
 		acceptConnections();
 

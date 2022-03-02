@@ -104,82 +104,197 @@ Client &	Client::operator=( Client const & rhs )
 	return *this;
 }
 
-#include <sys/types.h>
-#include <sys/stat.h>
+// I'LL NEED THAT SHIT TOMORROW TO DEBUG A CASE !!!! if upload path don't exist webserv hang forever...
 
-// SI FORMULAIRE GERE PAR CGI, EDITER _HEAD...
-int Client::uploadFiles( void )
+// std::string Client::uploadPath( void )
+// {
+// 	std::map<std::string, std::string> ml = _config["location"]._locations;
+// 	std::string s = "";
+// 	if (ml.find("upload") == ml.end())
+// 		return s;
+// 	struct stat info;
+// 	if (stat( ml["upload"].c_str(), &info) != 0)
+// 	{
+// 		std::cout << RED << "upload directory dosn't exists" << RESET << std::endl;
+// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+// 	}
+// 	else if (info.st_mode & S_IFDIR)
+// 	{
+// 		s += ml["upload"];
+// 		s += '/';
+// 	}
+// 	else
+// 	{
+// 		std::cout << RED << "upload location in configuration is not a directory" << RESET << std::endl;
+// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+// 	}
+// 	std::cout << s << std::endl;
+// 	return s;
+// }
+
+// CHECK SI LE FILE N'EXISTE PAS ?????
+bool Client::uploadFiles(Server & serv)
 {
 	//SET UP DE LA ROUTE DU FICHIER
 	std::string upload_path = "";
 	if (_route.route != "" && _route.upload != "")
-		upload_path = _route.upload;
+		upload_path =  _config[_hostname]["root"]._value + _route.route + _route.upload;
 	else if (_config[_hostname]["upload"]._value != "")
-		upload_path = _config[_hostname]["upload"]._value;
+		upload_path =  _config[_hostname]["root"]._value + "/" + _config[_hostname]["upload"]._value;
 
-	std::string data = _req.getBody();
-	std::string file;
-	
-	while (!data.empty())
+	std::string body = _req.getBody();
+	next:
+	if (!body.empty())
 	{
-		int save = 1;
-		int crlf = data.find("\r\n\r\n");
-		int f_index = data.find("filename") + 10;
-		if (f_index == -1)
-			return ERROR;
-		std::string f_name = "";
-		std::string extension = "";
-		while (data[f_index] != '\"')
+		if (_upload_fd == -1)
 		{
-			f_name += data[f_index];
-			f_index++;
-		}
-		if (f_name.length() == 0)
-			save = 0;
-		std::string tmp;
-		if (crlf != -1)
-			tmp = data.substr(crlf + 4, data.length() - (crlf + 4));
-		else
-			tmp = data;
-		int bd = tmp.find(_req.getBoundary());
-		if (bd == -1)
-			break ;
-		else
-		{
-			while (tmp[bd] && tmp[bd] == '-')
-				bd--;
-		}
-		std::string f_content = tmp.substr(0, bd);
-		if (save == 1)
-		{
-			int pos = _file_path.find(_route.route);
-			std::string path = _file_path.substr(0, pos + _route.route.size()) + upload_path;
-			if (!strIsPrintable(f_name))
+			std::string cls = "--" + _req.getBoundary() + "--";
+			size_t end = body.find(cls);
+			if (end == 0)// || lilend == 0)
+				return true;
+			size_t i_content = body.find("\r\n\r\n");
+			std::string header;
+			if (i_content == static_cast<size_t>(-1))
+				header = body;
+			else
+				header = body.substr(body.find(_req.getBoundary()) + _req.getBoundary().length(), i_content - _req.getBoundary().length());
+			if (header == "--")
+				return true;
+			size_t i_filename = header.find("filename") + 10;
+			std::string tmp_filename = header.substr(i_filename);
+			std::string filename = tmp_filename.substr(0, tmp_filename.find("\""));
+			_req.setBody(body.substr(body.find("\r\n\r\n") + 4));
+			body.clear();
+			body = _req.getBody();
+			size_t is_end = body.find(cls);
+			if (filename.length() == 0 && is_end != 0)
 			{
-				int ex = f_name.find(".");
-				if (ex == -1)
-					extension = f_name.substr(ex, f_name.length() - ex);
+				std::string bnd_dash = "--" + _req.getBoundary();
+				_req.setBody(body.substr(body.find(bnd_dash)));
+				body.clear();
+				body = _req.getBody();
+				size_t end2 = body.find(cls);
+				if (end2 == 0)
+				{
+					return true;
+				}
 				else
-					extension = f_name;
-				f_name.clear();
-				f_name = "file";
-				f_name += extension;
-			}	
-			if (path.length() != 0)
-                f_name = path + "/" + f_name;
-			
-            std::fstream fs;
-            fs.open(f_name.c_str(), std::fstream::out);
-            fs << f_content;
-            fs.close();
-            chmod(f_name.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+				{
+					goto next;
+					return false;
+				}
+			}
+			if (filename.length() == 0 && is_end == 0)
+				return true;
+			std::string path = upload_path + "/" + filename;
+			_upload_fd = ::open(path.c_str(), O_RDWR | O_CREAT);
+			chmod(path.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+			serv.addToPolling(_upload_fd);
+			serv.findFds(_upload_fd).events = POLLOUT;
+			return false;
 		}
-		int forward = tmp.find(_req.getBoundary()) + _req.getBoundary().length();
-		while (tmp[forward] && (tmp[forward] == '-' || tmp[forward] == '\r' || tmp[forward] == '\n'))
-			forward++;
-		data = tmp.substr(forward, tmp.length() - forward);
+		else if (serv.findFds(_upload_fd).revents & POLLOUT) // && fichier pas a la fin..)
+		{
+			std::string delim = "--" + _req.getBoundary();
+			size_t end_file = body.find(delim);
+			if (end_file > 0)
+			{
+				if (end_file > BUFFER_SIZE)
+				{
+					write(_upload_fd, body.c_str(), BUFFER_SIZE);
+					_req.setBody(body.substr(BUFFER_SIZE));
+				}
+				else
+				{
+					write(_upload_fd, body.c_str(), end_file);
+					_req.setBody(body.substr(end_file));
+				}
+				return false;
+			}
+			else
+			{
+				//std::string tmp = _req.getBody().substr(end_file, std::string::npos);
+				//close(_upload_fd);
+				if(_upload_fd != -1)
+				{
+					serv.setCleanFds(true);
+					serv.findFds(_upload_fd).fd = -1;
+					close(_upload_fd);
+					_upload_fd = -1;
+					goto next;
+				}
+				std::string bdy_end = "--" + _req.getBoundary() + "--";
+				std::string tmp = _req.getBody();
+				size_t upld_end = tmp.find(bdy_end);
+				if (upld_end == 0)
+				{
+					tmp.clear();
+					tmp = "";
+					return true;
+				}
+				else
+					return false;
+			}
+			//else
+			//return true;
+		}
+		else
+			return true;
 	}
-	return SUCCESS;
+	return true;
+}
+
+// I'LL NEED THAT SHIT TOMORROW TO DEBUG A CASE !!!! if upload path don't exist webserv hang forever...
+
+// std::string Client::uploadPath( void )
+// {
+// 	std::map<std::string, std::string> ml = _config["location"]._locations;
+// 	std::string s = "";
+// 	if (ml.find("upload") == ml.end())
+// 		return s;
+// 	struct stat info;
+// 	if (stat( ml["upload"].c_str(), &info) != 0)
+// 	{
+// 		std::cout << RED << "upload directory dosn't exists" << RESET << std::endl;
+// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+// 	}
+// 	else if (info.st_mode & S_IFDIR)
+// 	{
+// 		s += ml["upload"];
+// 		s += '/';
+// 	}
+// 	else
+// 	{
+// 		std::cout << RED << "upload location in configuration is not a directory" << RESET << std::endl;
+// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+// 	}
+// 	std::cout << s << std::endl;
+// 	return s;
+// }
+
+
+//https://stackoverflow.com/questions/31783947/what-http-status-code-should-be-return-when-we-get-error-while-uploading-file
+int Client::uploadAuthorized( void )
+{
+	std::string upload_path = "";
+	if (_route.route != "" && _route.upload != "")
+		upload_path =  _config[_hostname]["root"]._value + _route.route + _route.upload;
+	else if (_config[_hostname]["upload"]._value != "")
+		upload_path =  _config[_hostname]["root"]._value + "/" + _config[_hostname]["upload"]._value;
+
+	struct stat info;
+	if (stat(upload_path.c_str(), &info) != 0)
+	{
+		_status = INTERNAL_SERVER_ERROR;
+		return 0;
+	}
+	else if (info.st_mode & S_IFDIR)
+		return 1;
+	else
+	{
+		_status = INTERNAL_SERVER_ERROR;
+		return 0;
+	}
 }
 
 int	Client::setHostname( void )
@@ -234,6 +349,7 @@ int Client::receive( void )
 	if (req == SUCCESS)
 	{
 		int head_err = _req.fillHeaderAndBody();
+		_req.cleanRawContent();
 		if (setHostname())
 			return WRITING;
 		_req.setContinue(0);
@@ -326,15 +442,14 @@ int Client::checkRedirection( void )
 {
 	if (_route.route == "")
 		return (0);
-	std::string redirection = _route.redirection;
-	if (redirection == "")
+	std::string rewrite = _route.rewrite;
+	if (rewrite == "")
 		return (0);
 	int	pos = _file_path.find(_route.route);
 	if (pos >= 0)
 	{
-		std::string new_url = redirection + _file_path.substr(pos + _route.route.size());
+		std::string new_url = rewrite + _file_path.substr(pos + _route.route.size());
 		_file_path = new_url;
-		std::cout << BLUE << "NEW FILE " << _file_path << RESET << std::endl;
 		return (R_REDIR);
 	} 
 	return 0;
@@ -393,13 +508,8 @@ int	Client::checkAutoindex( void )
 
 int	Client::checkUpload( void )
 {
-	if (_req.getMultipart() == 1) // ADD METHOD = POST
+	if (_req.getMultipart() == 1 && uploadAuthorized() == 1) // ADD METHOD = POST
 	{
-		// if (_route.route != "" && _route.upload != "")
-		// 	uploadFiles(_route.upload);
-		// else if (_config[_hostname]["upload"]._value != "")
-		// 	uploadFiles(_config[_hostname]["upload"]._value);
-		// else
 		if (_route.route != "" && _route.upload != "")
 			return R_UPLOAD;
 		else if (_config[_hostname]["upload"]._value != "")
@@ -548,6 +658,7 @@ int	Client::delete_ressource( void )
 	}
 }
 
+
 int Client::execution( Server & serv, Port & port)
 {
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
@@ -555,8 +666,6 @@ int Client::execution( Server & serv, Port & port)
 	saveLogs();
 	setPath();
 	setRoute();
-
-	std::cout << _req.getHeader() << std::endl;
 	
 	int exec_type = setExecution();
 	if (exec_type == R_EXT)
@@ -569,15 +678,17 @@ int Client::execution( Server & serv, Port & port)
 		}
 		executeExtension(serv, port);
 	}
-	// else if (exec_type == R_UPLOAD)
-	// {
-	// 	if (!uploadFiles())
-	// 	{
-	// 		_file_complete = false;
-	// 		return SUCCESS;
-	// 	}
-	// 	_file_complete = true;
-	// }
+	else if (exec_type == R_UPLOAD)
+	{
+		if (!uploadFiles(serv))
+		{
+			_file_complete = false;
+			return SUCCESS;
+		}
+		_file_path = _req.getHead()["url"];
+		executeRedir();
+		_file_complete = true;
+	}
 	else if (exec_type == R_AUTO)
 		executeAutoin();
 	else if (exec_type == R_HTML)
@@ -607,7 +718,7 @@ int	Client::setExecution( void )
 	if (!checkPath())
 		return R_ERR;
 	if ((ret = checkUpload()))
-	 	return ret;
+	  	return ret;
 	if ((ret = checkCGI()))
 		return ret;
 	return R_HTML;

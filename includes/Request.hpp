@@ -34,7 +34,7 @@ class Request
 		int				findContinue( void );
 		int				multipartFormRaw( void );
 		int				analyseURL(void);
-
+		void			cleanRawContent(void);
 
 
 		// GETTERS
