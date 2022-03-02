@@ -182,10 +182,6 @@ int		CGI::execute( Client & cli ){
 	pid_t pid = fork();
 	if (pid == 0)
 	{
-		for (int i = 0; _env[i]; i++)
-		{
-			std::cout << FIRE << _env[i] << RESET << std::endl;
-		}
 		if (_header["method"] == "POST")
 			dup2(fileno(cli.getTmpFile()), STDIN);
 		dup2(fd[1], STDOUT);
