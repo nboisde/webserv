@@ -495,7 +495,7 @@ void	Parser::initParser(void)
 	stream << buf << "/www";
 	_default_keys["root"] = Value(stream.str());
 	free(buf);
-	_default_keys["index"] = Value("/php/index.php");
+	_default_keys["index"] = Value("");
 	_default_keys["location"] = Value("");
 	_default_keys["cgi"] = Value("");
 }
