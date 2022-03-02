@@ -2,7 +2,7 @@
 .vscode
 .DS_Store
 objects/*.o
-webserver
+webserv
 log.out
 logs/access.log
 logs/error.log

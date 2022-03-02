@@ -226,11 +226,9 @@ int	Request::multipartForm( void )
 	{
 		_multipart = 1;
 		std::string tmp = _header.substr(r);
-		//std::cout << tmp << std::endl;
 		int bd = strToLower(tmp).find("boundary=");
 		std::string tmp2 = tmp.substr(bd + 9, tmp.find("\r\n") - (bd + 9));
 		_boundary = tmp2;
-		//std::cout << GREEN << tmp2 << RESET << std::endl;
 		return 1;
 	}
 }
@@ -245,11 +243,9 @@ int	Request::multipartFormRaw( void )
 	{
 		_multipart = 1;
 		std::string tmp = _raw_content.substr(r);
-		//std::cout << tmp << std::endl;
 		int bd = strToLower(tmp).find("boundary=");
 		std::string tmp2 = tmp.substr(bd + 9, tmp.find("\r\n") - (bd + 9));
 		_boundary = tmp2;
-		//std::cout << GREEN << tmp2 << RESET << std::endl;
 		return 1;
 	}
 }
@@ -693,6 +689,11 @@ void	Request::resetValues(void){
 	//}
 }
 
+void	Request::cleanRawContent(void)
+{
+	_raw_content.clear();
+	_raw_content = "";
+}
 
 int										Request::requestReceptionState(void) { return _state; }
 std::string								Request::getRawContent(void) const { return _raw_content; }
