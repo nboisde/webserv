@@ -492,6 +492,7 @@ int Client::checkMethod( void )
 
 int	Client::checkAutoindex( void )
 {
+	std::cout << _file_path << std::endl;
 	if (!isURLDirectory())
 		return 0;
 	else if (_route.route != "" && _route.index != "")
@@ -502,7 +503,6 @@ int	Client::checkAutoindex( void )
 	}
 	else if (_route.route != "" && _route.autoindex == "on")
 		return R_AUTO;
-	_status = FORBIDDEN;
 	return R_ERR;
 }
 
