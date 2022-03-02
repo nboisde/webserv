@@ -5,8 +5,12 @@
 </head>
 <body>
 	<header>
-		<?php require('header.php'); ?>
+		<?php include('header.php'); ?>
 	</header>
 	<h1>Upload done</h1>
+	<img class="check" src="/imgs/check.png">
 	<a href="/php/index.php"><p>Go back home</p></a>
 </body>
+<footer>
+	<?php include('footer.php');?>
+</footer>

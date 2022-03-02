@@ -10,13 +10,13 @@ class	Route
 {
 	public:
 		std::string					route;
-		std::string					redirection;
+		std::string					rewrite;
 		std::string					autoindex;
 		std::string					index;
 		std::string					upload;
 		std::vector<std::string>	methods;
 
-		Route() : route(""), redirection(""), autoindex("off"), index(""), upload("") {};
+		Route() : route(""), rewrite(""), autoindex("off"), index(""), upload("") {};
 		~Route() {};
 		Route( Route const & src );
 		Route &		operator=( Route const & rhs ); 

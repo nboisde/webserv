@@ -29,7 +29,7 @@ Route & Route::operator=( Route const & rhs )
 	if (this != &rhs)
 	{
 		route = rhs.route;
-		redirection = rhs.redirection;
+		rewrite = rhs.rewrite;
 		autoindex = rhs.autoindex;
 		index = rhs.index;
 		upload = rhs.upload;
