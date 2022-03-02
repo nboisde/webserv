@@ -244,14 +244,57 @@ bool Client::uploadFiles(Server & serv)
 	return true;
 }
 
+// I'LL NEED THAT SHIT TOMORROW TO DEBUG A CASE !!!! if upload path don't exist webserv hang forever...
+
+// std::string Client::uploadPath( void )
+// {
+// 	std::map<std::string, std::string> ml = _config["location"]._locations;
+// 	std::string s = "";
+// 	if (ml.find("upload") == ml.end())
+// 		return s;
+// 	struct stat info;
+// 	if (stat( ml["upload"].c_str(), &info) != 0)
+// 	{
+// 		std::cout << RED << "upload directory dosn't exists" << RESET << std::endl;
+// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+// 	}
+// 	else if (info.st_mode & S_IFDIR)
+// 	{
+// 		s += ml["upload"];
+// 		s += '/';
+// 	}
+// 	else
+// 	{
+// 		std::cout << RED << "upload location in configuration is not a directory" << RESET << std::endl;
+// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
+// 	}
+// 	std::cout << s << std::endl;
+// 	return s;
+// }
+
+
+//https://stackoverflow.com/questions/31783947/what-http-status-code-should-be-return-when-we-get-error-while-uploading-file
 int Client::uploadAuthorized( void )
 {
-	for (std::vector<std::string>::iterator it = _config[_hostname]["method"]._methods.begin(); it != _config[_hostname]["method"]._methods.end(); it++)
+	std::string upload_path = "";
+	if (_route.route != "" && _route.upload != "")
+		upload_path =  _config[_hostname]["root"]._value + _route.route + _route.upload;
+	else if (_config[_hostname]["upload"]._value != "")
+		upload_path =  _config[_hostname]["root"]._value + "/" + _config[_hostname]["upload"]._value;
+
+	struct stat info;
+	if (stat(upload_path.c_str(), &info) != 0)
 	{
-		if ((*it) == "POST")
-			return 1;
+		_status = INTERNAL_SERVER_ERROR;
+		return 0;
 	}
-	return 0;
+	else if (info.st_mode & S_IFDIR)
+		return 1;
+	else
+	{
+		_status = INTERNAL_SERVER_ERROR;
+		return 0;
+	}
 }
 
 int	Client::setHostname( void )
@@ -465,13 +508,8 @@ int	Client::checkAutoindex( void )
 
 int	Client::checkUpload( void )
 {
-	if (_req.getMultipart() == 1) // ADD METHOD = POST
+	if (_req.getMultipart() == 1 && uploadAuthorized() == 1) // ADD METHOD = POST
 	{
-		// if (_route.route != "" && _route.upload != "")
-		// 	uploadFiles(_route.upload);
-		// else if (_config[_hostname]["upload"]._value != "")
-		// 	uploadFiles(_config[_hostname]["upload"]._value);
-		// else
 		if (_route.route != "" && _route.upload != "")
 			return R_UPLOAD;
 		else if (_config[_hostname]["upload"]._value != "")
