@@ -321,7 +321,7 @@ int Client::receive( void )
 	char	buffer[BUFFER_SIZE];
 
 	memset(buffer, 0, BUFFER_SIZE);
-	if (!_file_complete)
+	if (!_file_complete || !_cgi_complete)
 		return WRITING;
 	int ret = recv(_fd, buffer, BUFFER_SIZE - 1, 0);
 	if ( ret < 0)
@@ -651,24 +651,30 @@ int	Client::delete_ressource( void )
 	}
 }
 
-void	Client::read_fd_out( Server & serv )
+bool	Client::read_fd_out( Server & serv )
 {
 	if (_cgi_fd == -1)
-		return;
+		return false;
 	if (serv.findFds(_cgi_fd).revents & POLLIN)
 	{
 		char buf[BUFFER_SIZE];
 		memset(&buf, 0, BUFFER_SIZE);
-		read(_cgi_fd, &buf, BUFFER_SIZE);
+		int ret = read(_cgi_fd, &buf, BUFFER_SIZE);
 		_cgi_response += buf;
 		_cgi_complete = false;
+		if (ret == 0)
+		 	goto closing;
+		else
+			return false;
 	}
 	else
 	{
+		closing:
 		close(_cgi_fd);
 		serv.setCleanFds(true);
 		serv.findFds(_cgi_fd).fd = -1;
 		_cgi_complete = true;
+		return true;
 	}
 }
 
@@ -683,21 +689,25 @@ int Client::execution( Server & serv, Port & port)
 	int exec_type = setExecution();
 	if (exec_type == R_EXT)
 	{
-		std::cout << "ici";
+		if (!_cgi_complete)
+			goto next;
 		//CHECK IF TMP_FILE IS NEEDED, AND MONITOR IT WITH POLL IF SO
 		if (!TmpFileCompletion(serv))
 		{
 			_file_complete = false;
 			return SUCCESS;
 		}
-		executeExtension(serv, port);
+		if (executeExtension(serv, port))
+			return SUCCESS;
+		next:
 		if (!_cgi_complete)
-			read_fd_out(serv);
-		else
 		{
-			_res.treatCGI(_cgi_response);
-			_res.response(CGI_FLAG);
+			int ret = read_fd_out(serv);
+			if (!ret)
+				return SUCCESS;
 		}
+		_res.treatCGI(_cgi_response);
+		_res.response(CGI_FLAG);
 	}
 	else if (exec_type == R_UPLOAD)
 	{
@@ -750,10 +760,11 @@ int	Client::setExecution( void )
 int Client::executeExtension( Server & serv, Port & port)
 {
 	if (!_cgi_complete)
-		return SUCCESS;
+		return 0; //RETURN 0 IS NORMAL, I NEED IT THIS WAY
 	CGI cgi(*this, port, serv);
 	cgi.execute(*this);
-
+	
+	_file_complete = true;
 	//SETTING CGI COMPLETE TO FALSE, SINCE WE PASS HERE ONLY ONE TIME, OUT OF CGIs
 	_cgi_complete = false;
 	serv.addToPolling(_cgi_fd);

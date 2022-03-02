@@ -192,7 +192,7 @@ int		CGI::execute( Client & cli ){
 	}
 	waitpid(pid, &child_stat, 0);
 	close(fd[1]);
-	cli.setCGIFd(fd[1]);
+	cli.setCGIFd(fd[0]);
 	return SUCCESS;
 }
 

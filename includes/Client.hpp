@@ -109,7 +109,7 @@ class Client
 		std::string		getUrl( void ) const;
 
 		//GUIGs PATCH
-		void			read_fd_out( Server & serv );
+		bool			read_fd_out( Server & serv );
 		bool			getFileFlag(void) const;
 		void			setFileFlag(bool);
 		FILE *			getTmpFile( void ) const;
