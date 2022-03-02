@@ -23,6 +23,9 @@ _errors(),
 _hostname(""),
 _extension(""),
 _file_complete(true),
+_cgi_complete(true),
+_cgi_fd(-1),
+_cgi_response(""),
 _tmp_file(NULL),
 _upload_fd(-1)
 {}
@@ -40,6 +43,9 @@ _errors(),
 _hostname(""),
 _extension(""),
 _file_complete(true),
+_cgi_complete(true),
+_cgi_fd(-1),
+_cgi_response(""),
 _tmp_file(NULL),
 _upload_fd(-1)
 {
@@ -68,6 +74,9 @@ _hostname = "";
 _extension.clear();
 _extension = "";
 _file_complete = true;
+_cgi_complete = true;
+_cgi_fd = -1;
+_cgi_response.clear();
 _tmp_file = NULL;
 _upload_fd = -1;
 }
@@ -99,6 +108,9 @@ Client &	Client::operator=( Client const & rhs )
 		this->_file_complete = rhs.getFileFlag();
 		this->_tmp_file = rhs.getTmpFile();
 		this->_upload_fd = rhs.getUploadFd();
+		this->_cgi_complete = rhs.getCGIFlag();
+		this->_cgi_fd = rhs.getCGIFlag();
+		this->_cgi_response = rhs.getCGIResponse();
 
 	}
 	return *this;
@@ -639,6 +651,26 @@ int	Client::delete_ressource( void )
 	}
 }
 
+void	Client::read_fd_out( Server & serv )
+{
+	if (_cgi_fd == -1)
+		return;
+	if (serv.findFds(_cgi_fd).revents & POLLIN)
+	{
+		char buf[BUFFER_SIZE];
+		memset(&buf, 0, BUFFER_SIZE);
+		read(_cgi_fd, &buf, BUFFER_SIZE);
+		_cgi_response += buf;
+		_cgi_complete = false;
+	}
+	else
+	{
+		close(_cgi_fd);
+		serv.setCleanFds(true);
+		serv.findFds(_cgi_fd).fd = -1;
+		_cgi_complete = true;
+	}
+}
 
 int Client::execution( Server & serv, Port & port)
 {
@@ -651,6 +683,7 @@ int Client::execution( Server & serv, Port & port)
 	int exec_type = setExecution();
 	if (exec_type == R_EXT)
 	{
+		std::cout << "ici";
 		//CHECK IF TMP_FILE IS NEEDED, AND MONITOR IT WITH POLL IF SO
 		if (!TmpFileCompletion(serv))
 		{
@@ -658,6 +691,13 @@ int Client::execution( Server & serv, Port & port)
 			return SUCCESS;
 		}
 		executeExtension(serv, port);
+		if (!_cgi_complete)
+			read_fd_out(serv);
+		else
+		{
+			_res.treatCGI(_cgi_response);
+			_res.response(CGI_FLAG);
+		}
 	}
 	else if (exec_type == R_UPLOAD)
 	{
@@ -709,8 +749,16 @@ int	Client::setExecution( void )
 
 int Client::executeExtension( Server & serv, Port & port)
 {
+	if (!_cgi_complete)
+		return SUCCESS;
 	CGI cgi(*this, port, serv);
 	cgi.execute(*this);
+
+	//SETTING CGI COMPLETE TO FALSE, SINCE WE PASS HERE ONLY ONE TIME, OUT OF CGIs
+	_cgi_complete = false;
+	serv.addToPolling(_cgi_fd);
+	serv.findFds(_cgi_fd).events = POLLIN;
+
 	if (_tmp_file)
 		fclose(_tmp_file);
 	return SUCCESS;
@@ -815,5 +863,9 @@ std::string							Client::getUrl( void ) const { return _url;}
 bool								Client::getFileFlag(void) const {return _file_complete;}
 void								Client::setFileFlag(bool new_bool) {_file_complete = new_bool;}
 FILE*								Client::getTmpFile( void) const {return _tmp_file;}
-int									Client::getUploadFd( void ) const { return _upload_fd;}
+int									Client::getUploadFd( void ) const { return _upload_fd; }
+bool								Client::getCGIFlag(void) const { return _cgi_complete; }
+int									Client::getCGIFd( void ) const { return _cgi_fd; }
+void								Client::setCGIFd( int newfd ) { _cgi_fd = newfd; }
+std::string							Client::getCGIResponse( void ) const { return _cgi_response;}
 }
