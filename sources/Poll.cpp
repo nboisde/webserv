@@ -87,9 +87,7 @@ void	Server::launchServer( void )
 							(findFds((*ct).getFd())).events = POLLOUT;
 					}
 					else if (ret == ERROR)
-					{
-						//ERROR//
-					}
+	 					closeConnection(ct, pt);
 					ct++;
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLOUT)))
