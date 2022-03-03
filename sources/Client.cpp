@@ -109,7 +109,7 @@ Client &	Client::operator=( Client const & rhs )
 		this->_tmp_file = rhs.getTmpFile();
 		this->_upload_fd = rhs.getUploadFd();
 		this->_cgi_complete = rhs.getCGIFlag();
-		this->_cgi_fd = rhs.getCGIFlag();
+		this->_cgi_fd = rhs.getCGIFd();
 		this->_cgi_response = rhs.getCGIResponse();
 
 	}
