@@ -639,6 +639,7 @@ bool	Client::read_fd_out( Server & serv )
 		serv.setCleanFds(true);
 		serv.findFds(fileno(_cgi_tmp_file)).fd = -1;
 		fclose(_cgi_tmp_file);
+		_cgi_tmp_file = NULL;
 		_cgi_complete = true;
 		return true;
 	}
@@ -750,7 +751,10 @@ int Client::executeExtension( Server & serv, Port & port)
 	serv.findFds(fileno(_cgi_tmp_file)).events = POLLIN;
 
 	if (_tmp_file)
+	{
 		fclose(_tmp_file);
+		_tmp_file = NULL;
+	}
 	return SUCCESS;
 }
 
