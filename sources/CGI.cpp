@@ -169,17 +169,30 @@ int		CGI::execute( Client & cli ){
 	int child_stat;
 
 	FILE *tmp = tmpfile();
+	if (!tmp)
+		return ERROR;
 	pid_t pid = fork();
+	if (pid < 0)
+		return ERROR;
 	if (pid == 0)
 	{
 		if (_header["method"] == "POST")
-			dup2(fileno(cli.getTmpFile()), STDIN);
-		dup2(fileno(tmp), STDOUT);
+		{	
+			int ret = dup2(fileno(cli.getTmpFile()), STDIN);
+			if (ret < 0)
+				exit(ERROR);
+		}
+		int ret = dup2(fileno(tmp), STDOUT);
+		if (ret < 0)
+			exit(ERROR);
 		if (execve(_bin_location.c_str(), _arg, _env) < 0)
 			exit(ERROR);
 		exit(SUCCESS);
 	}
 	waitpid(pid, &child_stat, 0);
+	int ret = WEXITSTATUS(child_stat);
+	if (ret == ERROR)
+		return ret;
 	rewind(tmp);
 	cli.setCGIFile(tmp);
 	return SUCCESS;

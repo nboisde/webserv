@@ -59,10 +59,7 @@ void	Server::launchServer( void )
 					continue;
 				}
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLERR)))
-				{
-					std::cout << RED << "Client socket fd : " << findFds((*ct).getFd()).fd << " raised an error." << RESET << std::endl;
  					closeConnection(ct, pt);
-				}
 #ifdef __linux__
 				else if (findFds((*ct).getFd()).fd != 0 && ((findFds((*ct).getFd()).revents & POLLRDHUP)))
 #else

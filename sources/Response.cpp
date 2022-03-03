@@ -237,7 +237,6 @@ void		Response::treatCGI( std::string cgi_output )
 	if (pos1 == -1)
 		pos1 = 0;
 	pos2 = cgi_output.find(BODY_CRLF);
-	//_header += CRLF;
 	_header += cgi_output.substr(pos1, pos2);
 	if ((pos1 = cgi_output.find(BODY_CRLF)) != -1 && !cgi_output.substr(pos1 + 4).empty())
 		_body = cgi_output.substr(pos1 + 4);
