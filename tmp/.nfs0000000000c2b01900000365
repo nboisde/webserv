@@ -1,6 +1,6 @@
 #!/bin/bash
 
-var=$(ps -a | grep webserv | cut -d' ' -f2)
+var=$(ps -a | grep webserv | cut -d' ' -f3)
 
 while true
 do
