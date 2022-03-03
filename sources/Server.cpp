@@ -42,9 +42,21 @@ void	Server::closeConnection(it_client & ct, it_port & pt)
 	int tempo = (*ct).getFd();
 	findFds(tempo).revents = 0;
 	findFds(tempo).fd = -1;
-	((*pt).getClients()).erase(ct);
+
 	if (tempo >= 0)
 		close(tempo);
+
+	if (ct->getCGIFd() != -1)
+	{
+		findFds(ct->getCGIFd()).fd = -1;
+		close(ct->getCGIFd());
+	}
+	if (ct->getUploadFd() != -1)
+	{
+		findFds(ct->getUploadFd()).fd = -1;
+		close(ct->getUploadFd());
+	}
+	((*pt).getClients()).erase(ct);
 	_clean_fds = 1;
 }
 
