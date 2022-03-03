@@ -294,7 +294,7 @@ int Client::receive( void )
 	{
 		perror("\nIn recv");
 		_status = INTERNAL_SERVER_ERROR;
-		return WRITING;
+		return ERROR;
 	}
 	std::string tmp(buffer, ret);
 	int req = _req.concatenateRequest(tmp);
