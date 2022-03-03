@@ -77,6 +77,7 @@ _file_complete = true;
 _cgi_complete = true;
 _cgi_tmp_file = NULL;
 _cgi_response.clear();
+_cgi_response = "";
 _tmp_file = NULL;
 _upload_fd = -1;
 }
@@ -620,7 +621,12 @@ bool	Client::read_fd_out( Server & serv )
 		char buf[BUFFER_SIZE];
 		memset(&buf, 0, BUFFER_SIZE);
 		int ret = read(fileno(_cgi_tmp_file), &buf, BUFFER_SIZE);
-		_cgi_response += buf;
+		if (ret < 0)
+		{
+			_status = INTERNAL_SERVER_ERROR;
+			return false;
+		}
+		_cgi_response += std::string(buf, ret);
 		_cgi_complete = false;
 		if (ret == 0)
 		 	goto closing;
@@ -640,6 +646,7 @@ bool	Client::read_fd_out( Server & serv )
 
 int Client::execution( Server & serv, Port & port)
 {
+	int ret = 0;
 	_file_path = _config[_hostname]["root"]._value + _req.getHead()["url"];
 
 	saveLogs();
@@ -657,12 +664,21 @@ int Client::execution( Server & serv, Port & port)
 			_file_complete = false;
 			return SUCCESS;
 		}
-		if (executeExtension(serv, port))
+		ret = executeExtension(serv, port);
+		if (ret == SUCCESS)
 			return SUCCESS;
+		else if (ret == ERROR)
+			return (executeError());
 		next:
 		if (!_cgi_complete)
 		{
 			int ret = read_fd_out(serv);
+			if (!ret && _status == INTERNAL_SERVER_ERROR)
+			{
+				executeError();
+				_cgi_complete = true;
+				return SUCCESS;
+			}
 			if (!ret)
 				return SUCCESS;
 		}
@@ -722,7 +738,11 @@ int Client::executeExtension( Server & serv, Port & port)
 	if (!_cgi_complete)
 		return 0;
 	CGI cgi(*this, port, serv);
-	cgi.execute(*this);
+	if (cgi.execute(*this) < 0)
+	{
+		_status = INTERNAL_SERVER_ERROR;
+		return ERROR;
+	}
 	
 	_file_complete = true;
 	_cgi_complete = false;
