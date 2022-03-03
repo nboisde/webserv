@@ -115,7 +115,7 @@ std::string 	Response::genBody( int error )
 	body << "<title>" << error << " " << _status_code[error] << "</title>\n";
 	body << "</head>\n<body>\n";
 	body << "<h1>" << error << " " << _status_code[error] << "</h1>\n";
-	body << "</body>\n</html>";
+	body << "</body>\n</html>\r\n";
 
 	return body.str();
 }
