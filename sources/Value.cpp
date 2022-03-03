@@ -4,7 +4,7 @@ namespace ws
 {
 
 Value::Value( void ) : _default(false), _max_body_size(-1) {}
-Value::Value( std::string value) : _value(value), _max_body_size(-1) {}
+Value::Value( std::string value) : _default(false), _value(value), _max_body_size(-1) {}
 Value::Value( Value const & src ) { *this = src; }
 Value::~Value( void ) {}
 
