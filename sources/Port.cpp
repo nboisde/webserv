@@ -29,13 +29,6 @@ Port &				Port::operator=( Port const & rhs )
 	return *this;
 }
 
-std::ostream &			operator<<( std::ostream & o, Port const & i )
-{
-	(void)i;
-	//o << "Port_nb = " << ((i.getConfig())["listen"])._value;
-	return o;
-}
-
 
 /*
 ** --------------------------------- METHODS ----------------------------------
@@ -130,7 +123,6 @@ void	Port::removeClient( int fd )
 		{
 			if (fd >= 0)
 				close(fd);
-			//it = _clients.erase(it);
 			return;
 		}
 	}
@@ -144,8 +136,8 @@ int								Port::getFd( void ) const { return _fd; }
 struct sockaddr_in				Port::getPortAddr( void ) const { return _port_address; }
 void							Port::setFd( int fd ) {	_fd = fd; }
 std::vector<Client>	&			Port::getClients( void ) { return _clients; }
-map_configs &	Port::getConfig( void ) { return _config; }
-map_configs	Port::getConfig(void) const {return _config;}
+map_configs &					Port::getConfig( void ) { return _config; }
+map_configs						Port::getConfig(void) const {return _config;}
 
 /* ************************************************************************** */
 }

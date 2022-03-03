@@ -133,7 +133,7 @@ class SignalEnd : public std::exception
     public:
         SignalEnd(){};
         SignalEnd( int nb) : _sig_number(nb){};
-        virtual const char * what() const throw(){return ("Yeepeekiyay pov con");};
+        virtual const char * what() const throw(){return ("Gracefully shutting down <3");};
         int getSignal( void ){return _sig_number;};
     private:
         int _sig_number;

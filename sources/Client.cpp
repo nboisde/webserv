@@ -24,7 +24,7 @@ _hostname(""),
 _extension(""),
 _file_complete(true),
 _cgi_complete(true),
-_cgi_fd(-1),
+_cgi_tmp_file(NULL),
 _cgi_response(""),
 _tmp_file(NULL),
 _upload_fd(-1)
@@ -44,7 +44,7 @@ _hostname(""),
 _extension(""),
 _file_complete(true),
 _cgi_complete(true),
-_cgi_fd(-1),
+_cgi_tmp_file(NULL),
 _cgi_response(""),
 _tmp_file(NULL),
 _upload_fd(-1)
@@ -75,7 +75,7 @@ _extension.clear();
 _extension = "";
 _file_complete = true;
 _cgi_complete = true;
-_cgi_fd = -1;
+_cgi_tmp_file = NULL;
 _cgi_response.clear();
 _tmp_file = NULL;
 _upload_fd = -1;
@@ -109,45 +109,15 @@ Client &	Client::operator=( Client const & rhs )
 		this->_tmp_file = rhs.getTmpFile();
 		this->_upload_fd = rhs.getUploadFd();
 		this->_cgi_complete = rhs.getCGIFlag();
-		this->_cgi_fd = rhs.getCGIFd();
+		this->_cgi_tmp_file = rhs.getCGIFile();
 		this->_cgi_response = rhs.getCGIResponse();
 
 	}
 	return *this;
 }
 
-// I'LL NEED THAT SHIT TOMORROW TO DEBUG A CASE !!!! if upload path don't exist webserv hang forever...
-
-// std::string Client::uploadPath( void )
-// {
-// 	std::map<std::string, std::string> ml = _config["location"]._locations;
-// 	std::string s = "";
-// 	if (ml.find("upload") == ml.end())
-// 		return s;
-// 	struct stat info;
-// 	if (stat( ml["upload"].c_str(), &info) != 0)
-// 	{
-// 		std::cout << RED << "upload directory dosn't exists" << RESET << std::endl;
-// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
-// 	}
-// 	else if (info.st_mode & S_IFDIR)
-// 	{
-// 		s += ml["upload"];
-// 		s += '/';
-// 	}
-// 	else
-// 	{
-// 		std::cout << RED << "upload location in configuration is not a directory" << RESET << std::endl;
-// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
-// 	}
-// 	std::cout << s << std::endl;
-// 	return s;
-// }
-
-// CHECK SI LE FILE N'EXISTE PAS ?????
 bool Client::uploadFiles(Server & serv)
 {
-	//SET UP DE LA ROUTE DU FICHIER
 	std::string upload_path = "";
 	if (_route.route != "" && _route.upload != "")
 		upload_path =  _config[_hostname]["root"]._value + _route.route + _route.upload;
@@ -162,7 +132,7 @@ bool Client::uploadFiles(Server & serv)
 		{
 			std::string cls = "--" + _req.getBoundary() + "--";
 			size_t end = body.find(cls);
-			if (end == 0)// || lilend == 0)
+			if (end == 0)
 				return true;
 			size_t i_content = body.find("\r\n\r\n");
 			std::string header;
@@ -205,7 +175,7 @@ bool Client::uploadFiles(Server & serv)
 			serv.findFds(_upload_fd).events = POLLOUT;
 			return false;
 		}
-		else if (serv.findFds(_upload_fd).revents & POLLOUT) // && fichier pas a la fin..)
+		else if (serv.findFds(_upload_fd).revents & POLLOUT)
 		{
 			std::string delim = "--" + _req.getBoundary();
 			size_t end_file = body.find(delim);
@@ -225,8 +195,6 @@ bool Client::uploadFiles(Server & serv)
 			}
 			else
 			{
-				//std::string tmp = _req.getBody().substr(end_file, std::string::npos);
-				//close(_upload_fd);
 				if(_upload_fd != -1)
 				{
 					serv.setCleanFds(true);
@@ -247,8 +215,6 @@ bool Client::uploadFiles(Server & serv)
 				else
 					return false;
 			}
-			//else
-			//return true;
 		}
 		else
 			return true;
@@ -256,7 +222,6 @@ bool Client::uploadFiles(Server & serv)
 	return true;
 }
 
-//https://stackoverflow.com/questions/31783947/what-http-status-code-should-be-return-when-we-get-error-while-uploading-file
 int Client::uploadAuthorized( void )
 {
 	std::string upload_path = "";
@@ -334,7 +299,6 @@ int Client::receive( void )
 	int req = _req.concatenateRequest(tmp);
 	if (req == -1 && _req.findContinue() == 0)
 	{
-		std::cout << RED << "400 bad request (Header reception 1)" << RESET << std::endl;
 		_status = _req.getStatus();
 		return WRITING;
 	}
@@ -347,7 +311,6 @@ int Client::receive( void )
 		_req.setContinue(0);
 		if (head_err == ERROR)
 		{
-			std::cout << RED << "400 bad request (Header reception 2)" << RESET << std::endl;
 			_status = _req.getStatus();
 			return WRITING;
 		}
@@ -484,7 +447,6 @@ int Client::checkMethod( void )
 
 int	Client::checkAutoindex( void )
 {
-	std::cout << _file_path << std::endl;
 	if (!isURLDirectory())
 		return 0;
 	else if (_route.route != "" && _route.index != "")
@@ -501,7 +463,7 @@ int	Client::checkAutoindex( void )
 
 int	Client::checkUpload( void )
 {
-	if (_req.getMultipart() == 1 && uploadAuthorized() == 1) // ADD METHOD = POST
+	if (_req.getMultipart() == 1 && uploadAuthorized() == 1)
 	{
 		if (_route.route != "" && _route.upload != "")
 			return R_UPLOAD;
@@ -651,13 +613,13 @@ int	Client::delete_ressource( void )
 
 bool	Client::read_fd_out( Server & serv )
 {
-	if (_cgi_fd == -1)
+	if (_cgi_tmp_file == NULL)
 		return false;
-	if (serv.findFds(_cgi_fd).revents & POLLIN)
+	if (serv.findFds(fileno(_cgi_tmp_file)).revents & POLLIN)
 	{
 		char buf[BUFFER_SIZE];
 		memset(&buf, 0, BUFFER_SIZE);
-		int ret = read(_cgi_fd, &buf, BUFFER_SIZE);
+		int ret = read(fileno(_cgi_tmp_file), &buf, BUFFER_SIZE);
 		_cgi_response += buf;
 		_cgi_complete = false;
 		if (ret == 0)
@@ -668,9 +630,9 @@ bool	Client::read_fd_out( Server & serv )
 	else
 	{
 		closing:
-		close(_cgi_fd);
 		serv.setCleanFds(true);
-		serv.findFds(_cgi_fd).fd = -1;
+		serv.findFds(fileno(_cgi_tmp_file)).fd = -1;
+		fclose(_cgi_tmp_file);
 		_cgi_complete = true;
 		return true;
 	}
@@ -758,15 +720,14 @@ int	Client::setExecution( void )
 int Client::executeExtension( Server & serv, Port & port)
 {
 	if (!_cgi_complete)
-		return 0; //RETURN 0 IS NORMAL, I NEED IT THIS WAY
+		return 0;
 	CGI cgi(*this, port, serv);
 	cgi.execute(*this);
 	
 	_file_complete = true;
-	//SETTING CGI COMPLETE TO FALSE, SINCE WE PASS HERE ONLY ONE TIME, OUT OF CGIs
 	_cgi_complete = false;
-	serv.addToPolling(_cgi_fd);
-	serv.findFds(_cgi_fd).events = POLLIN;
+	serv.addToPolling(fileno(_cgi_tmp_file));
+	serv.findFds(fileno(_cgi_tmp_file)).events = POLLIN;
 
 	if (_tmp_file)
 		fclose(_tmp_file);
@@ -874,7 +835,7 @@ void								Client::setFileFlag(bool new_bool) {_file_complete = new_bool;}
 FILE*								Client::getTmpFile( void) const {return _tmp_file;}
 int									Client::getUploadFd( void ) const { return _upload_fd; }
 bool								Client::getCGIFlag(void) const { return _cgi_complete; }
-int									Client::getCGIFd( void ) const { return _cgi_fd; }
-void								Client::setCGIFd( int newfd ) { _cgi_fd = newfd; }
+FILE *								Client::getCGIFile( void ) const { return _cgi_tmp_file; }
+void								Client::setCGIFile( FILE * newfd ) { _cgi_tmp_file = newfd; }
 std::string							Client::getCGIResponse( void ) const { return _cgi_response;}
 }

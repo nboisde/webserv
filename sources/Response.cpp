@@ -155,7 +155,7 @@ std::string	const &	Response::genHeader( void ){
 
 	//ADD MORE FIELDS IN HEADER (CONTENT LENGHT ETC ETC)
 	addContentLength();
-	if (_status == BAD_REQUEST) // Maybe we will modify this and add Connection behavior all the time.
+	if (_status == BAD_REQUEST)
 	{
 		_header += CRLF;
 		_header += genConnection();
@@ -186,7 +186,6 @@ const char *	Response::response( int status )
 
 	const char * str = _response.c_str();
 
-	//std::cout << "RESPONSE " << str << std::endl;
 	resetResponse();
 	return str;
 }

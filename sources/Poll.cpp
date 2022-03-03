@@ -81,7 +81,6 @@ void	Server::launchServer( void )
 						//WILL ENTER AS MANY TIME NEEDED TO COMPLETE FILE WRITING
 						ct->execution(*this, *pt);
 
-						//IF FILE COMPLETION, SETTING FLAG 
 						bool	file_completion = ct->getFileFlag();
 						bool	cgi_flag = ct->getCGIFlag();
 						if (file_completion && cgi_flag)

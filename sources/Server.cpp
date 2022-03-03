@@ -46,10 +46,10 @@ void	Server::closeConnection(it_client & ct, it_port & pt)
 	if (tempo >= 0)
 		close(tempo);
 
-	if (ct->getCGIFd() != -1)
+	if (ct->getCGIFile() != NULL)
 	{
-		findFds(ct->getCGIFd()).fd = -1;
-		close(ct->getCGIFd());
+		findFds(fileno(ct->getCGIFile())).fd = -1;
+		fclose(ct->getCGIFile());
 	}
 	if (ct->getUploadFd() != -1)
 	{

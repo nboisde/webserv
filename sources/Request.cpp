@@ -104,7 +104,6 @@ int Request::analyseURL(void)
 		i++;
 	while (fl[i] == ' ')
 		i++;
-	//std::string url_try = fl.substr(i, fl.length() - i);
 	if (fl[i] != '/')
 	{
 		return 0;
@@ -140,7 +139,6 @@ void Request::findMethod(void)
 	else
 	{
 		_head["method"] = "UNKNOWN";
-		//_head["url"] = "/404.html"; // THIS LINE IS BULLSHIT AND MUST BE DYNAMIC..
 		_method_type = UNKNOWN;
 	}
 }
@@ -151,12 +149,8 @@ void Request::findMethod(void)
 
 int Request::identifyBodyLengthInHeader(void)
 {
-	std::string l = "content-length"; // Change with all compatible casses. ?
+	std::string l = "content-length";
 	std::string cl;
-	// std::string l2 = "Content-Length";
-	// int r1 = _raw_content.find(l);
-	// int r2 = _raw_content.find(l2);
-	// int ret = ((r1 == -1 && r2 == -1) || r1 >= 0) ? r1 : r2;
 	int ret = strToLower(_raw_content).find(l);
 	if (ret == -1)
 		return 0;
@@ -284,8 +278,7 @@ int Request::findBodyEnd( void )
 	else if (_continue == 1)
 	{
 		size_t i = _raw_content.find("0\r\n\r\n");
-		//size_t j = _raw_content.find("\r\n\r\n");
-		if (i == static_cast<size_t>(-1))// || j == static_cast<size_t>(-1)) || static_cast<size_t>(_content_length) > _raw_content.substr(j + 4).length())
+		if (i == static_cast<size_t>(-1))
 			return 0;
 	}
 	return bodyReceived();
@@ -303,7 +296,6 @@ int Request::findBodyEnd( void )
 ** 0 REQUEST_NOT_FULL -> continue to recv() to catch informations.
 */
 
-// BUG ON THE CONTROL C !!!!!
 int Request::concatenateRequest(std::string tmp)
 {
 	int nl = 0;
@@ -328,7 +320,6 @@ int Request::concatenateRequest(std::string tmp)
 	
 	_raw_content += buf;
 
-	// ICI: check la premiere ligne ! Check si le protocol est bon.
 	if (_line == 0)
 	{
 		int r = _raw_content.find("\r\n");
@@ -353,7 +344,6 @@ int Request::concatenateRequest(std::string tmp)
 	if (requestReceptionState() == RECEIVING_HEADER)
 	{
 		_header_len_received += buf.length();
-		//EDIT THE VECTOR AND LAUNCH ERROR FUNCTION !
 		std::string tmp2 = _raw_content.substr(_cursor, _raw_content.length() - _cursor);
 		int i = tmp2.find("\r\n");
 		int i2 = tmp2.find("\n");
@@ -373,10 +363,8 @@ int Request::concatenateRequest(std::string tmp)
 				break ;
 			}
 		}
-/* 		for (std::vector<std::string>::iterator it = _vheader.begin(); it != _vheader.end(); it++)
-			std::cout << (*it) << std::endl; */
 		if (errorHandling(_vheader, 2) == ERROR)
-			return ERROR; // return errorReturn();
+			return ERROR;
 		if (checkHeaderEnd() == 1)
 		{
 			_cursor = 0;
@@ -399,7 +387,6 @@ int Request::concatenateRequest(std::string tmp)
 		size_t r = _raw_content.find("\r\n\r\n");
 		size_t r2 = _raw_content.find("\n\n");
 		size_t i = (r == static_cast<size_t>(-1)) ? r2 : r;
-		// Attention ici a gerer si la content length ne match jamais la reception...
 		if (_multipart == 1 || _continue == 1)
 			return findBodyEnd();
 		else if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
@@ -607,7 +594,6 @@ int Request::fillHeaderAndBody(void){
 	int err = parseHeader();
 	if (err == ERROR)
 		return errorReturn(0);
-	// NE PAS ENREGISTRER LE BODY SUR UN UPLOAD..
 	if (_body_reception_encoding == BODY_RECEPTION_NOT_SPECIFIED)
 		return SUCCESS;
 	else if (_body_reception_encoding == CONTENT_LENGTH)
