@@ -503,6 +503,7 @@ int	Client::checkAutoindex( void )
 	}
 	else if (_route.route != "" && _route.autoindex == "on")
 		return R_AUTO;
+	_status = 404;
 	return R_ERR;
 }
 
