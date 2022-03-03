@@ -184,12 +184,22 @@ bool Client::uploadFiles(Server & serv)
 			{
 				if (end_file > BUFFER_SIZE)
 				{
-					write(_upload_fd, body.c_str(), BUFFER_SIZE);
+					int ret = write(_upload_fd, body.c_str(), BUFFER_SIZE);
+					if (ret <= 0)
+					{
+						_status = INTERNAL_SERVER_ERROR;
+						return false;
+					}
 					_req.setBody(body.substr(BUFFER_SIZE));
 				}
 				else
 				{
-					write(_upload_fd, body.c_str(), end_file);
+					int ret = write(_upload_fd, body.c_str(), end_file);
+					if (ret <= 0)
+					{
+						_status = INTERNAL_SERVER_ERROR;
+						return false;
+					}
 					_req.setBody(body.substr(end_file));
 				}
 				return false;
@@ -294,7 +304,7 @@ int Client::receive( void )
 	{
 		perror("\nIn recv");
 		_status = INTERNAL_SERVER_ERROR;
-		return WRITING;
+		return ERROR;
 	}
 	std::string tmp(buffer, ret);
 	int req = _req.concatenateRequest(tmp);
@@ -573,6 +583,11 @@ bool Client::TmpFileCompletion(Server & serv)
 				memset(&buf, 0, BUFFER_SIZE);
 				size_t added = body.copy(buf, BUFFER_SIZE);
 				size_t ret = fwrite(buf, sizeof(char), added, _tmp_file);
+				if (ferror(_tmp_file))
+				{
+					_status = INTERNAL_SERVER_ERROR;
+					return false;
+				}
 				_req.setBody(body.substr(ret));
 				return false;
 			}
@@ -662,6 +677,12 @@ int Client::execution( Server & serv, Port & port)
 		//CHECK IF TMP_FILE IS NEEDED, AND MONITOR IT WITH POLL IF SO
 		if (!TmpFileCompletion(serv))
 		{
+			if (_status == INTERNAL_SERVER_ERROR)
+			{
+				executeError();
+				_file_complete = true;
+				return SUCCESS;
+			}
 			_file_complete = false;
 			return SUCCESS;
 		}
@@ -690,6 +711,12 @@ int Client::execution( Server & serv, Port & port)
 	{
 		if (!uploadFiles(serv))
 		{
+			if (_status == INTERNAL_SERVER_ERROR)
+			{
+				_file_complete = true;
+				executeError();
+				return SUCCESS;
+			}
 			_file_complete = false;
 			return SUCCESS;
 		}
