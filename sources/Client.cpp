@@ -270,7 +270,7 @@ int Client::uploadAuthorized( void )
 
 int	Client::setHostname( void )
 {
-	std::string tmp2 = _req.getHead()["host"];
+ 	std::string tmp2 = _req.getHead()["host"];
 	size_t pos = tmp2.find(":");
 	if (pos >= static_cast<size_t>(0))
 		_hostname = tmp2.substr(0, pos);
@@ -287,7 +287,6 @@ int	Client::setHostname( void )
 			_status = BAD_REQUEST;
 			return WRITING;
 		}
-		std::cout << BLUE << _hostname << RESET << std::endl;
 	}
 	else if (it != ite)
 		_hostname = it->second["server_name"]._value;
@@ -297,8 +296,10 @@ int	Client::setHostname( void )
 		map_configs::iterator ite = _config.end();
 		_hostname = it->second["server_name"]._value;
 		for (; it != ite; it++)
+		{
 			if (it->second["listen"]._default == true)
 				_hostname = it->second["server_name"]._value;
+		}
 	}
 	return (0);
 }
