@@ -244,35 +244,6 @@ bool Client::uploadFiles(Server & serv)
 	return true;
 }
 
-// I'LL NEED THAT SHIT TOMORROW TO DEBUG A CASE !!!! if upload path don't exist webserv hang forever...
-
-// std::string Client::uploadPath( void )
-// {
-// 	std::map<std::string, std::string> ml = _config["location"]._locations;
-// 	std::string s = "";
-// 	if (ml.find("upload") == ml.end())
-// 		return s;
-// 	struct stat info;
-// 	if (stat( ml["upload"].c_str(), &info) != 0)
-// 	{
-// 		std::cout << RED << "upload directory dosn't exists" << RESET << std::endl;
-// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
-// 	}
-// 	else if (info.st_mode & S_IFDIR)
-// 	{
-// 		s += ml["upload"];
-// 		s += '/';
-// 	}
-// 	else
-// 	{
-// 		std::cout << RED << "upload location in configuration is not a directory" << RESET << std::endl;
-// 		std::cout << GREEN << "File will be registered by default at the root of the server." << RESET << std::endl;
-// 	}
-// 	std::cout << s << std::endl;
-// 	return s;
-// }
-
-
 //https://stackoverflow.com/questions/31783947/what-http-status-code-should-be-return-when-we-get-error-while-uploading-file
 int Client::uploadAuthorized( void )
 {
@@ -316,11 +287,19 @@ int	Client::setHostname( void )
 			_status = BAD_REQUEST;
 			return WRITING;
 		}
+		std::cout << BLUE << _hostname << RESET << std::endl;
 	}
 	else if (it != ite)
 		_hostname = it->second["server_name"]._value;
 	if (_hostname == LOCALHOST)
-		_hostname = _config.begin()->second["server_name"]._value;
+	{
+		map_configs::iterator it = _config.begin();
+		map_configs::iterator ite = _config.end();
+		_hostname = it->second["server_name"]._value;
+		for (; it != ite; it++)
+			if (it->second["listen"]._default == true)
+				_hostname = it->second["server_name"]._value;
+	}
 	return (0);
 }
 

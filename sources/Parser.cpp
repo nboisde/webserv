@@ -125,11 +125,12 @@ int	Parser::checkServer(void)
 			it->getConfig()[new_config["server_name"]._value] = new_config;
 			break;
 		}
-		std::cout << first_config_port << std::endl;
-		std::cout << new_config["listen"]._value << std::endl;
 	}
 	if (it == ite)
+	{
+		new_config["listen"]._default = true;
 		_server.addPort(Port(new_config["server_name"]._value, new_config));
+	}
 	return (SUCCESS);
 }
 
