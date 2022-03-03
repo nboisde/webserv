@@ -125,8 +125,6 @@ int	Parser::checkServer(void)
 			it->getConfig()[new_config["server_name"]._value] = new_config;
 			break;
 		}
-		std::cout << first_config_port << std::endl;
-		std::cout << new_config["listen"]._value << std::endl;
 	}
 	if (it == ite)
 		_server.addPort(Port(new_config["server_name"]._value, new_config));
@@ -178,15 +176,12 @@ int	Parser::setValues(std::string key, keys_type & new_config)
 	if (grammar == -1)
 		return (0);
 	std::string value = _content.substr(_pos, grammar - _pos);
-	std::cout << "Key " << key << "\t";
-	std::cout << "Value " << value << std::endl;
 	if (!(checkValue(key, value, new_config)))
 		return (0);
 	if (key != "location")
 		_pos = grammar + 1;
 	return (SUCCESS);
 }
-
 
 int	Parser::checkValue(std::string key, std::string value, keys_type & new_config)
 {
@@ -206,7 +201,7 @@ int	Parser::checkValue(std::string key, std::string value, keys_type & new_confi
 	return (SUCCESS);
 }
 
-int checkLine(std::string value, int nb_of_elem)
+int Parser::checkLine(std::string value, int nb_of_elem)
 {
 	int i = 0;
 	int nb = 0;
@@ -221,7 +216,6 @@ int checkLine(std::string value, int nb_of_elem)
 		while (isspace(value[i]))
 			i++;
 	}
-	std::cout << "Elems in value " << nb << std::endl;
 	if (nb_of_elem != nb)
 		return 0;
 	else
@@ -230,8 +224,6 @@ int checkLine(std::string value, int nb_of_elem)
 
 int	Parser::checkPort(std::string raw_value, Value & new_value)
 {
-	std::cout << "Raw_value [" << raw_value << "]" << std::endl;
-	std::cout << "Amount of elem: " << checkLine(raw_value, 1) << std::endl;
 	if (!checkLine(raw_value, 1))
 		return 0;
 	int port = atoi(raw_value.c_str()); 
@@ -249,7 +241,6 @@ int	Parser::checkMethod(std::string raw_value, Value & new_value)
 
 	if (!checkLine(raw_value, 1))
 		return 0;
-
 	new_value._methods.clear();
 	new_value._value = raw_value;
 	while (raw_value.size())
@@ -335,10 +326,24 @@ int	Parser::checkErrorPage(std::string raw_value, Value & new_value)
 	new_value._errors.insert(std::pair<int, std::string>(nbr_error, str_error));
 	return (SUCCESS);  
 }
-int	Parser::checkRoot(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
-int	Parser::checkIndex(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
-int	Parser::checkUpload(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
-int	Parser::checkReturn(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
+int	Parser::checkRoot(std::string raw_value, Value & new_value) 
+{ 
+	if (!checkLine(raw_value, 1))
+		return 0;
+	new_value._value = raw_value; return (1); 
+}
+int	Parser::checkIndex(std::string raw_value, Value & new_value)
+{
+	if (!checkLine(raw_value, 1))
+		return 0;
+	new_value._value = raw_value; return (1);
+}
+int	Parser::checkUpload(std::string raw_value, Value & new_value)
+{
+	if (!checkLine(raw_value, 1))
+		return 0;
+	new_value._value = raw_value; return (1);  
+}
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
 	size_t length = 0;
@@ -371,7 +376,6 @@ int	Parser::checkLocation(std::string raw_value, Value & new_value)
 	_pos++;
 	return (SUCCESS);
 }
-
 
 int	Parser::checkRouteKeys( Route & route )
 {
@@ -428,6 +432,8 @@ int	Parser::setRouteValues(std::string * value, std::vector<std::string> * metho
 	if ((grammar = _content.find_first_of(";", _pos)) == -1)
 		return (0);
 	new_value = _content.substr(_pos, grammar - _pos);
+	if (!checkLine(new_value, 1))
+		return (0);
 	if (value)
 		*value = new_value;
 	else
@@ -508,7 +514,6 @@ int Parser::checkCGI(std::string raw_value, Value & cgi)
 void	Parser::initParser(void)
 {
 	_key_checker["listen"] = &Parser::checkPort;
-	_key_checker["host"] = &Parser::checkHost;
 	_key_checker["server_name"] = &Parser::checkServerName;
 	_key_checker["client_max_body_size"] = &Parser::checkClientMaxSize;
 	_key_checker["error_page"] = &Parser::checkErrorPage;

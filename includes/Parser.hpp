@@ -33,6 +33,7 @@ class Parser
 		int					initWebServer(void);
 		int					checkHttp(void);
 		int					checkServer(void);
+		int 				checkLine(std::string value, int nb_of_elem);
 		int					checkKeys(keys_type & new_config);
 		int					setValues(std::string key, keys_type & new_config);
 		int					checkValue(std::string key, std::string value, keys_type & new_config);
@@ -45,7 +46,6 @@ class Parser
 		int					checkMethod(std::string, Value &);
 		int					checkAutoindex(std::string, Value &);	
 		int					checkClientMaxSize(std::string, Value &);
-		int					checkHost(std::string, Value &);
 		int					checkServerName(std::string, Value &);
 		int					checkErrorPage(std::string, Value &);
 		int					checkRoot(std::string, Value &);
