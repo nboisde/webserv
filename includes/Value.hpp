@@ -33,6 +33,7 @@ class Value
 
 		Value &		operator=( Value const & rhs );
 
+		bool								_default;
 		std::string							_value;
 		unsigned long						_max_body_size;
 		std::map<int, std::string>			_errors;
