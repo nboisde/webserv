@@ -174,25 +174,23 @@ int		CGI::generate_arg( Client const & cli ){
 }
 
 int		CGI::execute( Client & cli ){
-	
-	int fd[2];
-	pipe(fd);
+
 	int child_stat;
 
+	FILE *tmp = tmpfile();
 	pid_t pid = fork();
 	if (pid == 0)
 	{
 		if (_header["method"] == "POST")
 			dup2(fileno(cli.getTmpFile()), STDIN);
-		dup2(fd[1], STDOUT);
-		close(fd[0]);
-		close(fd[1]);
-		execve(_bin_location.c_str(), _arg, _env);
+		dup2(fileno(tmp), STDOUT);
+		if (execve(_bin_location.c_str(), _arg, _env) < 0)
+			exit(ERROR);
 		exit(SUCCESS);
 	}
 	waitpid(pid, &child_stat, 0);
-	close(fd[1]);
-	cli.setCGIFd(fd[0]);
+	rewind(tmp);
+	cli.setCGIFd(fileno(tmp));
 	return SUCCESS;
 }
 
