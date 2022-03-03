@@ -185,7 +185,7 @@ bool Client::uploadFiles(Server & serv)
 				if (end_file > BUFFER_SIZE)
 				{
 					int ret = write(_upload_fd, body.c_str(), BUFFER_SIZE);
-					if (ret < 0)
+					if (ret <= 0)
 					{
 						_status = INTERNAL_SERVER_ERROR;
 						return false;
@@ -195,7 +195,7 @@ bool Client::uploadFiles(Server & serv)
 				else
 				{
 					int ret = write(_upload_fd, body.c_str(), end_file);
-					if (ret < 0)
+					if (ret <= 0)
 					{
 						_status = INTERNAL_SERVER_ERROR;
 						return false;
