@@ -186,7 +186,6 @@ int	Parser::setValues(std::string key, keys_type & new_config)
 	return (SUCCESS);
 }
 
-
 int	Parser::checkValue(std::string key, std::string value, keys_type & new_config)
 {
 	std::map<std::string, Value>::iterator			ite = new_config.end();
@@ -196,7 +195,7 @@ int	Parser::checkValue(std::string key, std::string value, keys_type & new_confi
 
 	if (it == ite || cite == cit)
 		return (0);
-	if (!((this->*_key_checker[key])(value, _default_keys[key])))
+	if (value.empty() || !((this->*_key_checker[key])(value, _default_keys[key])))
 	{
 		std::cout << key << " : " << value << " is not valid" << std::endl;
 		return (0);
@@ -205,9 +204,32 @@ int	Parser::checkValue(std::string key, std::string value, keys_type & new_confi
 	return (SUCCESS);
 }
 
+int Parser::checkLine(std::string value, int nb_of_elem)
+{
+	int i = 0;
+	int nb = 0;
+
+	while (value[i])
+	{
+		int start = i;
+		while (!isspace(value[i]) && value[i])
+			i++;
+		if (start != i)
+			nb++;
+		while (isspace(value[i]))
+			i++;
+	}
+	if (nb_of_elem != nb)
+		return 0;
+	else
+		return 1;
+}
+
 int	Parser::checkPort(std::string raw_value, Value & new_value)
 {
-	int port = atoi(raw_value.c_str());
+	if (!checkLine(raw_value, 1))
+		return 0;
+	int port = atoi(raw_value.c_str()); 
 
 	if (port < 0 || port > 65535)
 		return (0);
@@ -220,6 +242,8 @@ int	Parser::checkMethod(std::string raw_value, Value & new_value)
 	std::string	method;
 	int			position;
 
+	if (!checkLine(raw_value, 1))
+		return 0;
 	new_value._methods.clear();
 	new_value._value = raw_value;
 	while (raw_value.size())
@@ -251,6 +275,8 @@ int	Parser::checkAutoindex(std::string raw_value, Value & new_value)
 
 int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value)
 {
+	if (!checkLine(raw_value, 1))
+		return 0;
 	int	i = 0;
 	int	size = raw_value.size();
 	int	body_size = atoi(raw_value.c_str());
@@ -274,10 +300,16 @@ int	Parser::checkClientMaxSize(std::string raw_value, Value & new_value)
 
 	return (SUCCESS);
 }
-int	Parser::checkHost(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
-int	Parser::checkServerName(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
+int	Parser::checkServerName(std::string raw_value, Value & new_value) 
+{ 
+	if (!checkLine(raw_value, 1))
+		return 0;
+	new_value._value = raw_value; return (1); 
+}
 int	Parser::checkErrorPage(std::string raw_value, Value & new_value) 
 {
+	if (!checkLine(raw_value, 2))
+		return 0;
 	int			size = raw_value.size();
 	std::string	str_error;
 	int			nbr_error;
@@ -297,10 +329,24 @@ int	Parser::checkErrorPage(std::string raw_value, Value & new_value)
 	new_value._errors.insert(std::pair<int, std::string>(nbr_error, str_error));
 	return (SUCCESS);  
 }
-int	Parser::checkRoot(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
-int	Parser::checkIndex(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
-int	Parser::checkUpload(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
-int	Parser::checkReturn(std::string raw_value, Value & new_value) { new_value._value = raw_value; return (1);  }
+int	Parser::checkRoot(std::string raw_value, Value & new_value) 
+{ 
+	if (!checkLine(raw_value, 1))
+		return 0;
+	new_value._value = raw_value; return (1); 
+}
+int	Parser::checkIndex(std::string raw_value, Value & new_value)
+{
+	if (!checkLine(raw_value, 1))
+		return 0;
+	new_value._value = raw_value; return (1);
+}
+int	Parser::checkUpload(std::string raw_value, Value & new_value)
+{
+	if (!checkLine(raw_value, 1))
+		return 0;
+	new_value._value = raw_value; return (1);  
+}
 int	Parser::checkLocation(std::string raw_value, Value & new_value) 
 {
 	size_t length = 0;
@@ -333,7 +379,6 @@ int	Parser::checkLocation(std::string raw_value, Value & new_value)
 	_pos++;
 	return (SUCCESS);
 }
-
 
 int	Parser::checkRouteKeys( Route & route )
 {
@@ -390,6 +435,8 @@ int	Parser::setRouteValues(std::string * value, std::vector<std::string> * metho
 	if ((grammar = _content.find_first_of(";", _pos)) == -1)
 		return (0);
 	new_value = _content.substr(_pos, grammar - _pos);
+	if (!checkLine(new_value, 1))
+		return (0);
 	if (value)
 		*value = new_value;
 	else
@@ -470,7 +517,6 @@ int Parser::checkCGI(std::string raw_value, Value & cgi)
 void	Parser::initParser(void)
 {
 	_key_checker["listen"] = &Parser::checkPort;
-	_key_checker["host"] = &Parser::checkHost;
 	_key_checker["server_name"] = &Parser::checkServerName;
 	_key_checker["client_max_body_size"] = &Parser::checkClientMaxSize;
 	_key_checker["error_page"] = &Parser::checkErrorPage;
@@ -482,7 +528,6 @@ void	Parser::initParser(void)
 	_key_checker["upload"] = &Parser::checkUpload;
 	_key_checker["cgi"] = &Parser::checkCGI;
 	_default_keys["listen"] = Value("8080");
-	_default_keys["host"] = Value(LOCALHOST);
 	_default_keys["upload"] = Value("");
 	_default_keys["server_name"] = Value(LOCALHOST);
 	_default_keys["client_max_body_size"] = Value("100000000");
