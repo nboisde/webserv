@@ -69,7 +69,7 @@ class Client
 		//GUIGS PATCH
 		bool			_file_complete;
 		bool			_cgi_complete;
-		int				_cgi_fd;
+		FILE *			_cgi_tmp_file;
 		std::string		_cgi_response;
 		FILE *			_tmp_file;
 		int				_upload_fd;
@@ -116,8 +116,8 @@ class Client
 		int				getUploadFd(void ) const;
 		void			resetValues( void );
 		bool			getCGIFlag(void) const;
-		int				getCGIFd( void ) const;
-		void			setCGIFd( int newfd );
+		FILE *			getCGIFile( void ) const;
+		void			setCGIFile( FILE * newfd );
 		std::string		getCGIResponse( void ) const;
 
 };

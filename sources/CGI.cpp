@@ -127,13 +127,6 @@ CGI &				CGI::operator=( CGI const & rhs )
 	return *this;
 }
 
-std::ostream &			operator<<( std::ostream & o, CGI const & i )
-{
-	(void) i;
-	//o << "Value = " << i.getValue();
-	return o;
-}
-
 
 /*
 ** --------------------------------- METHODS ----------------------------------
@@ -157,8 +150,6 @@ int		CGI::generate_env( void )
 		}
 		_env[_conversion.size()] = 0;
 	}
-	else
-		std::cout << "Other Method" << std::endl;
 	return SUCCESS;
 }
 
@@ -190,7 +181,7 @@ int		CGI::execute( Client & cli ){
 	}
 	waitpid(pid, &child_stat, 0);
 	rewind(tmp);
-	cli.setCGIFd(fileno(tmp));
+	cli.setCGIFile(tmp);
 	return SUCCESS;
 }
 

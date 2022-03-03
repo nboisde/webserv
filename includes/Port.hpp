@@ -45,11 +45,8 @@ class Port
 		struct sockaddr_in					_port_address;
 		client_type							_clients;
 		map_configs							_config;
-		// hostname, config(key, val)
 };
 
 }
-
-std::ostream &				operator<<( std::ostream & o, ws::Port const & i );
 
 #endif

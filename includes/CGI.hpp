@@ -50,6 +50,4 @@ class CGI {
 
 class CGI;
 
-std::ostream &			operator<<( std::ostream & o, CGI const & i );
-
 #endif /* ************************************************************* CGI_H */
