@@ -1,8 +1,0 @@
-#!/bin/bash
-
-var=$(ps -a | grep webserv | cut -d' ' -f3)
-
-while true
-do
-	watch -n 1 lsof -p $var
-done
