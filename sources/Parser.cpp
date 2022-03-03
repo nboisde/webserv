@@ -195,7 +195,7 @@ int	Parser::checkValue(std::string key, std::string value, keys_type & new_confi
 
 	if (it == ite || cite == cit)
 		return (0);
-	if (!((this->*_key_checker[key])(value, _default_keys[key])))
+	if (value.empty() || !((this->*_key_checker[key])(value, _default_keys[key])))
 	{
 		std::cout << key << " : " << value << " is not valid" << std::endl;
 		return (0);
